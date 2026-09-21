@@ -1,0 +1,10 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <FS.h>
+#include <WiFi.h>
+#include <LittleFS.h>
+#include "os.h"
+PochittaOS os;
+void setup(){os.begin();}
+void loop(){os.loop();delay(4);}

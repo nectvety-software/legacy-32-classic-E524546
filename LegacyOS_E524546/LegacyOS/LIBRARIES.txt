@@ -1,0 +1,48 @@
+========================================================
+  LEGACY-32 CLASSIC E524546 — Arduino Library List
+  LegacyOS v1.0
+========================================================
+
+Install these libraries via:
+  Arduino IDE → Sketch → Include Library → Manage Libraries
+
+─── REQUIRED ────────────────────────────────────────────
+✓ TFT_eSPI        by Bodmer          (Display driver)
+✓ ArduinoJson     by Benoit Blanchon (JSON / settings)
+
+─── OPTIONAL (enables full features) ────────────────────
+◎ RadioLib         by Jan Gromes      (LoRa SX1276/78)
+◎ EloquentLua      by Eloquent Systems (Lua scripting)
+◎ ESP8266Audio     by Earle Philhower  (Music player)
+
+─── BUILT-IN ESP32 (no install needed) ─────────────────
+• WiFi           (ESP32 core)
+• BLE            (ESP32 core)
+• SD             (ESP32 core)
+• SPIFFS         (ESP32 core)
+• Preferences    (ESP32 core)
+• SPI            (ESP32 core)
+
+========================================================
+  BOARD SETTINGS (Arduino IDE)
+========================================================
+
+Board:            ESP32S3 Dev Module
+Flash Size:       16MB (128Mb)
+Flash Mode:       QIO 80MHz
+PSRAM:            OPI PSRAM
+Partition Scheme: Huge APP (3MB No OTA/1MB SPIFFS)
+CPU Freq:         240MHz (WiFi/BT)
+Upload Speed:     921600
+USB CDC On Boot:  Enabled
+Core Debug Level: None
+
+========================================================
+  AFTER INSTALLING TFT_eSPI:
+========================================================
+
+Copy the included User_Setup.h into:
+  [Arduino libraries folder]/TFT_eSPI/User_Setup.h
+
+This configures the ST7789 240x320 display with
+the correct GPIO pins for LEGACY-32 CLASSIC E524546.

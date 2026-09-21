@@ -1,0 +1,17 @@
+{
+  "name": "Pixeler Arduino GFX",
+  "version": "1.0.0",
+  "description": "Arduino_GFX sources bundled with Pixeler",
+  "frameworks": "arduino",
+  "platforms": ["espressif32"],
+  "build": {
+    "srcFilter": [
+      "-<*>",
+      "+<Arduino_DataBus.cpp>",
+      "+<Arduino_GFX.cpp>",
+      "+<Arduino_TFT.cpp>",
+      "+<databus/Arduino_ESP32SPI.cpp>",
+      "+<display/Arduino_ST7789.cpp>"
+    ]
+  }
+}

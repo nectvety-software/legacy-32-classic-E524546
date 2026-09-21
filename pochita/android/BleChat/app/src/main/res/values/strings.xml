@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BLE Chat</string>
+    <string name="status_idle">Chưa kết nối. Đang quét POCHITA-CHAT...</string>
+    <string name="device_hint">Chạm vào thiết bị để kết nối:</string>
+    <string name="input_hint">Nhập tin nhắn...</string>
+    <string name="send">Gửi</string>
+    <string name="scan_again">Quét lại thiết bị</string>
+</resources>

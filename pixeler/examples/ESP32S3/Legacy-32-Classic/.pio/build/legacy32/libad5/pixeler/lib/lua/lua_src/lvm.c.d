@@ -1,0 +1,22 @@
+.pio/build/legacy32/libad5/pixeler/lib/lua/lua_src/lvm.c.o: \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lvm.c \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lprefix.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32-libs/esp32s3/include/newlib/platform_include/stdio.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lua.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/luaconf.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/ldebug.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lstate.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lobject.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/llimits.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/ltm.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lzio.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lmem.h \
+ C:/Users/admin/.platformio/packages/framework-arduinoespressif32-libs/esp32s3/include/newlib/platform_include/signal.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/ldo.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lfunc.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lgc.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lopcodes.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lstring.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/ltable.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/lvm.h \
+ .pio/libdeps/legacy32/pixeler/src/lib/lua/lua_src/ljumptab.h

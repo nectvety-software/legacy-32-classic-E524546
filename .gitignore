@@ -1,0 +1,33 @@
+# Build artifacts
+.pio/
+.pioenvs/
+.piolibdeps/
+.vscode/
+.venv/
+__pycache__/
+build/
+dist/
+*.o
+*.a
+*.elf
+*.bin
+*.map
+*.exe
+
+# Archives qua lon cho GitHub (gioi han 100MB/file).
+# Source da giai nen trong cac thu muc duoc commit day du.
+*.zip
+*.rar
+*.7z
+*.deb
+
+# OS / editor
+Thumbs.db
+Desktop.ini
+*.swp
+*~
+
+# Secrets / local
+.env
+*.pem
+*.key
