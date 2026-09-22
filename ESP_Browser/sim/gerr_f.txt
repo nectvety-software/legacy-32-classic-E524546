@@ -1,0 +1,14 @@
+..\src\main.cpp: In function 'void wifi_pass_show()':
+..\src\main.cpp:201:12: warning: 'char* strncat(char*, const char*, size_t)' specified bound 1 equals source length [-Wstringop-overflow=]
+  201 |     strncat(shown, "_", 1);
+      |     ~~~~~~~^~~~~~~~~~~~~~~
+..\src\main.cpp:203:12: warning: 'char* strncat(char*, const char*, size_t)' specified bound 1 equals source length [-Wstringop-overflow=]
+  203 |     strncat(shown, "_", 1);
+      |     ~~~~~~~^~~~~~~~~~~~~~~
+..\src\main.cpp: In function 'void urlin_show()':
+..\src\main.cpp:650:12: warning: 'char* strncat(char*, const char*, size_t)' specified bound 1 equals source length [-Wstringop-overflow=]
+  650 |     strncat(shown, "_", 1);
+      |     ~~~~~~~^~~~~~~~~~~~~~~
+..\src\main.cpp:652:12: warning: 'char* strncat(char*, const char*, size_t)' specified bound 1 equals source length [-Wstringop-overflow=]
+  652 |     strncat(shown, "_", 1);
+      |     ~~~~~~~^~~~~~~~~~~~~~~

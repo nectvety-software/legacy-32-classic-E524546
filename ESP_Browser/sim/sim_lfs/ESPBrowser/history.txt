@@ -1,0 +1,8 @@
+mtt:about	About
+mtt:startexample.com/	Browser V1.0
+mtt:start	Browser V1.0
+http://dmaxmrp.tk/	Mock Server
+http://m.facebook.com/	Mock Server
+http://google.com/	Mock Server
+mtt:web	Web Browser
+mtt:config	Settings

@@ -1,0 +1,13 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=2 book=0 ssid=VNPT-Home home=mtt:start
+[wifi] OK ip=192.168.1.77
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://qeafivels.com/
+[focus] line=2..3 link=-1 top=0 dir=1
+[focus] line=4..4 link=-1 top=0 dir=1
+[focus] line=6..6 link=0 top=0 dir=1
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit

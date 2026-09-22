@@ -1,0 +1,6 @@
+SERVERS_READY
+[server 18080] "GET /redirect HTTP/1.1" 302 -
+[server 18080] "GET /home HTTP/1.1" 200 -
+[server 18080] "GET /article HTTP/1.1" 200 -
+[server 18443] "GET / HTTP/1.1" 200 -
+[server 18443] "GET /chunked HTTP/1.1" 200 -

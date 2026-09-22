@@ -1,0 +1,104 @@
+Using built-in specs.
+COLLECT_GCC=C:\msys64\mingw64\bin\g++.exe
+Target: x86_64-w64-mingw32
+Configured with: ../gcc-16.1.0/configure --prefix=/mingw64 --with-local-prefix=/mingw64/local --libexecdir=/mingw64/lib --enable-bootstrap --enable-checking=release --with-arch=nocona --with-tune=generic --enable-mingw-wildcard --enable-languages=c,c++,ada,fortran,lto,objc,obj-c++,jit --enable-shared --enable-static --enable-libatomic --enable-threads=posix --enable-tls --enable-graphite --enable-fully-dynamic-string --enable-libstdcxx-backtrace=yes --enable-libstdcxx-filesystem-ts --enable-libstdcxx-time --disable-libstdcxx-pch --enable-libgomp --disable-libssp --disable-multilib --disable-rpath --disable-win32-registry --disable-nls --disable-werror --disable-symvers --with-libiconv --with-system-zlib --with-gmp=/mingw64 --with-mpfr=/mingw64 --with-mpc=/mingw64 --with-isl=/mingw64 --with-pkgversion='Rev5, Built by MSYS2 project' --with-bugurl=https://github.com/msys2/MINGW-packages/issues --with-gnu-as --with-gnu-ld --with-libstdcxx-zoneinfo=yes --disable-libstdcxx-debug --enable-lto --with-boot-ldflags=-static-libstdc++ --with-stage1-ldflags=-static-libstdc++
+Thread model: posix
+Supported LTO compression algorithms: zlib zstd
+gcc version 16.1.0 (Rev5, Built by MSYS2 project) 
+COLLECT_GCC_OPTIONS='-c' '-o' 't.o' '-v' '-shared-libgcc' '-mtune=generic' '-march=nocona'
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/cc1plus.exe -quiet -v -iprefix C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/ -D_REENTRANT t.c -quiet -dumpbase t.c -dumpbase-ext .c -mtune=generic -march=nocona -version -o C:\Users\doxuanhop\AppData\Local\Temp\ccxGJ2Be.s
+GNU C++20 (Rev5, Built by MSYS2 project) version 16.1.0 (x86_64-w64-mingw32)
+	compiled by GNU C version 16.1.0, GMP version 6.3.0, MPFR version 4.2.2, MPC version 1.4.1, isl version isl-0.27-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"
+ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0"
+ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0/x86_64-w64-mingw32"
+ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0/backward"
+ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include"
+ignoring nonexistent directory "D:/M/msys64/mingw64/include"
+ignoring nonexistent directory "/mingw64/include"
+ignoring duplicate directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed"
+ignoring nonexistent directory "C:/msys64/mingw64/lib/gcc/../../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../x86_64-w64-mingw32/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0/x86_64-w64-mingw32
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include/c++/16.1.0/backward
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/../../../../include
+ C:/msys64/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/16.1.0/include-fixed
+End of search list.
+Compiler executable checksum: 6e34a8b177db61ba0d2de93f76860efa
+t.c:1:1: error: stray '\377' in program
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      | ^~~~
+t.c:1:2: error: stray '\376' in program
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |     ^~~~
+t.c:1:4: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |          ^~~~~~~~
+t.c:1:6: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                   ^~~~~~~~
+t.c:1:8: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                            ^~~~~~~~
+t.c:1:12: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                              ^~~~~~~~
+t.c:1:14: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                       ^~~~~~~~
+t.c:1:16: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                ^~~~~~~~
+t.c:1:18: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                         ^~~~~~~~
+t.c:1:20: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                  ^~~~~~~~
+t.c:1:22: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                           ^~~~~~~~
+t.c:1:24: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                    ^~~~~~~~
+t.c:1:26: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                             ^~~~~~~~
+t.c:1:28: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                      ^~~~~~~~
+t.c:1:30: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                               ^~~~~~~~
+t.c:1:32: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                        ^~~~~~~~
+t.c:1:34: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                                 ^~~~~~~~
+t.c:1:36: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                                          ^~~~~~~~
+t.c:1:40: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                                                            ^~~~~~~~
+t.c:1:42: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                                                                     ^~~~~~~~
+t.c:1:44: warning: null character(s) ignored
+    1 | <ff><fe>i<U+0000>n<U+0000>t<U+0000> <U+0000>m<U+0000>a<U+0000>i<U+0000>n<U+0000>(<U+0000>)<U+0000>{<U+0000>r<U+0000>e<U+0000>t<U+0000>u<U+0000>r<U+0000>n<U+0000> <U+0000>0<U+0000>;<U+0000>}<U+0000>
+      |                                                                                                                                                                                              ^~~~~~~~
+t.c:2:1: warning: null character(s) ignored
+    2 | <U+0000>
+      | ^~~~~~~~
+t.c:3:1: warning: null character(s) ignored
+    3 | <U+0000>
+      | ^~~~~~~~
+t.c:1:3: error: 'i' does not name a type
+    1 | ÿþi n t   m a i n ( ) { r e t u r n   0 ; } 
+      |   ^

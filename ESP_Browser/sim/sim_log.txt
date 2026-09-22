@@ -1,0 +1,22 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=8 book=0 ssid=VNPT-Home home=mtt:start
+[wifi] OK ip=192.168.1.77
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] http://m.facebook.com/
+[nav] mtt:start
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=8 book=0 ssid=VNPT-Home home=mtt:start
+[wifi] OK ip=192.168.1.77
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] http://dmaxmrp.tk/
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[nav] mtt:start
+[nav] #
+[nav] example.com/
+[nav] mtt:about

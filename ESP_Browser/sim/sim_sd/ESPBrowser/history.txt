@@ -1,0 +1,16 @@
+mtt:about	About
+mtt:start	Browser V1.0
+mtt:startexample.com/	Browser V1.0
+http://dmaxmrp.tk/	Mock Server
+mtt:config	Settings
+http://info.cern.ch/hypertext/WWW/TheProject.html	http://info.cern.ch/hypertext/WWW/TheProject.html
+http://google.com/search?q=qeafivels	http://google.com/search?q=qeafivels
+http://www.google.com	http://www.google.com
+https://www.google.com	https://www.google.com
+http://dmaxmrp.tk/example.com/	Mock Server
+mtt:web	Web Browser
+mtt:menuexample.com/	DMAX V1.0
+mtt:menu	Menu
+http://example.com/	http://example.com/
+http://google.com/imghp?sca_esv=c914b721c78ed037&amp;ie=UTF-8	http://google.com/imghp?sca_esv=c914b721c78ed037&amp;ie=UTF-8
+http://google.com/	http://google.com/
