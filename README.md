@@ -1,8 +1,8 @@
 # legacy-32-classic-E524546
 
-Tuyển tập firmware và hệ điều hành cho **thiết bị cầm tay tự chế dùng chung một
+Firmware và hệ điều hành cho **thiết bị cầm tay tự chế dùng chung một
 cấu hình phần cứng**: ESP32-S3-WROOM-1 (N16R8, Flash 16MB + PSRAM 8MB),
-màn hình TFT 2" ST7789 240x320, **10 nút keypad Symbian 3x3 + SELECT**, thẻ SD.
+màn hình TFT 2" ST7789 240x320, **10 nút keypad 3x3 + SELECT**, thẻ SD.
 
 ## Chuẩn keypad (thống nhất toàn repo)
 
