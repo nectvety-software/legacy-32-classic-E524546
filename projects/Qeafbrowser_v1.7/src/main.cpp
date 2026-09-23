@@ -30,6 +30,12 @@ extern "C" {
 #include "browser.h"
 #include "LGFX_ESP32S3_ST7789.h"
 
+// loopTask stack: go_url -> http_get -> TLS -> doc_parse -> thumb_prefetch (http_get lai)
+// tran 8KB mac dinh -> Stack canary. SET_LOOP_TASK_STACK_SIZE override weak getArduinoLoopTaskStackSize.
+#if defined(ARDUINO)
+SET_LOOP_TASK_STACK_SIZE(32768);
+#endif
+
 // ---------------- UI palette (RGB565) — theo legacy keypad browser_GFX_Accuracy_Comparison ----------------
 // UI — UC Browser / Opera Mini (OSNews)
 #define UI_TITLE  0xC800    // red title
@@ -2324,8 +2330,9 @@ static void on_key(const char *k) {
       (!strcmp(k, "back") || !strcmp(k, "up") || !strcmp(k, "down") ||
        !strcmp(k, "left") || !strcmp(k, "right") || !strcmp(k, "ok"))) {
     if (!strcmp(k, "back")) { mouse_on = false; render(); return; }
-    if (!strcmp(k, "up"))    { mouse_y -= 12; if (mouse_y < HDR_H) mouse_y = HDR_H; render(); return; }
-    if (!strcmp(k, "down"))  { mouse_y += 12; if (mouse_y > SCR_H - FTR_H) mouse_y = SCR_H - FTR_H; render(); return; }
+    // up/down: cuộn trang (giup doc dai) + van di chuyen con tro chuot
+    if (!strcmp(k, "up"))    { body_scroll_kick(-1); mouse_y -= 12; if (mouse_y < HDR_H) mouse_y = HDR_H; render(); return; }
+    if (!strcmp(k, "down"))  { body_scroll_kick(1);  mouse_y += 12; if (mouse_y > SCR_H - FTR_H) mouse_y = SCR_H - FTR_H; render(); return; }
     if (!strcmp(k, "left"))  { mouse_x -= 12; if (mouse_x < 2) mouse_x = 2; render(); return; }
     if (!strcmp(k, "right")) { mouse_x += 12; if (mouse_x > SCR_W - 3) mouse_x = SCR_W - 3; render(); return; }
     if (!strcmp(k, "ok")) {
