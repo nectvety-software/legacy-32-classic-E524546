@@ -1,0 +1,87 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=3 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[wifi] OK ip=192.168.1.77
+[nav] https://qeafivels.com/
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/97856203.qbt (2352 px)
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/2f60e9f3.qbt (2352 px)
+[thumb] prefetch=2/2 image(s)
+[thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://keypad.test/
+[focus] line=3..4 link=-1 top=0 dir=1
+[focus] line=5..6 link=0 top=0 dir=1
+[focus] line=8..10 link=-1 top=0 dir=1
+[focus] line=11..11 link=1 top=0 dir=1
+[focus] line=13..13 link=2 top=0 dir=1
+[shot] sim/pixel_scroll_out/01_before_pixel_scroll.bmp scroll=0 target=0 active=0
+[focus] line=15..16 link=-1 top=2 dir=1
+[assert] normal start=12 target=22
+[shot] sim/pixel_scroll_out/02_pixel_scroll_early.bmp scroll=15 target=22 active=1
+[shot] sim/pixel_scroll_out/03_pixel_scroll_mid.bmp scroll=19 target=22 active=1
+[shot] sim/pixel_scroll_out/04_pixel_scroll_settled.bmp scroll=22 target=22 active=0
+[PASS] D-pad pixel easing progression
+[nav] https://qeafivels.com/
+[thumb] PSRAM hit slot=0 hits=3 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=2 https://www.qeafivels.com/products-audio.png
+[thumb] prefetch=2/2 image(s)
+[thumb] PSRAM hit slot=0 hits=4 https://www.qeafivels.com/hero-banner.jpg
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[thumb] PSRAM hit slot=0 hits=5 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=6 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=7 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=8 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/pixel_scroll_out/05_overview_before_ok.bmp scroll=0 target=0 active=0
+[thumb] PSRAM hit slot=0 hits=9 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=10 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=11 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/pixel_scroll_out/06_overview_handoff_start.bmp scroll=42 target=76 active=1
+[thumb] PSRAM hit slot=0 hits=12 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/pixel_scroll_out/07_overview_handoff_early.bmp scroll=53 target=76 active=1
+[thumb] PSRAM hit slot=0 hits=13 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=14 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=3 https://www.qeafivels.com/products-audio.png
+[shot] sim/pixel_scroll_out/08_overview_handoff_mid.bmp scroll=65 target=76 active=1
+[thumb] PSRAM hit slot=0 hits=15 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=4 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=16 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=5 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=17 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=6 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=18 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=7 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=19 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=8 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=20 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=9 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=21 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=10 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=22 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=11 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=23 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=12 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=24 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=13 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=25 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=14 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=26 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=15 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=27 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=16 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=28 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=17 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=29 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=18 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=30 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=19 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=31 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=20 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=32 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=21 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=33 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=22 https://www.qeafivels.com/products-audio.png
+[shot] sim/pixel_scroll_out/09_overview_handoff_settled.bmp scroll=76 target=76 active=0
+[assert] handoff 42 -> 53 -> 65 -> 76 target=76
+[PASS] overview -> body pixel-scroll handoff
+[done] pixel scroll regression complete

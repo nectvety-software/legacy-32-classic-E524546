@@ -1,0 +1,7 @@
+mtt:about	About
+https://example.com/	Mock Server
+mtt:start	Qeafbrowser
+https://www.qeafivels.com/	Qeafivels Software - Audio Tools, AI Agents, Hugging Face & 2D Games
+mtt:config	Settings
+http://vxpstore.xtgem.com/	VXPstore - Qeafivels
+mtt:history	History

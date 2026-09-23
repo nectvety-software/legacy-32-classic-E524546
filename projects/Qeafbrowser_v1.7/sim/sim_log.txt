@@ -1,0 +1,43 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=7 book=0 ssid= home=https://qeafivels.com/
+[wifi] Vao Settings > Ket noi WiFi de quet + nhap thu cong
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[focus] line=3..3 link=1 top=0 dir=1
+[focus] line=5..5 link=2 top=0 dir=1
+[focus] line=7..7 link=3 top=0 dir=1
+[focus] line=9..9 link=4 top=0 dir=1
+[nav] mtt:config
+[nav] mtt:wifi
+[wifi] quet mang THAT (WiFi.scanNetworks)...
+[wifi] thay 4 mang THAT
+[nav] mtt:wifisel#0
+[wifi] thu ket noi 'VNPT-Home' pass='abc'
+[store] config.ini da luu (ssid=VNPT-Home)
+[clock] simulator realtime UTC+7
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=7 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[wifi] OK ip=192.168.1.77
+[clock] simulator realtime UTC+7
+[nav] https://qeafivels.com/
+[thumb] prefetch=0/2 image(s)
+[mouse] desktop UI detected -> virtual mouse on
+[thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://qeafivels.com/
+[thumb] PSRAM hit slot=0 hits=3 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=2 https://www.qeafivels.com/products-audio.png
+[thumb] prefetch=0/2 image(s)
+[mouse] desktop UI detected -> virtual mouse on
+[thumb] PSRAM hit slot=0 hits=4 https://www.qeafivels.com/hero-banner.jpg
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[thumb] PSRAM hit slot=0 hits=5 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=6 https://www.qeafivels.com/hero-banner.jpg
+[nav] mtt:start
+[nav] #
+[nav] https://example.com/
+[nav] mtt:about

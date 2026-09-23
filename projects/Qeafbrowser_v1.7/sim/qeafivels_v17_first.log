@@ -1,0 +1,68 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=3 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[wifi] OK ip=192.168.1.77
+[nav] https://qeafivels.com/
+[thumb] LFS save /Qeafbrowser/thumbcache/97856203.qbt (2352 px)
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://qeafivels.com/
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[assert] final_url=https://www.qeafivels.com/
+[PASS] redirect + title parse
+[shot] sim/qeafivels_out/01_qeafivels_loaded_ssr_minimap.bmp
+[focus] line=2..3 link=-1 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/qeafivels_out/02_focus_hero_image_decoded.bmp
+[focus] line=4..4 link=-1 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/qeafivels_out/03_focus_audio_tools.bmp
+[focus] line=6..6 link=0 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/qeafivels_out/04_focus_ai_agents.bmp
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/qeafivels_out/05_desktop_overview_x1.bmp
+[shot] sim/qeafivels_out/06_desktop_overview_x2.bmp
+[shot] sim/qeafivels_out/07_desktop_overview_x4.bmp
+[shot] sim/qeafivels_out/08_desktop_overview_x8.bmp
+[shot] sim/qeafivels_out/09_desktop_overview_x8_panned.bmp
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[shot] sim/qeafivels_out/10_zoomed_section_after_ok.bmp
+[nav] https://qeafivels.com/
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=2..3 link=-1 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=4..4 link=-1 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=6..6 link=0 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=7..7 link=1 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=8..8 link=2 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=9..9 link=3 top=0 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=11..11 link=-1 top=1 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=12..14 link=-1 top=3 dir=1
+[thumb] PSRAM hit slot=0 https://www.qeafivels.com/hero-banner.jpg
+[focus] line=15..15 link=-1 top=5 dir=1
+[thumb] LFS save /Qeafbrowser/thumbcache/2f60e9f3.qbt (2352 px)
+[focus] line=17..17 link=-1 top=6 dir=1
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[focus] line=19..19 link=-1 top=8 dir=1
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[shot] sim/qeafivels_out/11_png_product_thumb_scrollbar.bmp
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=1 https://www.qeafivels.com/products-audio.png
+[shot] sim/qeafivels_out/12_virtual_mouse.bmp
+[done] qeafivels Opera Mini 4 style regression complete

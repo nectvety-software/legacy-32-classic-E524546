@@ -1,0 +1,28 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=3 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[wifi] OK ip=192.168.1.77
+[nav] https://qeafivels.com/
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/97856203.qbt (2352 px)
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/2f60e9f3.qbt (2352 px)
+[thumb] prefetch=2/2 image(s)
+[thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://keypad.test/
+[focus] line=3..4 link=-1 top=0 dir=1
+[focus] line=5..6 link=0 top=0 dir=1
+[focus] line=8..10 link=-1 top=0 dir=1
+[focus] line=11..11 link=1 top=0 dir=1
+[focus] line=13..13 link=2 top=0 dir=1
+[shot] sim/inertia_scroll_out/01_before_inertia.bmp pos=0 target=0 vel=0 inertia=0 active=0
+[focus] line=15..16 link=-1 top=2 dir=1
+[shot] sim/inertia_scroll_out/02_dpad_held.bmp pos=6 target=22 vel=576 inertia=1 active=1
+[shot] sim/inertia_scroll_out/03_release_start.bmp pos=6 target=22 vel=576 inertia=1 active=1
+[shot] sim/inertia_scroll_out/04_coast_early.bmp pos=8 target=22 vel=517 inertia=1 active=1
+[shot] sim/inertia_scroll_out/05_coast_mid.bmp pos=11 target=22 vel=416 inertia=1 active=1
+[shot] sim/inertia_scroll_out/06_coast_late.bmp pos=14 target=22 vel=335 inertia=1 active=1
+[shot] sim/inertia_scroll_out/07_settled.bmp pos=22 target=22 vel=0 inertia=0 active=0
+[assert] held=6/576 release=6/576 early=8/517 mid=11/416 late=14/335 end=22/0 target=22
+[PASS] release inertia + integer friction + final settle
+[done] inertia scroll regression complete

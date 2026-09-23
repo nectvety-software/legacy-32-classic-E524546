@@ -1,0 +1,16 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=3 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[wifi] OK ip=192.168.1.77
+[clock] simulator realtime UTC+7
+[nav] https://qeafivels.com/
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/97856203.qbt (2352 px)
+[thumb] LFS hit v2 /Qeafbrowser/thumbcache/2f60e9f3.qbt (2352 px)
+[thumb] prefetch=2/2 image(s)
+[thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[shot] sim/clock_out/01_ntp_synced.bmp
+[shot] sim/clock_out/02_one_second_later.bmp
+[shot] sim/clock_out/03_two_seconds_later.bmp
+[PASS] realtime clock footer updated without full-page timer task

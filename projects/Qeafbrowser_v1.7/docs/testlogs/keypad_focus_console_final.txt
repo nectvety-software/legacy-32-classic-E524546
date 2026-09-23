@@ -1,0 +1,28 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=3 book=0 ssid=VNPT-Home home=mtt:start
+[wifi] OK ip=192.168.1.77
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[nav] https://keypad.test/
+[shot] sim_out_keypad/01_focus_heading.bmp
+[focus] line=3..4 link=-1 top=0 dir=1
+[shot] sim_out_keypad/02_focus_paragraph.bmp
+[focus] line=5..6 link=0 top=0 dir=1
+[shot] sim_out_keypad/03_focus_long_link.bmp
+[focus] line=3..4 link=-1 top=0 dir=-1
+[shot] sim_out_keypad/04_left_previous_block.bmp
+[focus] line=5..6 link=0 top=0 dir=1
+[shot] sim_out_keypad/05_right_long_link.bmp
+[nav] /article.html
+[shot] sim_out_keypad/06_ok_open_article.bmp
+[nav] https://keypad.test/
+[focus] line=3..4 link=-1 top=0 dir=1
+[focus] line=5..6 link=0 top=0 dir=1
+[focus] line=8..10 link=-1 top=0 dir=1
+[focus] line=11..11 link=1 top=0 dir=1
+[focus] line=13..13 link=2 top=0 dir=1
+[focus] line=15..16 link=-1 top=2 dir=1
+[shot] sim_out_keypad/07_autoscroll_lower_block.bmp
+[done] keypad browser navigation test complete

@@ -1,0 +1,18 @@
+[boot] 1 serial
+[boot] 2 display
+[store] FS=LittleFS
+[store] fs=LFS hist=0 book=0 ssid=VNPT-Home home=mtt:start
+[wifi] OK ip=127.0.0.1
+[nav] mtt:start
+[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[shot] sim_out_linux/01_home.bmp
+[nav] http://127.0.0.1:18080/redirect
+[shot] sim_out_linux/02_http_redirect.bmp
+[nav] /article
+[shot] sim_out_linux/03_link_click.bmp
+[nav] https://127.0.0.1:18443/
+[shot] sim_out_linux/04_https_tls.bmp
+[nav] mtt:history
+[shot] sim_out_linux/05_history.bmp
+[nav] https://127.0.0.1:18443/chunked
+[shot] sim_out_linux/06_chunked.bmp

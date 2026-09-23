@@ -1,0 +1,19 @@
+Qeafbrowser v2.1.2 Arduino-only API smoke compile
+=================================================
+Result: PASS
+
+Checked source path: src/main.cpp
+Checked ESP32-only API call shapes:
+- PNGdec 1.1.6 callback: int (PNGDRAW*)
+- PNG::openRAM(uint8_t*, int, PNG_DRAW_CALLBACK*)
+- PNG::decode(void*, int)
+- PNG::getLineAsRGB565(..., PNG_RGB565_LITTLE_ENDIAN, ...)
+- TJpg_Decoder 1.1.0 callback: bool(int16_t,int16_t,uint16_t,uint16_t,uint16_t*)
+- TJpgDec.getJpgSize(..., uint32_t) -> JRESULT
+- TJpgDec.drawJpg(..., uint32_t) -> JRESULT
+- JDR_OK == 0 result handling
+- psramFound()/ESP.getPsramSize()/ESP.getFreePsram() compile path
+- configTzTime(...) compile path
+
+Compiler command used a host shim for Arduino framework APIs to force the ARDUINO-only branches of main.cpp to compile.
+No full ESP32 PlatformIO toolchain is installed in this environment, so this is an API/type compatibility gate, not a hardware firmware upload result.
