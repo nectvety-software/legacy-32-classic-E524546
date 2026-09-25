@@ -8,6 +8,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
 struct Screen {
  std::vector<uint16_t> pixels = std::vector<uint16_t>(240*270,0);
  unsigned rectangles=0, texts=0;
@@ -112,7 +116,103 @@ static bool readEvents(const char *path,int frames,std::vector<KeyEvent> &events
      [](const KeyEvent &a,const KeyEvent &b){return a.frame<b.frame;});
   return true;
 }
+// PC-only persistent Lua VM bridge for QEAPP Studio's virtual feature phone.
+// NOT an ARM/Symbian/ESP32 hardware emulator. The same bounded Lua VM is shared
+// with the standalone host preview; no filesystem/network access is exposed.
+static int interactive(const char* luaFile, size_t heapKiB) {
+#ifdef _WIN32
+  // Raw RGB565 bytes must not be rewritten by Windows CRT's text newline mode.
+  _setmode(_fileno(stdout), _O_BINARY);
+#endif
+  std::ifstream input(luaFile, std::ios::binary);
+  if (!input) { std::cerr<<"Script missing\n"; return 2; }
+  std::string source((std::istreambuf_iterator<char>(input)), {});
+  if (source.empty() || source.size()>QeLuaRuntime::kMaxSource) {
+    std::cerr<<"Invalid script size\n"; return 2;
+  }
+  Screen screen;
+  QeLuaRuntime vm;
+  QeLuaRuntime::Draw draw{fill,text,nowMs,&screen};
+  if (!vm.start(source.data(), source.size(), draw, heapKiB*1024u)) {
+    std::cerr<<"Lua startup FAIL: "<<vm.error()<<"\n"; return 1;
+  }
+  std::string line;
+  uint32_t seq=0;
+  uint64_t render_us_sum=0;
+  // One command per line from a local trusted Qt QProcess. No dynamic
+  // process/OS commands and no arbitrary key names are forwarded into Lua.
+  while (std::getline(std::cin,line)) {
+    if (line.size()>40) { std::cerr<<"Command too long\n"; return 2; }
+    if (line=="QUIT") break;
+    if (line.rfind("KEY ",0)==0) {
+      std::istringstream command(line);
+      std::string tag,key,down,extra;
+      if (!(command>>tag>>key>>down) || (command>>extra) ||
+          !keyAllowed(key) || (down!="0" && down!="1")) {
+        std::cerr<<"Unsupported emulator key\n"; return 2;
+      }
+      if(!vm.key(key.c_str(),down=="1")) {
+        std::cerr<<"Lua key FAIL: "<<vm.error()<<"\n"; return 1;
+      }
+      continue;
+    }
+    if (line.rfind("TICK ",0)==0) {
+      std::istringstream command(line);
+      std::string tag,extra;
+      int dtMs=0;
+      if (!(command>>tag>>dtMs) || (command>>extra) || dtMs<1 || dtMs>100) {
+        std::cerr<<"Invalid frame delta (1..100 ms)\n"; return 2;
+      }
+      if (seq>=18000) { std::cerr<<"Host session frame limit reached\n"; return 2; }
+      const auto render_started=std::chrono::steady_clock::now();
+      std::fill(screen.pixels.begin(),screen.pixels.end(),0);
+      if(!vm.update(dtMs/1000.0f)||!vm.render()) {
+        std::cerr<<"Lua VM frame FAIL: "<<vm.error()<<"\n"; return 1;
+      }
+      render_us_sum += static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::microseconds>(
+          std::chrono::steady_clock::now()-render_started).count());
+      // 240x270 little-endian RGB565; 29 status + 21 footer rows are composed
+      // by the virtual phone UI and are not part of the guest framebuffer.
+      std::cout<<"QEFRAME "<<seq++<<"\n";
+      for(uint16_t color: screen.pixels) {
+        std::cout.put(char(color & 0xff));
+        std::cout.put(char(color >> 8));
+      }
+      std::cout.flush();
+      if (seq%10==0) {
+        std::cerr<<"QEHOST_METRIC frame="<<seq
+                 <<" heap_used="<<vm.heapUsed()
+                 <<" heap_peak="<<vm.peakHeapUsed()
+                 <<" render_us="<<(render_us_sum/10)<<"\n";
+        render_us_sum=0;
+      }
+      if(!std::cout) { std::cerr<<"Frame output broken\n"; return 2; }
+      continue;
+    }
+    std::cerr<<"Unsupported emulator command\n";
+    return 2;
+  }
+  vm.stop();
+  return 0;
+}
+
 int main(int argc,char **argv) {
+ // Configurable, strictly bounded desktop-only VM heap. Existing two-argument
+ // interactive CLI remains compatible with v0.7 scripts and smoke tests.
+ if ((argc==3 || argc==5) && std::string(argv[2])=="--interactive") {
+   size_t kib=192;
+   if (argc==5) {
+     if (std::string(argv[3])!="--heap-kib") {
+       std::cerr<<"Invalid interactive option\n";return 2;
+     }
+     const std::string value(argv[4]);
+     if (value!="96" && value!="192" && value!="384") {
+       std::cerr<<"Invalid heap cap (96, 192 or 384 KiB)\n";return 2;
+     }
+     kib=static_cast<size_t>(std::stoi(value));
+   }
+   return interactive(argv[1],kib);
+ }
  if(argc<2||argc>6){std::cerr<<"Usage: qe_lua_host main.lua [image.ppm] [frames=4] [memory_kib=192] [events.txt]\n";return 2;}
  std::ifstream f(argv[1],std::ios::binary);if(!f){std::cerr<<"Source missing\n";return 2;}
  std::string source((std::istreambuf_iterator<char>(f)),{});

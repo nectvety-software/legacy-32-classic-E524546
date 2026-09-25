@@ -47,7 +47,7 @@ Muốn game `.qeapp` cài được tùy ý: cần chốt ADR package version m�
 
 - `Workspace` giới hạn file UTF-8 <=1 MiB, extension allow-list, không mở/edit symlink, hidden, `dist/build`, `.git`, `.pem/.key`, chặn `..`; New Folder dùng quy tắc tương tự.
 - Atomic save bằng tempfile + `fsync` + `os.replace`; so hash trước ghi, báo conflict nếu tệp đổi. Không cam kết atomic cross-process filesystem locking.
-- Preferences đặt tại `%APPDATA%/QEAPPStudio/settings.json` trên Windows, hoặc `~/.config/QEAPPStudio/settings.json`; chỉ chứa recent paths và firmware root. Signing PEM **không** lưu.
+- Preferences đặt tại `%APPDATA%/QEAPP-Studio/config/settings.json` trên Windows, hoặc `~/.config/QEAPP-Studio/config/settings.json`; chỉ chứa recent paths và firmware root. Thư mục cũ `%APPDATA%/QEAPPStudio` được rename + migrate vào `config/` khi khởi động. Signing PEM **không** lưu.
 - CLI nhận argv list, không `shell=True`. Job log loại bỏ private key path; chặn job đồng thời, timeout, stop cả process tree (`taskkill /T /F` Windows, `killpg` POSIX).
 - Qt worker chạy QThread, thông báo về main thread bằng Signals, screenshot chỉ hiển thị sau job code=0. Muốn thử GUI offscreen cần cài PySide6.
 - Editor Explorer cố ý không hiển thị binary asset ở v0.3; icon PNG 32×32 được tham chiếu qua JSON và xác thực bằng validate. Trình duyệt asset hình trong IDE là milestone tiếp.

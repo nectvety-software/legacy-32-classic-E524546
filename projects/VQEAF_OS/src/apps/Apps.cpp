@@ -1,6 +1,7 @@
 #include "Apps.h"
 #include "../core/BuildVersion.h"
 #include "BoardConfig.h"
+#include "../core/QeappIconBlit.h"
 #include <esp_heap_caps.h>
 
 // GCC 8 / GNU++11 needs definitions when class constexpr integers are odr-used
@@ -14,6 +15,10 @@ constexpr int TextViewerApp::MAX_DOCS;
 constexpr int TextViewerApp::PAGE_LINES;
 constexpr int TextViewerApp::PAGE_STACK;
 
+// One global 2 KiB UI scratch for Installer + Applications (mutually exclusive
+// screens). Explorer retains its separate 2 KiB selected-icon cache.
+// Never allocate icon buffers on the 8 KiB Arduino loopTask stack.
+static uint16_t gQeappUiIconPixels[1024] = {};
 static bool gBleReady = false;
 static bool statusWifi() { return WiFi.status() == WL_CONNECTED; }
 
@@ -115,7 +120,8 @@ const uint16_t *ExplorerApp::selectedIcon(AppContext &ctx,const LauncherRow &row
   if(!row.packageId || !ctx.storage.mounted()) {
     cachedIconId[0]=0; cachedIconValid=false; return nullptr;
   }
-  if(strcmp(cachedIconId,row.packageId)!=0) {
+  if(cachedIconRevision!=ctx.installer.revision()||strcmp(cachedIconId,row.packageId)!=0) {
+    cachedIconRevision=ctx.installer.revision();
     snprintf(cachedIconId,sizeof cachedIconId,"%s",row.packageId);
     cachedIconValid=ctx.installer.loadIcon(row.packageId,cachedIcon);
   }
@@ -1270,13 +1276,16 @@ void TextViewerApp::enter(AppContext &ctx) {
   returnTo = ctx.pendingPackageLaunch ? ScreenId::Applications : (ctx.pendingOpenPath.length() ? ScreenId::Files : ScreenId::Applications);
   bool fromPackage = ctx.pendingPackageLaunch;
   ctx.pendingPackageLaunch = false;
-  popup.close(); viewing=false; index=offset=page=0; nextOffset=0; lineCount=0;
+  popup.close(); viewing=false; packageOpenError=""; index=offset=page=0; nextOffset=0; lineCount=0;
   memset(offsets,0,sizeof(offsets));
   const char *ext[] = {".txt", ".md", ".log", ".json", ".ini", ".csv"};
   count=ctx.storage.scanMedia(StoragePaths::DOCUMENTS,ext,6,docs,MAX_DOCS,2);
   if(!count)count=ctx.storage.scanMedia("/",ext,6,docs,MAX_DOCS,3);
   if (fromPackage) {
     if (!ctx.pendingOpenPath.length() || !ctx.storage.exists(ctx.pendingOpenPath)) {
+      Serial.printf("[VQEAF][QEAPP][LAUNCH_FAIL] missing package document: %s\n",
+                    ctx.pendingOpenPath.c_str());
+      packageOpenError="Installed package content unavailable";
       ctx.pendingOpenPath="";
       return;
     }
@@ -1284,6 +1293,10 @@ void TextViewerApp::enter(AppContext &ctx) {
     if (f && !f.isDirectory()) {
       docs[0]=FsEntry("Package document",ctx.pendingOpenPath,false,f.size());count=1;index=offset=0;
       page=0;offsets[0]=0;loadPage(ctx,0);viewing=true;
+    }
+    if (!viewing) {
+      packageOpenError="Could not read signed package document";
+      Serial.println("[VQEAF][QEAPP][LAUNCH_FAIL] payload unreadable after verification");
     }
     if (f) f.close();
     ctx.pendingOpenPath="";
@@ -1339,6 +1352,11 @@ void TextViewerApp::drawViewer(AppContext &ctx) {
 void TextViewerApp::draw(AppContext &ctx) {
   if (viewing) { drawViewer(ctx); return; }
   ctx.ui.chrome("Text viewer",statusWifi(),false,false,ctx.settings.data().hour12);
+  if (packageOpenError.length()) {
+    ctx.ui.message("Cannot open QEAPP",packageOpenError,"Check SD card and reinstall");
+    ctx.ui.softkeys("","","Back");
+    return;
+  }
   if (!count) ctx.ui.message("Text viewer","No TXT/MD/LOG/JSON files found");
   else {
     for(int row=0;row<SymbianUI::LIST_VISIBLE;++row){int i=offset+row; if(i>=count){ctx.ui.clearListRow(row);continue;} ctx.ui.listItem(row,"Doc",docs[i].name,String((unsigned long)(docs[i].size/1024ULL))+" KB",i==index);} 
@@ -1948,13 +1966,14 @@ static const char *const INSTALLER_OPTS[] = {
 };
 static constexpr int INSTALLER_OPT_COUNT = 7;
 
-void AppInstallerApp::reload(AppContext &ctx) {
+void AppInstallerApp::reload(AppContext &ctx, bool forceCatalogRefresh) {
   count=0;index=0;offset=0;details=false;confirm=false;feedback="";selectedPath="";previewIconReady=false;willUpdate=false;installAllowed=false;confirmData=false;previousVersion="";
   if (!ctx.storage.mounted()) {feedback="microSD not mounted";return;}
   if (!ctx.storage.ensureSystemLayout()) {
     feedback="SD folders unavailable or read-only";
   }
-  ctx.installer.refresh();
+  if (forceCatalogRefresh) ctx.installer.refresh();
+  else ctx.installer.refreshIfNeeded();
   if (installedTab) { count=ctx.installer.count();return; }
   // Users may copy .qeapp to Downloads or the card root. Show all three
   // known import locations without recursive scanning or dynamic arrays.
@@ -1991,7 +2010,7 @@ void AppInstallerApp::reload(AppContext &ctx) {
 
 void AppInstallerApp::enter(AppContext &ctx,ScreenId from){
   returnTo=(from==ScreenId::Files||from==ScreenId::Browser)?from:ScreenId::Applications;
-  installedTab=false;popup.close();operationResultOpen=false;
+  installedTab=false;popup.close();operationResultOpen=false;resultCanOpen=false;resultAppId[0]=0;
   const String requested=ctx.pendingPackagePath;
   ctx.pendingPackagePath="";
   if(requested.length()){
@@ -2002,12 +2021,12 @@ void AppInstallerApp::enter(AppContext &ctx,ScreenId from){
     willUpdate=installAllowed=confirmData=false;previousVersion="";
     if(ctx.storage.mounted()){
       ctx.storage.ensureSystemLayout();
-      ctx.installer.refresh();
+      ctx.installer.refreshIfNeeded();
     }
     openDetails(ctx);
     Serial.printf("[VQEAF][QEAPP] opened: %s verified=%u reason=%s\n",
         requested.c_str(), unsigned(verified), feedback.c_str());
-  }else reload(ctx);
+  }else reload(ctx,false); // boot/SD/installer already established trusted catalog
 }
 
 void AppInstallerApp::paintRow(AppContext &ctx,int item,bool selected){
@@ -2015,8 +2034,9 @@ void AppInstallerApp::paintRow(AppContext &ctx,int item,bool selected){
  if(installedTab){
    if(item>=ctx.installer.count()){ctx.ui.clearListRow(row);return;}
    const auto &app=ctx.installer.at(item);
-   ctx.ui.listItem(row,"App",app.info.name,String("v")+app.info.version+" / "+app.info.type,selected);
-   if(ctx.installer.loadIcon(app.info.id,previewPixels))ctx.ui.display().pushImage(9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+10,32,32,previewPixels);
+   const bool custom=ctx.installer.loadIcon(app.info.id,gQeappUiIconPixels);
+   ctx.ui.listItem(row,"App",app.info.name,String("v")+app.info.version+" / "+app.info.type,selected,!custom);
+   if(custom)QeappIconBlit::draw(ctx.ui.display(),9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+4,gQeappUiIconPixels);
  }else{
    if(item>=count){ctx.ui.clearListRow(row);return;}
    if(inboxLabel[item].manifestOk)
@@ -2036,7 +2056,8 @@ void AppInstallerApp::openDetails(AppContext &ctx){
    }else feedback="No installed app selected";
  }else{
    if(!selectedPath.length()&&index>=0&&index<count)selectedPath=inbox[index].path;
-   if(selectedPath.length())verified=ctx.installer.inspect(selectedPath,selectedMeta,feedback);
+   if(selectedPath.length())verified=ctx.installer.inspectWithIcon(
+       selectedPath,selectedMeta,feedback,gQeappUiIconPixels,previewIconReady);
    else feedback="No .qeapp selected";
  }
  if(verified){
@@ -2053,9 +2074,8 @@ void AppInstallerApp::openDetails(AppContext &ctx){
      }
    }
  }
- if (verified) previewIconReady = installedTab ?
-   ctx.installer.loadIcon(selectedMeta.id,previewPixels) :
-   ctx.installer.previewIcon(selectedPath,previewPixels);
+ if (verified && installedTab)
+   previewIconReady=ctx.installer.loadIcon(selectedMeta.id,gQeappUiIconPixels);
 }
 
 void AppInstallerApp::draw(AppContext &ctx){
@@ -2067,7 +2087,7 @@ void AppInstallerApp::draw(AppContext &ctx){
  if(operationResultOpen){
    ctx.ui.message(operationResultTitle,feedback.substring(0,34),
      feedback.substring(34,68),"Press Back to continue");
-   ctx.ui.softkeys("","","Back");return;
+   ctx.ui.softkeys("",resultCanOpen?"Open":"","Back");return;
  }
  if(confirm){
    ctx.ui.dialog(confirmData?"Erase app data?":(installedTab?"Uninstall application?":(willUpdate?"Update application?":"Install application?")),
@@ -2092,7 +2112,7 @@ void AppInstallerApp::draw(AppContext &ctx){
        selectedMeta.name,String("Version ")+selectedMeta.version+"  /  "+selectedMeta.type,
        !installedTab&&!installAllowed?feedback:(
        !strcmp(selectedMeta.type,"web")?"Access: network (HTTPS URL)":"Access: bundled text only"));
-   if(previewIconReady)ctx.ui.display().pushImage(103,170,32,32,previewPixels);
+   if(previewIconReady)QeappIconBlit::draw(ctx.ui.display(),103,170,gQeappUiIconPixels);
    else ctx.ui.drawIcon(101,167,"App",ctx.ui.c().bg);
    ctx.ui.softkeys("Options",installedTab?"Open":(installAllowed?(willUpdate?"Update":"Install"):"Disabled"),"Back");
    drawPopup(ctx,popup,INSTALLER_OPTS,INSTALLER_OPT_COUNT);return;
@@ -2112,8 +2132,13 @@ void AppInstallerApp::draw(AppContext &ctx){
 ScreenId AppInstallerApp::handle(AppContext &ctx,const KeyEvent &e){
  if(!e.pressed||e.longPress)return ScreenId::AppInstaller;
  if(operationResultOpen){
+   if(e.key==Key::Start && resultCanOpen){
+     ctx.pendingPackageId=resultAppId;
+     operationResultOpen=false;resultCanOpen=false;
+     return ScreenId::PackageApp; // main resolves after full signed re-verification
+   }
    if(e.key==Key::A||e.key==Key::B||e.key==Key::Start){
-     operationResultOpen=false;draw(ctx);
+     operationResultOpen=false;resultCanOpen=false;draw(ctx);
    }
    return ScreenId::AppInstaller;
  }
@@ -2146,7 +2171,12 @@ ScreenId AppInstallerApp::handle(AppContext &ctx,const KeyEvent &e){
        }
        const bool upgrading=willUpdate, erased=confirmData;
        const bool wasInstalledTab=installedTab;
-       confirm=false;details=false;reload(ctx);
+       const bool openAfterInstall=!error.length()&&!erased&&!wasInstalledTab;
+       char newId[25]={};
+       if(openAfterInstall)snprintf(newId,sizeof newId,"%s",selectedMeta.id);
+       confirm=false;details=false;reload(ctx,false);
+       resultCanOpen=openAfterInstall;
+       if(openAfterInstall)snprintf(resultAppId,sizeof resultAppId,"%s",newId);
        // Show full diagnostic instead of truncating errors to a 32-char footer.
        operationResultOpen=true;
        operationResultTitle=error.length()?"App manager failed":"App manager";
@@ -2162,7 +2192,7 @@ ScreenId AppInstallerApp::handle(AppContext &ctx,const KeyEvent &e){
      int choice=popup.index;popup.close();
      if(choice==0){selectedPath="";openDetails(ctx);}
      if(choice==1){if(!details){selectedPath="";openDetails(ctx);}if(verified&&(installedTab||installAllowed)){confirm=true;confirmData=false;confirmChoice=1;}}
-     if(choice==2){installedTab=!installedTab;selectedPath="";reload(ctx);}
+     if(choice==2){installedTab=!installedTab;selectedPath="";reload(ctx,false);}
      if(choice==3){selectedPath="";reload(ctx);}
      if(choice==4)return ScreenId::Applications;
      if(choice==5){
@@ -2249,9 +2279,9 @@ void ApplicationsApp::draw(AppContext &ctx){
    if(item<APP_COUNT)ctx.ui.listItem(row,applicationIcon[item],applicationTitle[item],applicationSub[item],item==index);
    else{
      const auto &entry=ctx.installer.at(item-APP_COUNT);
-     ctx.ui.listItem(row,"App",entry.info.name,String("v")+entry.info.version+" / "+entry.info.type,item==index);
-     if(ctx.installer.loadIcon(entry.info.id,iconPixels))
-       ctx.ui.display().pushImage(9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+10,32,32,iconPixels);
+     const bool custom=ctx.installer.loadIcon(entry.info.id,gQeappUiIconPixels);
+     ctx.ui.listItem(row,"App",entry.info.name,String("v")+entry.info.version+" / "+entry.info.type,item==index,!custom);
+     if(custom)QeappIconBlit::draw(ctx.ui.display(),9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+4,gQeappUiIconPixels);
    }
  }
  ctx.ui.scrollbar(total,SymbianUI::LIST_VISIBLE,offset);
@@ -2282,9 +2312,9 @@ ScreenId ApplicationsApp::handle(AppContext &ctx,const KeyEvent &e){
      auto rp=[&](int item,bool sel){int row=item-offset;if(row<0||row>=SymbianUI::LIST_VISIBLE)return;
        if(item<APP_COUNT)ctx.ui.listItem(row,applicationIcon[item],applicationTitle[item],applicationSub[item],sel);
        else{const auto &entry=ctx.installer.at(item-APP_COUNT);
-         ctx.ui.listItem(row,"App",entry.info.name,String("v")+entry.info.version+" / "+entry.info.type,sel);
-         if(ctx.installer.loadIcon(entry.info.id,iconPixels))
-           ctx.ui.display().pushImage(9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+10,32,32,iconPixels);
+         const bool custom=ctx.installer.loadIcon(entry.info.id,gQeappUiIconPixels);
+         ctx.ui.listItem(row,"App",entry.info.name,String("v")+entry.info.version+" / "+entry.info.type,sel,!custom);
+         if(custom)QeappIconBlit::draw(ctx.ui.display(),9,SymbianUI::CONTENT_TOP+1+row*SymbianUI::LIST_ROW_H+4,gQeappUiIconPixels);
        }};
      rp(old,false);rp(index,true);ctx.ui.scrollbar(total,SymbianUI::LIST_VISIBLE,offset);
    }

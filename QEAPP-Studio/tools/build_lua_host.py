@@ -1,38 +1,66 @@
 #!/usr/bin/env python3
-"""Build desktop host runner from the SAME bounded VM as ESP32 firmware.
-Default: official Lua vendor source installed by bootstrap_lua.py.
---system-lua is a Linux-only diagnostic fallback for environments with the
-liblua5.4 shared library but no network; never used for firmware/release builds.
-"""
+"""Build the desktop host runner from the same bounded VM as ESP32 firmware."""
 from __future__ import annotations
+
 import argparse
 import os
 from pathlib import Path
 import subprocess
 import sys
-ROOT=Path(__file__).resolve().parents[1]
-def main():
- p=argparse.ArgumentParser();p.add_argument('--system-lua',action='store_true');p.add_argument('--output',type=Path,default=ROOT/'build'/'qe_lua_host')
- a=p.parse_args();a.output.parent.mkdir(parents=True,exist_ok=True)
- base=ROOT/'runtime';files=[base/'src/QeLuaRuntime.cpp',base/'host/qe_lua_host.cpp']
- opts=['g++','-std=c++17','-O2','-Wall','-Wextra','-I'+str(base/'include')]
- if a.system_lua:
-  opts += ['-I'+str(base/'host/compat')]
-  libs=['-Wl,-l:liblua5.4.so.0']
- else:
-  vendor=ROOT/'firmware/VQEAF-OS/lib/VqeafLua54/src'
-  if not (vendor/'lua.h').exists():
-   sys.exit('Run python tools/bootstrap_lua.py first (official Lua 5.4.8)')
-  opts+=['-I'+str(vendor)]
-  cfiles=[str(f) for f in vendor.glob('*.c')]
-  cfiles=[f for f in cfiles if Path(f).name not in ('lua.c','luac.c','onelua.c')]
-  objs=[]
-  for path in cfiles:
-   obj=a.output.parent/(Path(path).name+'.o')
-   subprocess.run(['gcc','-std=c99','-O2','-I'+str(vendor),'-c',path,'-o',str(obj)],check=True)
-   objs.append(str(obj))
-  libs=objs+['-lm']+(['-ldl'] if sys.platform.startswith('linux') else [])
- cmd=opts+[str(x) for x in files]+libs+['-o',str(a.output)]
- subprocess.run(cmd,check=True)
- print('Host runner:',a.output)
-if __name__=='__main__':main()
+
+try:
+    from tools.host_toolchain import find_host_tool
+except ModuleNotFoundError:
+    from host_toolchain import find_host_tool
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--system-lua', action='store_true')
+    parser.add_argument('--output', type=Path,
+                        default=ROOT / 'build' / ('qe_lua_host.exe' if os.name == 'nt' else 'qe_lua_host'))
+    args = parser.parse_args()
+    if args.system_lua and os.name == 'nt':
+        raise SystemExit('--system-lua is Linux-only')
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    gcc_tool = find_host_tool('gcc')
+    gxx_tool = find_host_tool('g++')
+    build_env = os.environ.copy()
+    tool_dirs = {str(Path(gcc_tool).parent), str(Path(gxx_tool).parent)}
+    build_env['PATH'] = os.pathsep.join(sorted(tool_dirs)) + os.pathsep + build_env.get('PATH', '')
+    base = ROOT / 'runtime'
+    files = [base / 'src/QeLuaRuntime.cpp', base / 'host/qe_lua_host.cpp']
+    options = [gxx_tool, '-std=c++17', '-O2', '-Wall', '-Wextra',
+               '-I' + str(base / 'include')]
+    if os.name == 'nt':
+        options.append('-static')
+    if args.system_lua:
+        options += ['-I' + str(base / 'host/compat')]
+        libraries = ['-Wl,-l:liblua5.4.so.0']
+    else:
+        vendor = ROOT / 'firmware/VQEAF-OS/lib/VqeafLua54/src'
+        if not (vendor / 'lua.h').exists():
+            raise SystemExit('Run python tools/bootstrap_lua.py first (official Lua 5.4.8)')
+        options += ['-I' + str(vendor)]
+        sources = [str(path) for path in vendor.glob('*.c')]
+        sources = [path for path in sources
+                   if Path(path).name not in ('lua.c', 'luac.c', 'onelua.c')]
+        objects = []
+        for source in sources:
+            output = args.output.parent / (Path(source).name + '.o')
+            subprocess.run([gcc_tool, '-std=c99', '-O2', '-I' + str(vendor),
+                            '-c', source, '-o', str(output)], check=True, env=build_env)
+            objects.append(str(output))
+        libraries = objects + ['-lm']
+        if sys.platform.startswith('linux'):
+            libraries.append('-ldl')
+    command = options + [str(path) for path in files] + libraries + ['-o', str(args.output)]
+    subprocess.run(command, check=True, env=build_env)
+    print('Host runner:', args.output)
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

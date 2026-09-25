@@ -15,7 +15,9 @@ class Preflight(unittest.TestCase):
         self.assertEqual(report['checks']['runtime_mirror']['status'],'READY')
         self.assertEqual(report['checks']['beta_profile']['status'],'READY')
         self.assertEqual(report['checks']['stock_isolated']['status'],'READY')
-        self.assertEqual(report['checks']['lua_source']['status'],'MISSING')
+        source_ready = all((ROOT/'firmware/VQEAF-OS/lib/VqeafLua54/src'/name).is_file()
+                           for name in ('lua.h','lapi.c','lauxlib.c','lualib.h'))
+        self.assertEqual(report['checks']['lua_source']['status'],'READY' if source_ready else 'MISSING')
         self.assertEqual(report['checks']['beta_public_key']['status'],'MISSING')
         self.assertEqual(report['device_build'],'NOT_RUN')
 
@@ -26,7 +28,7 @@ class Preflight(unittest.TestCase):
             (fw/'src/lua').mkdir(parents=True)
             (fw/'src/services').mkdir(parents=True)
             (fw/'platformio.ini').write_text('''[env:vqeaf_os]\nbuild_flags = -D BASE\n[env:vqeaf_lua_beta]\nbuild_flags = -D VQEAF_ENABLE_LUA=1 -D QE_LUA_PSRAM_ALLOC=1 -D VQEAF_LUA_BETA_TRUST=1\n''')
-            for file in ('lua.h','lua.c','lauxlib.c','lualib.h'):
+            for file in ('lua.h','lapi.c','lauxlib.c','lualib.h'):
                 (fw/'lib/VqeafLua54/src'/file).write_text('fake source placeholder')
             (fw/'src/services/QeappTrustKeyLuaBeta.h').write_text('// only public declaration TEST\n')
             src=(ROOT/'runtime/src/QeLuaRuntime.cpp').read_text()

@@ -9,7 +9,9 @@ def main() -> int:
     except ImportError:
         print('PySide6 not installed. Run: python -m pip install -r requirements-studio.txt', file=sys.stderr)
         return 2
+    from studio.core.diagnostics import install_exception_hook
     from studio.gui.window import StudioWindow
+    install_exception_hook()
     app = QApplication(sys.argv)
     app.setApplicationName('QEAPP Studio')
     window = StudioWindow()

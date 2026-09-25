@@ -26,7 +26,7 @@ def inspect(fw: Path, cli: str | None = None, source_root: Path = ROOT) -> dict:
     check('stock_isolated','VQEAF_ENABLE_LUA=1' not in standard,
           'Default production firmware does not expose Lua beta', 'Remove beta flags from stock env')
     vendor=fw/'lib/VqeafLua54/src'
-    check('lua_source',all((vendor/p).is_file() for p in ('lua.h','lua.c','lauxlib.c','lualib.h')),
+    check('lua_source',all((vendor/p).is_file() for p in ('lua.h','lapi.c','lauxlib.c','lualib.h')),
           'Bundled official Lua 5.4 source is required for real device linking',
           'python tools/bootstrap_lua.py (inspect SHA-256 before installation)')
     key=fw/'src/services/QeappTrustKeyLuaBeta.h'

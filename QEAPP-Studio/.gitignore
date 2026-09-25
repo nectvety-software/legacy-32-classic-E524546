@@ -19,3 +19,15 @@ dist/
 *.pfx
 *.qeapp
 !.gitkeep
+
+# Monorepo build/cache exclusions
+**/__pycache__/
+**/.venv/
+**/build/
+**/dist/
+**/*.pyc
+**/*.pem
+**/*.key
+**/logs/
+.qeapp_envs/
+

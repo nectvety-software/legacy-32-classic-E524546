@@ -24,7 +24,7 @@ public:
   void chrome(const String &title, bool wifi, bool ble, bool sd, bool hour12);
   void refreshWifiBadge(bool connected, bool hour12);
   void softkeys(const String &left, const String &center, const String &right);
-  void listItem(int row, const String &icon, const String &title, const String &sub, bool selected);
+  void listItem(int row, const String &icon, const String &title, const String &sub, bool selected, bool showIcon = true);
   void menuBackground();
   void gridItem(int slot, const String &icon, const String &title, bool selected);
   void gridHint(const String &title, const String &sub);

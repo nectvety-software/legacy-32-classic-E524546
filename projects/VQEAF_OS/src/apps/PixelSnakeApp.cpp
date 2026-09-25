@@ -1,6 +1,9 @@
 #include "PixelSnakeApp.h"
 #include <WiFi.h>
 #include <string.h>
+#if defined(VQEAF_PERF_DIAG)
+#include "../core/UiFrameMetrics.h"
+#endif
 // A small adapter: all pixel art is rendered by the SAME pure C++ renderer
 // used by preview generation and host pixel-regression tests.
 namespace {
@@ -56,15 +59,24 @@ bool PixelSnakeApp::enter(AppContext &ctx){
 }
 void PixelSnakeApp::paintTFT(AppContext &ctx,bool full){
  if(!valid_)return;
+#if defined(VQEAF_PERF_DIAG)
+ const uint32_t startUs=micros();
+#endif
  if(full){
    ctx.ui.chrome("Pixel Snake",WiFi.status()==WL_CONNECTED,false,ctx.storage.mounted(),ctx.settings.data().hour12);
  }
  ScreenCanvas canvas(ctx.ui.display());
  PixelSnake::Renderer::scene(canvas,game_,colors_,high_>game_.score()?high_:game_.score());
  if(full)ctx.ui.softkeys("MENU","OK / Pause","Back");
+#if defined(VQEAF_PERF_DIAG)
+ vqeafFrameMetrics.gameFrame(UiFrameMetrics::elapsed(micros(),startUs));
+#endif
 }
 void PixelSnakeApp::draw(AppContext &ctx){paintTFT(ctx,true);}
 void PixelSnakeApp::redrawDelta(AppContext &ctx,PixelSnake::Point beforeHead,PixelSnake::Point beforeTail,PixelSnake::Result change){
+#if defined(VQEAF_PERF_DIAG)
+ const uint32_t startUs=micros();
+#endif
  ScreenCanvas canvas(ctx.ui.display());
  if(change==PixelSnake::Result::Moved||change==PixelSnake::Result::Ate){
    PixelSnake::Renderer::cell(canvas,beforeHead,game_,colors_);
@@ -84,6 +96,9 @@ void PixelSnakeApp::redrawDelta(AppContext &ctx,PixelSnake::Point beforeHead,Pix
    PixelSnake::Renderer::overlay(canvas,game_.phase(),colors_);
    PixelSnake::Renderer::hud(canvas,game_,high_,colors_);
  }
+#if defined(VQEAF_PERF_DIAG)
+ vqeafFrameMetrics.gameFrame(UiFrameMetrics::elapsed(micros(),startUs));
+#endif
 }
 void PixelSnakeApp::tick(AppContext &ctx){
  if(!valid_||game_.phase()!=PixelSnake::Phase::Running)return;

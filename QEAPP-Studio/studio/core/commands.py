@@ -79,3 +79,12 @@ def lua_preview(project: Path, screenshot: Path, frames: int = 8) -> JobSpec:
 def beta_preflight(firmware: Path) -> JobSpec:
     return JobSpec([sys.executable, str(ROOT / 'tools/device_preflight.py'), '--firmware-root', str(firmware)],
         'Lua beta device preflight (not an upload)', timeout=20)
+
+
+def build_lua_host() -> JobSpec:
+    """Build desktop Lua runner with the same VM source as beta ESP32 runtime."""
+    import os
+    argv = [sys.executable, str(ROOT/'tools/build_lua_host.py')]
+    if os.environ.get('QEAPP_HOST_SYSTEM_LUA') == '1':
+        argv += ['--system-lua']
+    return JobSpec(argv, 'Build Lua host virtual-phone runner', timeout=180)

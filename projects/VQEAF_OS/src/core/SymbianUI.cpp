@@ -515,7 +515,7 @@ void SymbianUI::drawIcon(int x, int y, const String &kind, uint16_t color) {
   drawS60MenuIcon(x, y, kind, color);
 }
 
-void SymbianUI::listItem(int row, const String &icon, const String &title, const String &sub, bool selected) {
+void SymbianUI::listItem(int row, const String &icon, const String &title, const String &sub, bool selected, bool showIcon) {
   if (row < 0 || row >= LIST_VISIBLE) return;
   const int y = CONTENT_TOP + 1 + row * LIST_ROW_H;
   const uint16_t bg = selected ? colors.selected : colors.bg;
@@ -527,10 +527,12 @@ void SymbianUI::listItem(int row, const String &icon, const String &title, const
 
   // All twelve core glyphs use the hand-rastered 24x24 variant in lists;
   // extra v2.3 glyphs keep their existing, source-compatible 36px fallback.
-  const VqeafIcons::Id standardId=VqeafIcons::fromLegacy(UiIconCatalog::canonical(icon.c_str()));
-  if (standardId != VqeafIcons::Id::Count)
-    VqeafIcons::drawOpaque(tft, standardId, 12, y + 9, 24, bg);
-  else drawIcon(7, y + 3, icon, bg);
+  if (showIcon) {
+    const VqeafIcons::Id standardId=VqeafIcons::fromLegacy(UiIconCatalog::canonical(icon.c_str()));
+    if (standardId != VqeafIcons::Id::Count)
+      VqeafIcons::drawOpaque(tft, standardId, 12, y + 9, 24, bg);
+    else drawIcon(7, y + 3, icon, bg);
+  }
 
   const uint16_t labelInk = selected ? selectedInk : colors.text;
   tft.setTextColor(labelInk, bg);

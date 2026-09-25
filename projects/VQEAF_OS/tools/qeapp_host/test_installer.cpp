@@ -38,13 +38,38 @@ int main(int argc,char **argv){
   copyFile(argv[2],base+"/welcome_from_root.qeapp");
   assert(installer.inspect("/welcome_from_root.qeapp",m,error));
   assert(!strcmp(m.id,"welcome"));
-  assert(installer.inspect(text.c_str(),m,error));assert(!strcmp(m.id,"welcome")&&m.hasIcon&&!strcmp(m.version,"1.0.0"));
+  bool previewReady=false;uint16_t preview[1024]={};
+  assert(installer.inspectWithIcon(text.c_str(),m,error,preview,previewReady));
+  assert(previewReady && !strcmp(m.id,"welcome") && m.hasIcon && !strcmp(m.version,"1.0.0"));
+  const auto bytesBeforeInstall=readBytes(base+text);
+  const unsigned startOfIcon=116+unsigned(bytesBeforeInstall[8])+
+       (unsigned(bytesBeforeInstall[9])<<8)+
+       (unsigned(bytesBeforeInstall[10])<<16)+
+       (unsigned(bytesBeforeInstall[11])<<24);
+  assert(!memcmp(preview,bytesBeforeInstall.data()+startOfIcon,2048));
+  assert(installer.inspect(text.c_str(),m,error));
   assert(installer.install(text.c_str(),m,error));assert(installer.count()==1);
   assert(storage.exists("/System/Apps/Installed/welcome/manifest.ini"));
   assert(storage.exists("/System/Apps/Installed/welcome/icon.rgb565"));
   assert(storage.exists("/System/Apps/Installed/welcome/payload.txt"));
   assert(storage.exists("/System/Apps/Installed/welcome/receipt.bin"));
   uint16_t pix[1024];assert(installer.loadIcon("welcome",pix));
+  // Regression: icon rendering must not rehash/re-verify the whole installed
+  // payload for each list row; only the icon is checked against the already
+  // fully verified and signed receipt cached by refresh().
+  assert(installer.get("welcome",m));
+  assert(installer.loadIcon("welcome",pix));
+  installer.refreshIfNeeded();assert(installer.count()==1);
+  const std::string installedIcon=base+"/System/Apps/Installed/welcome/icon.rgb565";
+  const auto pristineIcon=readBytes(installedIcon);assert(pristineIcon.size()==2048);
+  auto tamperedIcon=pristineIcon;tamperedIcon[101]^=0x40;writeBytes(installedIcon,tamperedIcon);
+  assert(!installer.loadIcon("welcome",pix));
+  String launchReason;assert(!installer.get("welcome",m,&launchReason));
+  assert(launchReason.length()>0); // tampered package cannot launch
+  writeBytes(installedIcon,pristineIcon);
+  assert(installer.loadIcon("welcome",pix));
+  assert(installer.get("welcome",m,&launchReason) && launchReason.length()==0);
+  assert(!installer.get("does_not_exist",m,&launchReason) && launchReason.length()>0);
   assert(!installer.install(text.c_str(),m,error));assert(error=="Already installed. Uninstall before reinstall");
   assert(installer.install("/System/Apps/Inbox/help_site.qeapp",m,error));
   assert(installer.count()==2);assert(!strcmp(m.type,"web"));

@@ -16,6 +16,7 @@ public:
   struct Installed {
     Qeapp::Meta info;
     char path[96];
+    uint8_t verifiedIconHash[32] = {}; // from fully verified receipt at catalog scan
   };
   struct RecoveryStats { uint8_t restored, finalized, blocked, discardedStages; };
   static void printBootInstallDiagnostics();
@@ -25,11 +26,17 @@ public:
   RecoveryStats recoveryStats() const { return recovery; }
   bool updateAvailable(const Qeapp::Meta &candidate) const;
   void refresh();
+  void refreshIfNeeded() { if (!catalogReady) refresh(); }
+  void invalidateCatalog() { catalogReady = false; used = 0; ++catalogRevision; }
+  uint32_t revision() const { return catalogRevision; }
   int count() const { return used; }
   // Caller must check n < count(); no out-of-range read of uninitialized Meta.
   const Installed &at(int n) const { return installed[n >= 0 && n < used ? n : MAX_INSTALLED]; }
-  bool get(const String &id, Qeapp::Meta &meta) const;
+  bool get(const String &id, Qeapp::Meta &meta, String *why = nullptr) const;
   bool inspect(const String &pkg, Qeapp::Meta &meta, String &error);
+  // Single full signature verification + optional bounded verified icon preview.
+  bool inspectWithIcon(const String &pkg, Qeapp::Meta &meta, String &error,
+                       uint16_t out[1024], bool &iconReady);
   // Installs new apps or replaces an already trusted, older version using
   // a staged copy plus signed backup. Downgrades and unsigned apps fail.
   bool install(const String &pkg, Qeapp::Meta &result, String &error);
@@ -41,6 +48,8 @@ private:
   StorageService *card = nullptr;
   Installed installed[MAX_INSTALLED + 1] = {}; // final slot is zero-initialized sentinel
   int used = 0;
+  bool catalogReady = false;
+  uint32_t catalogRevision = 0;
   RecoveryStats recovery = {0, 0, 0, 0};
   ProgressCallback progressFn = nullptr;
   void *progressUser = nullptr;

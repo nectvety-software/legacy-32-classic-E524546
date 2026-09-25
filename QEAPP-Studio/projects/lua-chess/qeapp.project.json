@@ -1,0 +1,8 @@
+{
+  "project_format": 1,
+  "id": "chess_2p",
+  "name": "Chess 2P",
+  "version": "0.1.0",
+  "type": "lua",
+  "content": "main.lua"
+}

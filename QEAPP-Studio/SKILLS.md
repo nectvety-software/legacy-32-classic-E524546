@@ -1,90 +1,125 @@
-# SKILLS.md — Kỹ năng và checklist phát triển QEAPP Studio
+# SKILLS.md — QEAPP-Studio Agent Execution Skills
 
-Mọi agent bắt đầu bằng `PROMPT.md` và file này; kích hoạt thêm mục kỹ năng phù hợp. Nguồn chuẩn: **code hiện tại** của firmware có ưu tiên cao hơn draft API trong bộ tài liệu.
+> **Baseline mã nguồn: QEAPP-Studio v0.7.4.** Đây là các playbook theo trigger để AI Agent thực thi công việc và báo cáo kết quả có bằng chứng. Đọc `PROMPT.md` trước. Lệnh dùng `python` theo hệ điều hành; trên Windows đã cài Python 3, có thể dùng `py -3` hoặc interpreter active từ launcher.
 
-## Skill 1 — Project scaffolding
+## Bảng kích hoạt nhanh
 
-**Trigger:** New Project, template, app/game mới. **Input:** project ID, loại, phiên bản, target firmware, quyền dự kiến. **Các bước:**
+| Trigger | Skill | Agent chủ trì | Gate chính |
+|---|---|---|---|
+| 'new app/game', project JSON, template | S01 | `agents/app-template.md` | init + validate + preview (nếu Lua) |
+| IDE/Editor/Explorer/theme desktop | S02 | `agents/studio-gui.md` | GUI offscreen thực + Studio tests |
+| Lua VM, input, fps host | S03 | `agents/lua-runtime.md` | bounded VM + replay + leak/crash |
+| build, signer, install `.qeapp` | S04 | `agents/package-security.md` | validate + inspect signature + compatibility |
+| firmware, Back, performance thiết bị | S05 | `agents/firmware-core.md` | host regressions + PlatformIO + Serial gate |
+| launcher, dependency, repair, rollback | S06 | `agents/studio-gui.md` | launcher tests + Qt post-update + rollback |
+| test/release/report | S07 | `agents/qa-release.md` | test matrix + evidence + diff audit |
 
-1. Chọn mode: `CURRENT_QEAPP2`, `BUILTIN_NATIVE_HANDLER` hoặc `PROPOSED_SCRIPT_RUNTIME`.
-2. Hiện tại dùng `qeapp.project.json` của Studio làm metadata *trên PC*, KHÔNG ghi JSON này vào QEAPP/2: signer chuyển sang ASCII manifest whitelist.
-3. Tạo `assets/`, `src/` hoặc `content.txt`, `tests/`, `README.md`, `CHANGELOG.md`; giữ `dist/` và khóa bí mật ngoài Git.
-4. Chạy `python tools/qstudio.py validate <project>` và test dự án. Mẫu `snake-lua-proposal` luôn báo chưa có runtime.
+## S01 — Tạo app/game mẫu
 
-**PASS:** ID, tên, version đúng hợp đồng; file asset có thực; không có symlink/path traversal; phân biệt mode rõ ràng.
+**Khi dùng:** tạo project mới. Chọn rõ loại `text`, `web` (stock) hoặc `lua` (beta). Không biến host preview thành khẳng định `.qeapp` Lua chạy trên stock OS.
 
-## Skill 2 — Signed QEAPP build & install
+```sh
+python tools/qstudio.py init --template text --id demo_notes --name "Demo Notes" -o projects/demo-notes
+python tools/qstudio.py init --template lua --id demo_lua --name "Demo Lua" -o projects/demo-lua
+python tools/qstudio.py validate projects/demo-notes
+python tools/qstudio.py validate projects/demo-lua
+# chỉ khi đã bootstrap + build Lua host:
+python tools/qstudio.py lua-preview projects/demo-lua --frames 14 -o build/demo-lua.png
+```
 
-**Trigger:** build, export, ký, cài, update. **Các bước:**
+Mẫu thực tế: `projects/lua-hello/`, `lua-snake/`, `lua-sprite/`, `text-notes/`, `web-bookmark/`. `qeapp.project.json` (PC metadata) chứa `project_format=1`, `id`, `name`, `version`, `type`, và `content` hoặc `url`; `icon` tùy chọn PNG 32×32. `id` `[a-z0-9_-]{1,24}`, `name` printable ASCII 1..40, `version` số dấu chấm ≤19 ký tự. Không đưa `build/`, `dist/` hoặc key vào template.
 
-1. Đọc format thực trong `docs/QEAPP_V15_SIGNING.md` và script gốc; `pip install cryptography Pillow` trên PC.
-2. Tạo private key P-256 **bên ngoài** repo, ghi public key và key-id phù hợp vào firmware bằng `tools/qeapp_keys.py` rồi rebuild/reflash firmware. Backup key riêng.
-3. Gọi `qstudio.py build ... --sign-key PATH --firmware-root PATH`; verify `qstudio.py inspect --public-key ... --key-id ...`.
-4. Test sửa 1 byte → chữ ký không hợp lệ; test downgrade, same-version, mất SD và backup recovery. Copy gói tới `/System/Apps/Inbox/`, mở App Installer và xác nhận.
+**Pass:** validate exit 0; preview chỉ PASS nếu PNG thực từ VM cùng log/replay; ký/cài là gate riêng.
 
-**FAIL bắt buộc:** khác key-id, private/public mismatch, manifest có key ngoài whitelist, payload >256KiB, icon không đúng 32x32, unsigned QEAPP/1. **Không bypass verifier** để "sửa" lỗi cài đặt.
+## S02 — Desktop GUI và IDE
 
-## Skill 3 — Game loop, UI, phím cứng
+**Khi dùng:** PySide6, Explorer, editor, panels, virtual phone, diagnostics. Đọc `studio/gui/window.py`, `studio/gui/virtual_phone.py`, `studio/core/workspace.py`, `tools/gui_post_update_check.py`; giữ chức năng thật của mọi nút. Chỉ đổi UI **IDE** khi có yêu cầu; theme/renderer **firmware OS** là phạm vi khác.
 
-**Trigger:** game 2D, app có tương tác, màn hình 240x320. Lưu API giả lập host và adapter ESP32 trong lớp platform riêng. Dự kiến hàm `init`, `update(dt_ms)`, `render`, `key`, `pause`, `resume`, `shutdown`. Giới hạn fixed-step, không block input, clamp dt. Đặt softkey/statusbar dưới quyền OS; test MENU/Home, A/Back, START/OK, SELECT long-press >600ms và D-Pad repeat. Render RGB565 và kiểm tra clipping tại biên 0..239, 0..319.
+```bat
+run_studio.bat --diagnose
+run_studio.bat --gui-check
+run_studio.bat
+```
 
-**PASS:** 240x320 golden image, 60s stress test trên host, input determinism, không mất phím/đóng băng launcher; thiết bị thật là gate riêng.
+Linux/macOS có PySide6: `QT_QPA_PLATFORM=offscreen python tools/gui_post_update_check.py --output build/gui-check.json --screenshot build/gui-check.png`. Chạy `python -m unittest discover -s studio/tests -v`. Không có PySide6: thông báo **GUI NOT_RUN/SKIPPED**, vẫn có thể chạy core tests. Ảnh do `make_ui_mockup.py` là ảnh minh họa, không phải bằng chứng Qt thật.
 
-## Skill 4 — Asset pipeline & bộ nhớ
+**Pass:** GUI khởi tạo `QApplication/StudioWindow`, mở tệp dự án tạm, editor/Explorer/virtual device hoạt động, ảnh offscreen có thật và không sửa project người dùng. Windows Qt platform plugin phải kiểm chứng riêng trên Windows.
 
-**Trigger:** spritesheet, fonts, tilemap, âm thanh. Dùng pipeline offline PNG → RGB565 hoặc palette/RLE theo asset, không decode ảnh lớn vào internal SRAM. Đo dung lượng `.qeapp` và bitmap giải nén; xếp tài nguyên trên SD theo thư mục sandbox tương lai. Đừng tự nới payload firmware mà không đổi format/version và test toàn bộ parser.
+## S03 — Lua host VM và preview
 
-**PASS:** lossless RGB565 round-trip tại target, palette range/chunk bounds, không OOM trong test lâu; số đo trên PC không phải số đo ESP32.
+**Khi dùng:** Lua callbacks, RGB565, timeout, FPS, crash, replay. Đọc `docs/10_LUA_BETA_ARCHITECTURE.md`, `runtime/`, `studio/core/frame_protocol.py`. **Lua host** dùng cùng nguồn core C++ nhưng không giả lập microSD/installer/I2S/CPU ESP32.
 
-## Skill 5 — Runtime sandbox (chỉ roadmap)
+```sh
+python tools/bootstrap_lua.py
+python tools/build_lua_host.py
+python tools/qstudio.py lua-preview projects/lua-snake --frames 14 --replay tests/input_replay.json -o build/lua-snake-test.png
+python tools/test_lua_beta_host.py
+python -m unittest discover -s tests -v
+```
 
-**Trigger:** yêu cầu "biên dịch game/app Lua thành `.qeapp` chạy độc lập". Tạo host interpreter + platform adapter + capability broker, không sửa manifest sang `type=lua` trên QEAPP/2. Thiết kế hợp đồng ABI mới/versioned, kiểm tra bytecode/source khi load, hạn mức instruction/memory, thư mục data theo ID và không dùng `loadfile/dofile/require` tự do từ SD.
+Trên Linux, `python tools/build_lua_host.py --system-lua` chỉ dùng khi có `liblua5.4` và **chỉ là chẩn đoán host**, không đủ điều kiện build firmware. Đo `frame_count`, render/VM ms, heap, watchdog, input lag với môi trường/hệ số chuẩn. Đối chiếu ảnh bằng CRC/hash nếu có baseline và kiểm tra trực quan khi golden thay đổi.
 
-**PASS:** host unit tests, fuzz malformed bytecode/resources, watchdog, host screenshots; **chưa PASS phát hành** cho đến khi firmware parser/loader/runtime/installer có E2E trên thiết bị thật.
+Giữ callbacks `on_update(dt)`, `on_draw()`, `on_key(key,down)`. Lua API hiện có `engine.clear`, `rect`, `text` và `blit1` (nếu version core hỗ trợ). `engine.width=240`, `engine.height=270` thuộc vùng vẽ dưới status/footer trong runtime beta hiện hành; LCD tổng thể vẫn 240×320. Không tự suy ra API `audio.play`, `filesystem`, `wifi` chưa được triển khai.
 
-## Skill 6 — IDE + debugger
+**Pass:** suite liên quan thành công; đánh dấu rõ lỗi thiếu Lua source/toolchain và `SKIPPED` không thay `PASS`.
 
-**Trigger:** UI IDE tương tự LuaS30-IDE. Qt/PySide6 trên PC chỉ là giao diện; gọi cùng `qstudio` CLI cho Build/Inspect/Test, không giữ private key trong workspace JSON. Có Explorer, editor, asset preview, Build log, Error diagnostics, simulator controls, screenshots và device Serial Monitor. **Stop** phải hủy process thử nghiệm; các command đầy quyền cần xác nhận.
+## S04 — Signed QEAPP/2 + firmware compatibility
 
-**PASS:** workflow tạo `text-app` → validate → signed build → verify, với mock signing key từ test tạm; nút Build trả đúng CLI exit code; key không bị ghi log.
+**Khi dùng:** build/export/install/rollback/signature. Đọc *parser và signer thực* trong firmware target trước khi đóng gói. Stock hỗ trợ `text|web`; Lua chỉ build khi chủ động chọn beta + key beta tương ứng.
 
-## Skill 7 — Regression và báo cáo
+```sh
+python tools/qstudio.py validate projects/text-notes
+python tools/qstudio.py doctor --firmware-root ../VQEAF-OS
+# chỉ dùng key riêng của người phát hành được lưu bên ngoài repo:
+python tools/qstudio.py build projects/text-notes --firmware-root ../VQEAF-OS --sign-key <PRIVATE_KEY_PATH> -o dist/text-notes.qeapp
+python tools/qstudio.py inspect dist/text-notes.qeapp --public-key <TRUSTED_PUBLIC_KEY_PATH> --key-id <MATCHING_KEY_ID>
+```
 
-- Bộ host: parser, hashes, P-256, icon/endian, malicious payload, signature mismatch, power-loss stage recovery, file sizes, game loop, render golden, resource leak; suite `verify_v242.py` trong firmware.
-- Bộ ESP32 (cần board): cross-build PlatformIO, 115200 serial, SD FAT mounting, WiFi/NTP/TLS, install/update/reboot, theme interaction, display 240x320, D-Pad, 10-minute runtime soak, FPS/heap low-water, screenshots chụp từ máy hoặc camera.
-- Báo cáo bắt buộc ghi `host simulated` hay `hardware verified`, SHA artifact, commit SHA, trust key-id (không có private key), tool versions và giới hạn.
+`--experimental-lua` chỉ dành cho `vqeaf_lua_beta` và riêng `tools/provision_lua_beta_key.py`. Không dùng gói text/web ký production để giả định tương thích beta key khác. Inspect bằng PEM được chỉ định **chưa** xác minh public key đã ghim trên thiết bị. Khi người dùng yêu cầu app chạy stock, dùng `text/web`, không chọn Lua chỉ vì preview thành công.
 
-## Skill 8 — M1 portable host game/app core (ĐÃ CÓ từ v0.2)
+**Pass:** package hợp lệ theo parser, signature đúng key dự kiến, tamper bị từ chối, key-id trùng trust firmware, hành vi cài/update được xác minh ở tier thích hợp. Không đưa private key vào patch hay screenshot.
 
-**Trigger:** tạo game/app C++ host demo, kiểm tra loop/input/renderer hoặc đổi API core.
+## S05 — Firmware lõi, Back và thiết bị thật
 
-1. Đọc `docs/07_M1_HOST_ENGINE.md`, `engine/include/qe/runtime.h`, `tests/golden/host_sha256.json`.
-2. Dùng `qe::App` (`init/update/draw/onKey/pause/resume/shutdown`) và `qe::Platform`; không import Arduino/TFT_eSPI trong engine core.
-3. Phím `Menu` / `SelectLong` chỉ đi đến `reservedSystemKey`; không giải phóng quyền này cho game.
-4. Giữ ring input 32 event, fixed-step 50ms và capped catch-up; không cấp phát trong `Runtime::tick()`.
-5. Chạy `python3 tools/qstudio.py simulate --demo snake --scenario playing -o screenshot.png` và `... --demo hello`; chạy `python3 -m unittest discover -s tests -v`.
-6. Golden mismatch là **FAIL** cho đến khi ảnh được người phát triển xem và cập nhật golden có giải thích.
+**Khi dùng:** input router, dialogs, installer, theme safety, FPS/đồ họa/âm thanh game. Đọc checkout VQEAF OS người dùng chỉ định. ZIP Studio v0.7.4 **không phải** bằng chứng chứa firmware v2.5.1 Back r2 mới nhất. Không overwrite `src/main.cpp` từ baseline cũ.
 
-**Không được hứa:** preview host nghĩa là app `.qeapp` native được firmware cài và chạy; `QEAPP/2` chỉ hỗ trợ web/text có chữ ký.
+**Bảo vệ đồ họa cũ:** snapshot SHA-256 tất cả file theme/icon/renderer trước và sau; các yêu cầu 'chỉ sửa lõi' phải giữ chúng nguyên byte. `A=Back` ở app mở OS confirm; `No` khôi phục session cũ, `Yes` dọn trạng thái trở về launcher; MENU=Home theo hợp đồng repo; không biến B=Delete thành Back. Không giả định guest nhận phím A.
 
-## Skill 9 — M2 PySide6 IDE (ĐÃ CODE trong v0.3, kiểm thử GUI cần PySide6)
+```sh
+pio run -d ../VQEAF-OS -e vqeaf_os
+# chỉ chạy nếu đã provision beta + Lua source chuẩn:
+pio run -d ../VQEAF-OS -e vqeaf_lua_beta
+```
 
-**Kích hoạt:** thiết kế Explorer/Editor/Build/Preview/Stop/New Project. Quy trình:
+Lệnh PlatformIO chỉ là **build gate**. Thiết bị thật phải nạp đúng environment/board, chụp LCD, thu Serial **115200**, ghi reset reason, heap/PSRAM trước-sau cài, thử Back No/Yes ≥20 chu kỳ, đo FPS thực khi game chạy, quan sát âm thanh loa nếu game có SFX. Các chỉ số từ host không được ghi là FPS ESP32 hoặc audio phát qua loa. Thiết bị không kết nối → `DEVICE_NOT_RUN`.
 
-1. Đọc `docs/09_M2_DESKTOP_CORE.md`, `studio/core/{workspace,config,commands,jobs}.py`, `studio/gui/window.py`.
-2. Tất cả file-access qua `Workspace`, chỉ nhận đường dẫn tương đối; không sửa symlink, file khóa, build artifacts; conflict khi nội dung trên đĩa đổi là lỗi bắt buộc.
-3. Đảm bảo giao diện ghi rõ preview là **HOST replay**, không phải thiết bị/firmware; signed build chỉ `text`/`web`.
-4. Async command luôn gọi `commands.*` → `JobRunner.execute(argv)`; khi nhấn Stop, kill process tree và báo lỗi/timeout rõ ràng; không lưu private key vào config hoặc log.
-5. Test core trước: `python -m unittest discover -s studio/tests -v`; bắt buộc đọc `skipped` và KHÔNG coi test Qt bị skip là đã chạy.
-6. Test Qt thật: cài `requirements-studio.txt`; chạy `QT_QPA_PLATFORM=offscreen python -m unittest discover -s studio/tests -v` và mở ứng dụng trên desktop Windows để thử New/Open/Edit/Build/Preview/Stop.
-7. Test QEAPP/2 thực với firmware checkout và khóa tạm riêng: `QEAPP_FIRMWARE_ROOT=/path/to/VQEAF-OS python -m unittest discover -s tests -v`.
+**Pass:** không bootloop/crash, không rò memory qua lặp lại, Back callback đúng, display/âm thanh được kiểm chứng bằng log/video tương ứng.
 
-**Chưa hỗ trợ ở M2:** trình mô phỏng firmware thực, breakpoint/debug live, Game Engine Lua trên ESP32, `.qeapp` native thực thi tùy ý, tự động flash board. Giữ các nhãn này tách biệt trong GUI và tài liệu.
+## S06 — Windows launcher Safe Update & Repair
 
-## v0.5: Pixel Sprite beta contract
+**Khi dùng:** lỗi `run_studio.bat`, thay Python dependency, venv hỏng, GUI không mở. Giữ `logs/active-runtime.json` rollback pointer, venv stage riêng và GUI probe thực; không nâng cấp trực tiếp env khỏe mạnh, không tự xóa project hoặc reset config chưa sao lưu.
 
-- Đọc `docs/13_SPRITE_AND_LUA_WORKFLOW_V05.md` và `tests/test_sprite_v05.py` trước mọi thay đổi sprite.
-- Mã `runtime/src/QeLuaRuntime.cpp` phải mirror đúng trong `firmware/VQEAF-OS/src/lua/`; sửa một bên thì chạy test đồng bộ.
-- `engine.blit1` chỉ nhận mask 1-bit row-major/MSB-first, kích thước tối đa 32×32, color RGB565; clipping vùng game 240×270, budget 512 draw calls. KHÔNG tạo API chưa có hoặc mở đường đọc SD/file từ Lua.
-- IDE PNG preview dùng `Workspace.read_png_preview()` chỉ với PNG nội bộ dự án, giới hạn 1 MiB/512×512, chặn symlink/traversal. PNG→Lua chuyển đổi CHỈ chạy trên PC.
-- Với release beta: chạy `python tools/verify_v05.py`; ghi riêng GUI SKIPPED và PlatformIO/hardware NOT_RUN. Chữ ký hợp lệ không đồng nghĩa app chạy được trên stock firmware.
+```bat
+run_studio.bat --diagnose
+run_studio.bat --gui-check
+run_studio.bat --update-now
+run_studio.bat --rollback-update
+run_studio.bat --offline
+```
+
+Sau cập nhật, kiểm `logs/launcher.log`, `logs/gui-check-active.json`, ảnh `logs/gui-check*.png`, `pip check`, explorer/editor/VM. Lỗi Qt → rollback có log và verify env cũ; không coi image sinh thủ công là GUI screenshot. Đọc `docs/17_SAFE_GUI_UPDATES_v074.md` để kiểm tra từng nhánh.
+
+**Pass:** đã chạy pytest/unittest liên quan và thực thi GUI probe khi có Qt; trên môi trường không có Qt/Windows phải báo chưa xác minh thay vì PASS giả.
+
+## S07 — QA, security và release
+
+**Khi dùng:** tổng hợp, commit, release, báo cáo. Đi theo `docs/agents/TEST_MATRIX.md` và `docs/agents/HANDOFF_TEMPLATE.md`. Có ít nhất test cụ thể cho logic/CLI/VM/GUI/firmware liên quan, và test negative cho sandbox + package tamper khi sửa path/packer.
+
+```sh
+python tools/validate_agent_docs.py
+python -m unittest discover -s studio/tests -v
+python -m unittest discover -s tests -v
+python tools/verify_v072.py --full      # môi trường đủ Lua toolchain; tùy bài test
+```
+
+`--require-qt` sử dụng khi muốn gate fail nếu Qt không chạy. Luôn ghi 4 trạng thái `PASS`, `FAIL`, `SKIPPED`, `NOT_RUN`, mức xác minh `STATIC | HOST | GUI_QT | PIO_BUILD | DEVICE`. Trước commit: `git diff --check`, kiểm không có `.pem/.key`, nhắc ảnh và hash nếu graphics gate. Cung cấp commit title + phần body nêu *why, what, tests, limitations* và chỉ báo push khi có log từ git.

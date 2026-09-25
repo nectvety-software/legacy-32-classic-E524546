@@ -1,3 +1,5 @@
+> **v2.5.1 candidate:** QEAPP signed app opening, RGB565 icon and UI performance fixes. See [device measurement and acceptance guide](docs/V251_QEAPP_GRAPHICS_MEMORY_PERF_VN.md). Physical FPS and reboot fixes still require actual ESP32-S3 testing.
+
 > **v2.5.0:** Tối ưu giao diện và icon RGB565 scanline cho ESP32-S3; xem [Feature-phone render core](docs/FEATURE_PHONE_RENDER_CORE_V250_VN.md) và chạy `python tools/verify_v250.py`. Đây là nguồn ứng viên; chưa xác nhận FPS trên bo mạch thực.
 
 # VQEAF OS v2.4.4 — Installer reboot investigation candidate

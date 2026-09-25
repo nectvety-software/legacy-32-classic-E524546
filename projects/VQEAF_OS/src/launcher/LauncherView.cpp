@@ -1,6 +1,7 @@
 #include "LauncherView.h"
 #include <string.h>
 #include "../core/UiVietnameseFont.h"
+#include "../core/QeappIconBlit.h"
 
 void LauncherView::clipped(const char *txt,int x,int y,int maxWidth,
                            uint16_t fg,uint16_t bg,int font,bool bold) {
@@ -101,7 +102,7 @@ void LauncherView::preview(const LauncherStyle &s,const LauncherRow *item,const 
   if(!item){clipped("No applications",10,PREVIEW_Y+21,W-20,s.previewFg,s.previewBg,2);return;}
   if(icon565) {
     tft.fillRect(8,PREVIEW_Y+8,42,42,s.border);
-    tft.pushImage(13,PREVIEW_Y+13,32,32,icon565);
+    QeappIconBlit::draw(tft,13,PREVIEW_Y+13,icon565);
   } else icon(item->glyph,9,PREVIEW_Y+10,39,s,true);
   clipped(item->title,57,PREVIEW_Y+8,W-65,s.previewFg,s.previewBg,2,true);
   clipped(item->summary,57,PREVIEW_Y+30,W-65,s.previewFg,s.previewBg,1);

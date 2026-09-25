@@ -1,3 +1,12 @@
+## v2.5.1 (2026-09-25) — QEAPP launch/icon fixes and device performance instrumentation
+
+- Single-pass cryptographically verified selected package+icon preview; retained independent install/launch verification.
+- Correct signed QEAPP icon RGB565 wire byte-order consistently in Apps, Installer and Explorer; fix list-row icon placement.
+- Cached icon SHA per verified catalog, on-demand 2KB-only icon rehash, catalog revision invalidation; share one icon scratch across installer/apps.
+- Add post-install Open action and visible launch diagnostics; reduce expensive catalog scans/transition frames.
+- Opt-in real ESP32-S3 metrics for rendered Snake updates, navigation and input dispatch, minimum observed RAM/PSRAM; Serial parser and transition A/B build profiles.
+- Host tests and target validation protocol in docs/V251_QEAPP_GRAPHICS_MEMORY_PERF_VN.md. No physical board test claimed.
+
 ## [2.5.0] — Feature-phone UI / graphics response (host candidate)
 
 - Opaque 24/36px icon scanline streaming (72-byte stack row, one batched TFT transaction/icon); original transparent renderer and A/B compatibility profile retained.

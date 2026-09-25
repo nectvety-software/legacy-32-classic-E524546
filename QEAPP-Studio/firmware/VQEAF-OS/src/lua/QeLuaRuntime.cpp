@@ -1,8 +1,10 @@
 #if defined(VQEAF_ENABLE_LUA) && VQEAF_ENABLE_LUA
 #include "QeLuaRuntime.h"
+extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+}
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -184,6 +186,16 @@ int QeLuaRuntime::lBlit1(lua_State *L) {
   }
   return 0;
 }
+int QeLuaRuntime::lHeapUsed(lua_State *L) {
+  auto *vm=self(L);
+  lua_pushnumber(L,vm ? static_cast<lua_Number>(vm->heapUsed()) : 0);
+  return 1;
+}
+int QeLuaRuntime::lHeapPeak(lua_State *L) {
+  auto *vm=self(L);
+  lua_pushnumber(L,vm ? static_cast<lua_Number>(vm->peakHeapUsed()) : 0);
+  return 1;
+}
 static void qe_require(lua_State *L,const char *name,lua_CFunction fn) {
   luaL_requiref(L,name,fn,1);
   lua_pop(L,1);
@@ -213,6 +225,8 @@ bool QeLuaRuntime::start(const char *source,size_t bytes,const Draw &draw,size_t
   lua_pushcfunction(L_,lText);lua_setfield(L_,-2,"text");
   lua_pushcfunction(L_,lClear);lua_setfield(L_,-2,"clear");
   lua_pushcfunction(L_,lBlit1);lua_setfield(L_,-2,"blit1");
+  lua_pushcfunction(L_,lHeapUsed);lua_setfield(L_,-2,"heap_used");
+  lua_pushcfunction(L_,lHeapPeak);lua_setfield(L_,-2,"heap_peak");
   lua_pushnumber(L_,240);lua_setfield(L_,-2,"width");
   lua_pushnumber(L_,270);lua_setfield(L_,-2,"height");
   lua_setglobal(L_,"engine");

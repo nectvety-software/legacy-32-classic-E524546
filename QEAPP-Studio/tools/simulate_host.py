@@ -8,13 +8,17 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import shutil
+import os
 import struct
 import subprocess
 import sys
 import tempfile
 import zlib
 from pathlib import Path
+try:
+    from tools.host_toolchain import find_host_tool
+except ModuleNotFoundError:
+    from host_toolchain import find_host_tool
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCES = ['engine/src/runtime.cpp','engine/src/draw.cpp','engine/host/HostCanvas.cpp']
@@ -29,14 +33,23 @@ class SimulatorError(Exception): pass
 def compile_host(output: Path, compiler: str | None = None, demo: str = 'snake') -> None:
     if demo not in DEMO_SOURCES:
         raise SimulatorError('Unsupported native host demo')
-    cc = compiler or shutil.which('g++') or shutil.which('clang++')
-    if not cc:
-        raise SimulatorError('C++17 g++/clang++ compiler unavailable')
+    if compiler:
+        cc = compiler
+    else:
+        try:
+            cc = find_host_tool('g++')
+        except (OSError, RuntimeError, ValueError):
+            try:
+                cc = find_host_tool('clang++')
+            except (OSError, RuntimeError, ValueError) as exc:
+                raise SimulatorError('C++17 g++/clang++ compiler unavailable') from exc
+    env = os.environ.copy()
+    env['PATH'] = str(Path(cc).parent) + os.pathsep + env.get('PATH', '')
     output.parent.mkdir(parents=True, exist_ok=True)
-    cmd = [cc,'-std=c++17','-O2','-Wall','-Wextra','-Werror','-pedantic',
+    cmd = [cc,'-std=c++17','-O2','-Wall','-Wextra','-Werror','-pedantic',*( ['-static'] if os.name=='nt' else []),
            *[arg for folder in INCLUDES for arg in ('-I',str(ROOT/folder))],
            *[str(ROOT/src) for src in SOURCES+DEMO_SOURCES[demo]],'-o',str(output)]
-    result = subprocess.run(cmd,capture_output=True,text=True,timeout=90)
+    result = subprocess.run(cmd,capture_output=True,text=True,timeout=90,env=env)
     if result.returncode:
         raise SimulatorError('Host compilation failed:\n'+result.stderr[-8000:])
 

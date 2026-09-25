@@ -209,24 +209,48 @@ def inspect(file: Path, public_key: Path|None=None, key_id: int|None=None) -> di
     return info
 
 def init_project(template: str, destination: Path, app_id: str, name: str) -> None:
-    src=Path(__file__).resolve().parents[1]/'projects'/({'text':'text-notes','web':'web-bookmark','lua':'lua-hello','lua-snake':'lua-snake','lua-sprite':'lua-sprite'}[template])
+    """Create a project. `lua`/`lua-standard` use the full standard scaffold."""
+    if template in ('lua', 'lua-standard'):
+        try:
+            from studio.core.project_scaffold import (
+                ScaffoldError, create_standard_lua_project,
+            )
+        except ModuleNotFoundError:
+            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+            from studio.core.project_scaffold import (
+                ScaffoldError, create_standard_lua_project,
+            )
+        try:
+            target = create_standard_lua_project(destination, app_id, name)
+        except ScaffoldError as err:
+            raise ProjectError(str(err)) from err
+        if template == 'lua':
+            sample = Path(__file__).resolve().parents[1] / 'projects' / 'lua-hello' / 'main.lua'
+            if sample.is_file():
+                (target / 'main.lua').write_text(sample.read_text(encoding='utf-8'), encoding='utf-8', newline='\n')
+        validate(target)
+        return
+    src = Path(__file__).resolve().parents[1] / 'projects' / {
+        'text': 'text-notes', 'web': 'web-bookmark',
+        'lua-snake': 'lua-snake', 'lua-sprite': 'lua-sprite', 'lua-chess': 'lua-chess',
+    }[template]
     if destination.exists():
         raise ProjectError('Destination exists; refusing to overwrite')
-    if not re.fullmatch(r'[a-z0-9_-]{1,24}',app_id):
+    if not re.fullmatch(r'[a-z0-9_-]{1,24}', app_id):
         raise ProjectError('New project ID invalid')
-    if not name or len(name)>40 or not name.isascii() or any(ord(c)<32 or ord(c)>126 for c in name):
+    if not name or len(name) > 40 or not name.isascii() or any(ord(c) < 32 or ord(c) > 126 for c in name):
         raise ProjectError('New project name must be printable ASCII (1..40)')
-    shutil.copytree(src,destination)
-    cfg=destination/'qeapp.project.json'
-    obj=json.loads(cfg.read_text(encoding='utf-8'))
-    obj['id'],obj['name']=app_id,name
-    cfg.write_text(json.dumps(obj,indent=2,ensure_ascii=True)+'\n',encoding='utf-8')
+    shutil.copytree(src, destination)
+    cfg = destination / 'qeapp.project.json'
+    obj = json.loads(cfg.read_text(encoding='utf-8'))
+    obj['id'], obj['name'] = app_id, name
+    cfg.write_text(json.dumps(obj, indent=2, ensure_ascii=True) + '\n', encoding='utf-8')
     validate(destination)
 
 def parse():
     cli=argparse.ArgumentParser(description='QEAPP Studio v0.5: signed text/web + opt-in Lua beta and 1-bit sprite preview')
     sub=cli.add_subparsers(dest='cmd',required=True)
-    new=sub.add_parser('init');new.add_argument('--template',choices=['text','web','lua','lua-snake','lua-sprite'],required=True)
+    new=sub.add_parser('init');new.add_argument('--template',choices=['text','web','lua','lua-standard','lua-snake','lua-sprite','lua-chess'],required=True)
     new.add_argument('--id',required=True);new.add_argument('--name',required=True)
     new.add_argument('-o','--output',type=Path,required=True)
     d=sub.add_parser('doctor');d.add_argument('--firmware-root',type=Path,required=True)
@@ -296,6 +320,14 @@ def main()->int:
               'docs/QEAPP_V15_SIGNING.md') if not (root/p).is_file()]
             if missing:raise ProjectError('Firmware checkout missing: '+', '.join(missing))
             print('PASS: detected signed QEAPP/2 firmware toolchain (does NOT verify hardware build)')
+            try:
+                from tools.device_preflight import inspect as beta_inspect
+            except ModuleNotFoundError:
+                from device_preflight import inspect as beta_inspect
+            beta=beta_inspect(root)
+            if beta['status']!='READY_FOR_DEVICE_BUILD':
+                missing=[name for name,item in beta['checks'].items() if item['status']!='READY']
+                print('WARN: Lua beta device preflight: '+beta['status']+' ('+', '.join(missing)+')')
     except (ProjectError,OSError,UnicodeError,ValueError) as err:
         print(f'ERROR: {err}',file=sys.stderr)
         return 2

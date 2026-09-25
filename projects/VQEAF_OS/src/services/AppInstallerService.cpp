@@ -139,15 +139,29 @@ bool AppInstallerService::scanPackage(File &f,Qeapp::Header &h,Qeapp::Meta &m,St
  error="";return true;
 }
 
-bool AppInstallerService::inspect(const String &pkg,Qeapp::Meta &meta,String &error){
+bool AppInstallerService::inspectWithIcon(const String &pkg,Qeapp::Meta &meta,
+                                          String &error,uint16_t out[1024],bool &iconReady){
+ iconReady=false;
  if(!card||!card->mounted()){error="microSD not mounted";return false;}
- // Accept user-chosen microSD path, never install directories.
  String path=pkg;path.toLowerCase();
  if(!path.endsWith(".qeapp")||!pkg.startsWith("/")||pkg.length()>220||
     strstr(pkg.c_str(),"..")!=nullptr||strchr(pkg.c_str(),'\\')!=nullptr){
    error="Expected safe absolute .qeapp file path";return false;
  }
- File f=card->fs().open(pkg,FILE_READ);Qeapp::Header h;bool ok=scanPackage(f,h,meta,error,true);if(f)f.close();return ok;
+ File f=card->fs().open(pkg,FILE_READ);Qeapp::Header h;
+ const bool ok=scanPackage(f,h,meta,error,true);
+ // Reuse the already-verified package handle. No second ECDSA/payload pass.
+ // This is only a visual preview; install and launch independently verify.
+ if(ok&&out&&h.iconLen==Qeapp::ICON_BYTES){
+   iconReady=f.seek(Qeapp::HEADER_BYTES+h.manifestLen)&&
+             f.read(reinterpret_cast<uint8_t*>(out),Qeapp::ICON_BYTES)==(int)Qeapp::ICON_BYTES;
+ }
+ if(f)f.close();
+ return ok;
+}
+bool AppInstallerService::inspect(const String &pkg,Qeapp::Meta &meta,String &error){
+ bool ignored=false;
+ return inspectWithIcon(pkg,meta,error,nullptr,ignored);
 }
 
 bool AppInstallerService::copySection(File &src,const String &dst,uint32_t bytes,const uint8_t hash[32],String &error){
@@ -321,7 +335,8 @@ bool AppInstallerService::updateAvailable(const Qeapp::Meta &candidate) const {
 }
 
 void AppInstallerService::refresh(){
- used=0;if(!card||!card->mounted())return;
+ ++catalogRevision;
+ used=0;catalogReady=false;if(!card||!card->mounted())return;
  recoverTransactions();
  File root=card->fs().open(StoragePaths::APPS_INSTALLED,FILE_READ);
  if(!root||!root.isDirectory())return;
@@ -331,19 +346,34 @@ void AppInstallerService::refresh(){
    if(dir.isDirectory()&&safeId(id)){
      Qeapp::Meta verified;String reason;
      if(verifyInstalled(id,verified,reason)){
-       installed[used].info=verified;
-       snprintf(installed[used].path,sizeof installed[used].path,"%s",installedPath(id).c_str());used++;
+       // Only accept icon reference digest after full on-disk signature check.
+       // A modified icon after refresh never renders; launch still verifies all bytes.
+       uint8_t receipt[Qeapp::HEADER_BYTES];
+       File proof=card->fs().open(installedPath(id)+"/receipt.bin",FILE_READ);
+       const bool proofOk=proof && proof.read(receipt,sizeof receipt)==(int)sizeof receipt;
+       if(proof)proof.close();
+       if(proofOk){
+         installed[used].info=verified;
+         memcpy(installed[used].verifiedIconHash,receipt+52,32);
+         snprintf(installed[used].path,sizeof installed[used].path,"%s",installedPath(id).c_str());used++;
+       }
      }
    }
    dir.close();dir=root.openNextFile();
  }
  if(dir)dir.close();
  root.close();
+ catalogReady=true;
 }
 
-bool AppInstallerService::get(const String &id,Qeapp::Meta &meta) const{
+bool AppInstallerService::get(const String &id,Qeapp::Meta &meta,String *why) const{
  // Reverify at use-time: removable SD may have changed after listing.
- for(int i=0;i<used;i++)if(id==installed[i].info.id){String error;return verifyInstalled(id,meta,error);}
+ for(int i=0;i<used;i++)if(id==installed[i].info.id){
+   String error;const bool ok=verifyInstalled(id,meta,error);
+   if(why) *why=ok?String():error;
+   return ok;
+ }
+ if(why) *why="App not in catalog; rescan Apps or remount SD";
  return false;
 }
 
@@ -498,10 +528,19 @@ bool AppInstallerService::uninstall(const String &id,String &error){
 
 bool AppInstallerService::loadIcon(const String &id,uint16_t out[1024]){
  if(!out||!card||!card->mounted()||!safeId(id))return false;
- Qeapp::Meta entry;if(!get(id,entry)||!entry.hasIcon)return false;
+ const Installed *trusted=nullptr;
+ for(int i=0;i<used;i++)if(id==installed[i].info.id){trusted=&installed[i];break;}
+ if(!trusted||!trusted->info.hasIcon)return false;
  File f=card->fs().open(installedPath(id)+"/icon.rgb565",FILE_READ);
  if(!f||f.size()!=Qeapp::ICON_BYTES){if(f)f.close();return false;}
- bool ok=f.read(reinterpret_cast<uint8_t*>(out),Qeapp::ICON_BYTES)==(int)Qeapp::ICON_BYTES;f.close();return ok;
+ const bool readOk=f.read(reinterpret_cast<uint8_t*>(out),Qeapp::ICON_BYTES)==(int)Qeapp::ICON_BYTES;
+ f.close();
+ if(!readOk)return false;
+ Qeapp::Sha256 hash;uint8_t digest[32];
+ hash.update(reinterpret_cast<const uint8_t*>(out),Qeapp::ICON_BYTES);
+ hash.finish(digest);
+ // Do NOT cache arbitrary SD icon contents or drop signing on launch.
+ return Qeapp::equalHash(digest,trusted->verifiedIconHash);
 }
 
 bool AppInstallerService::previewIcon(const String &pkg,uint16_t out[1024]){

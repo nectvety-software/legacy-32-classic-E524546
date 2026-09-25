@@ -42,6 +42,8 @@ private:
   static int lText(lua_State *L);
   static int lClear(lua_State *L);
   static int lBlit1(lua_State *L);
+  static int lHeapUsed(lua_State *L);
+  static int lHeapPeak(lua_State *L);
   void setError(const char *message);
   bool invoke(const char *name, int args);
   lua_State *L_;

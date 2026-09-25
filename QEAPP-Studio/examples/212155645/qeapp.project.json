@@ -4,5 +4,6 @@
   "name": "TestApi",
   "version": "1.0.0",
   "type": "web",
+  "profile": "production",
   "url": "https://qeafivels.com/"
 }

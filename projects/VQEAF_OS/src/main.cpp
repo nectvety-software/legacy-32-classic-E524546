@@ -11,6 +11,7 @@
 #include "core/SymbianUI.h"
 #if defined(VQEAF_PERF_DIAG)
 #include "core/UiPerfCounter.h"
+#include "core/UiFrameMetrics.h"
 #endif
 #if defined(VQEAF_ICON_SELFTEST)
 #include "core/VqeafIconSelfTest.h"
@@ -180,6 +181,9 @@ static bool shouldShowOpening(ScreenId from, ScreenId to) {
 }
 
 static void enterScreen(ScreenId s, bool animate = true, bool resume = false) {
+#if defined(VQEAF_PERF_DIAG)
+  const uint32_t navStartUs=micros();
+#endif
   ScreenId from = screen;
   // A mere WiFi-list browse must not permanently disable saved-AP recovery;
   // explicit manual Connect/Disconnect still takes priority.
@@ -187,17 +191,26 @@ static void enterScreen(ScreenId s, bool animate = true, bool resume = false) {
     wifiConnection.resumeAutoAfterBrowsing();
   }
   String packageOpeningName;
+  String launchFeedback;
   if (s == ScreenId::PackageApp) {
     Qeapp::Meta meta;
-    if (!appInstaller.get(appCtx.pendingPackageId, meta)) {
-      notifications.push("Applications", "Installed application unavailable");
+    String launchFailure;
+    if (!appInstaller.get(appCtx.pendingPackageId, meta, &launchFailure)) {
+      Serial.printf("[VQEAF][QEAPP][LAUNCH_FAIL] id=%s reason=%s\n",
+                    appCtx.pendingPackageId.c_str(),launchFailure.c_str());
+      notifications.push("Applications", launchFailure);
+      launchFeedback=launchFailure;
       s = ScreenId::Applications;
     } else {
       packageOpeningName = meta.name;
       appCtx.pendingPackageLaunch = true;
       if (!strcmp(meta.id, "snake_pixel") && !strcmp(meta.type, "text")) {
         if (pixelSnakeApp.enter(appCtx)) s = ScreenId::Snake;
-        else { notifications.push("Pixel Snake", "Invalid signed game settings"); s = ScreenId::Applications; }
+        else {
+          launchFeedback="Game settings invalid (signed demo required)";
+          notifications.push("Pixel Snake", launchFeedback);
+          s = ScreenId::Applications;
+        }
         // Browser and Text Viewer normally consume this flag. Snake does not.
         appCtx.pendingPackageLaunch = false;
       } else if (!strcmp(meta.type, "web")) {
@@ -221,10 +234,18 @@ static void enterScreen(ScreenId s, bool animate = true, bool resume = false) {
 
   if (from == ScreenId::Launcher || s == ScreenId::Launcher ||
       from == ScreenId::Explorer || s == ScreenId::Explorer) ui.invalidateChrome();
-  if (animate && from != ScreenId::Launcher && s != ScreenId::Launcher &&
+#if defined(VQEAF_V250_NAV_COMPAT)
+  // Diagnostic A/B: old transition policy, SAME v2.5.1 code and profiler.
+  const bool heavyRoute=false;
+#else
+  const bool heavyRoute = from==ScreenId::AppInstaller || s==ScreenId::AppInstaller ||
+       from==ScreenId::Applications || s==ScreenId::Applications ||
+       s==ScreenId::Browser || s==ScreenId::TextViewer;
+#endif
+  if (animate && !heavyRoute && from != ScreenId::Launcher && s != ScreenId::Launcher &&
       from != ScreenId::Explorer && s != ScreenId::Explorer &&
       screen != ScreenId::Splash && s != ScreenId::Lock) ui.transitionOut();
-  if (animate && shouldShowOpening(from, s) && s != ScreenId::Recovery) {
+  if (animate && !heavyRoute && shouldShowOpening(from, s) && s != ScreenId::Recovery) {
     ui.chrome("Opening", wifiConnected(), false, false, settings.data().hour12);
     ui.openingApp(packageOpeningName.length() ? packageOpeningName : SystemService::screenName(s),
                   packageOpeningName.length() ? "App" : SystemService::screenIcon(s), resume);
@@ -274,7 +295,14 @@ static void enterScreen(ScreenId s, bool animate = true, bool resume = false) {
     case ScreenId::Themes:
       if (!resume) themesApp.enter(appCtx, from); themesApp.draw(appCtx); break;
     case ScreenId::Applications:
-      if (!resume) applicationsApp.enter(appCtx); applicationsApp.draw(appCtx); break;
+      if (!resume) applicationsApp.enter(appCtx);
+      applicationsApp.draw(appCtx);
+      if (launchFeedback.length()) {
+        ui.message("Cannot open QEAPP",launchFeedback.substring(0,32),
+                   launchFeedback.substring(32,64),"Rescan or reinstall signed app");
+        ui.softkeys("","","Back");
+      }
+      break;
     case ScreenId::AppInstaller:
       if (!resume) appInstallerApp.enter(appCtx, from); appInstallerApp.draw(appCtx); break;
     case ScreenId::QuickPanel:
@@ -309,13 +337,17 @@ static void enterScreen(ScreenId s, bool animate = true, bool resume = false) {
     }
     case ScreenId::About:
       ui.chrome("About", wifiConnected(), false, false, settings.data().hour12);
-      ui.message("VQEAF OS", "v2.4 App Manager", "ESP32-S3 / 240x320 portrait", "Browser, .vqeaf, .qeapp");
+      ui.message("VQEAF OS", VQEAF_OS_VERSION_TEXT, "ESP32-S3 / 240x320 portrait", "Browser, .vqeaf, .qeapp");
       ui.softkeys("", "", "Back");
       break;
     default: break;
   }
   systemService.recordScreen(s);
   lastClockRefresh = millis();
+#if defined(VQEAF_PERF_DIAG)
+  vqeafFrameMetrics.navigation(UiFrameMetrics::elapsed(micros(),navStartUs));
+#endif
+
 }
 
 static void drawSplash() {
@@ -560,9 +592,23 @@ struct UiLoopTimingProbe {
 static void reportUiPerformanceIfDue() {
   static uint32_t lastReportMs=0;
   const uint32_t now=millis();
-  if ((uint32_t)(now-lastReportMs)<5000) return;
+  const uint32_t elapsedMs=now-lastReportMs;
+  if (elapsedMs<5000) return;
   lastReportMs=now;
   const auto perf=uiLoopPerf.take();
+  const auto frames=vqeafFrameMetrics.take(elapsedMs);
+  Serial.printf("[VQEAF][FPS] window_ms=%lu game_frames=%lu game_fps_x10=%lu "
+                "game_draw_avg_us=%lu game_draw_max_us=%lu game_draw_p95_le_us=%lu "
+                "nav_count=%lu nav_avg_us=%lu nav_max_us=%lu nav_p95_le_us=%lu "
+                "input_events=%lu input_dispatch_avg_us=%lu input_dispatch_max_us=%lu "
+                "input_dispatch_p95_le_us=%lu\n",
+       (unsigned long)frames.elapsedMs,(unsigned long)frames.game.count,
+       (unsigned long)frames.gameFpsX10(),(unsigned long)frames.game.meanUs(),
+       (unsigned long)frames.game.maxUs,(unsigned long)frames.game.p95UpperBoundUs(),
+       (unsigned long)frames.navigation.count,(unsigned long)frames.navigation.meanUs(),
+       (unsigned long)frames.navigation.maxUs,(unsigned long)frames.navigation.p95UpperBoundUs(),
+       (unsigned long)frames.input.count,(unsigned long)frames.input.meanUs(),
+       (unsigned long)frames.input.maxUs,(unsigned long)frames.input.p95UpperBoundUs());
   Serial.printf("[VQEAF][PERF] samples=%lu avg_loop_us=%lu max_loop_us=%lu "
                 "over16=%lu over33=%lu over100=%lu heap8=%lu largest8=%lu psram=%lu\n",
      (unsigned long)perf.samples, (unsigned long)perf.meanUs,
@@ -678,6 +724,14 @@ void loop() {
   input.setTextInputActive(keyboard.active());
   KeyEvent e = input.poll();
   if (e.key == Key::None) { delay(4); return; }
+#if defined(VQEAF_PERF_DIAG)
+  // Measures from event delivery (input.poll) through dispatch/UI writes;
+  // it is NOT interrupt-to-photon latency on the physical LCD.
+  struct InputLatencyScope {
+    uint32_t started=micros();
+    ~InputLatencyScope(){vqeafFrameMetrics.inputDispatch(UiFrameMetrics::elapsed(micros(),started));}
+  } latencyScope;
+#endif
   lastActivityAt = millis();
 
   // Locked state consumes all keypad events before any global shortcut.
