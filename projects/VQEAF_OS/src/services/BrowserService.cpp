@@ -219,7 +219,10 @@ void BrowserService::resetPage() {
   pageTitle[0] = 0;
   errorText[0] = 0;
   cachedPage = false;
-  if (lines) for (int i = 0; i < MAX_LINES; ++i) { lines[i].text[0] = 0; lines[i].link = -1; }
+  if (lines) for (int i = 0; i < MAX_LINES; ++i) {
+    lines[i].text[0] = 0; lines[i].link = -1;
+    lines[i].style = BR_STYLE_BODY; lines[i].block = 0;
+  }
   if (links) for (int i = 0; i < MAX_LINKS; ++i) { links[i].url[0] = 0; links[i].label[0] = 0; }
 }
 
@@ -721,7 +724,8 @@ int BrowserService::addLink(const char *href, const char *label) {
   return i;
 }
 
-void BrowserService::addWrappedText(const char *text, int linkIndex) {
+void BrowserService::addWrappedText(const char *text, int linkIndex,
+                                    uint8_t style, uint16_t block) {
   if (!text || !text[0] || lineUsed >= MAX_LINES) return;
   char clean[192]; int c = 0; bool space = false;
   for (const char *p = text; *p && c < (int)sizeof(clean)-1; ++p) {
@@ -735,7 +739,9 @@ void BrowserService::addWrappedText(const char *text, int linkIndex) {
   trimAscii(clean);
   if (!clean[0]) return;
 
-  const int WRAP = 34;
+  // Headings and folder rows wrap a little wider; body text keeps the
+  // feature-phone 34-column measure used by the OS Browser viewport.
+  const int WRAP = (style == BR_STYLE_H1 || style == BR_STYLE_FOLDER) ? 32 : 34;
   const char *p = clean;
   while (*p && lineUsed < MAX_LINES) {
     int n = min((int)strlen(p), WRAP);
@@ -747,7 +753,10 @@ void BrowserService::addWrappedText(const char *text, int linkIndex) {
     while (n > 0 && p[n-1] == ' ') --n;
     BrowserLine &ln = lines[lineUsed++];
     int copy = min(n, (int)sizeof(ln.text)-1);
-    memcpy(ln.text, p, copy); ln.text[copy] = 0; ln.link = (int8_t)linkIndex;
+    memcpy(ln.text, p, copy); ln.text[copy] = 0;
+    ln.link = (int8_t)linkIndex;
+    ln.style = style;
+    ln.block = block;
     p += n;
     while (*p == ' ') ++p;
   }
@@ -755,7 +764,7 @@ void BrowserService::addWrappedText(const char *text, int linkIndex) {
 
 static void decodeEntities(char *s) {
   struct Pair { const char *a; const char *b; } pairs[] = {
-    {"&amp;","&"},{"&lt;","<"},{"&gt;",">"},{"&quot;","\""},{"&#39;","'"},{"&nbsp;"," "}
+    {"&amp;","&"},{"&lt;","<"},{"&gt;",">"},{"&quot;","\""},{"&#39;","'"},{"&apos;","'"},{"&nbsp;"," "}
   };
   for (const auto &pair : pairs) {
     char out[192]; out[0] = 0; const char *p = s;
@@ -768,6 +777,66 @@ static void decodeEntities(char *s) {
     }
     snprintf(s, 192, "%s", out);
   }
+  // Numeric entities (Vietnamese pages): &#7871; / &#xE1; -> UTF-8.
+  char out[192]; out[0] = 0; const char *p = s;
+  while (*p && strlen(out) < sizeof(out) - 5) {
+    if (*p == '&' && p[1] == '#') {
+      const char *q = p + 2;
+      int base = 10;
+      if (*q == 'x' || *q == 'X') { base = 16; ++q; }
+      char num[8]; int n = 0;
+      while (*q && *q != ';' && n < 7 &&
+             ((base == 16 && isxdigit((unsigned char)*q)) ||
+              (base == 10 && isdigit((unsigned char)*q)))) num[n++] = *q++;
+      if (n && *q == ';') {
+        num[n] = 0;
+        long v = strtol(num, nullptr, base);
+        if (v > 0 && v <= 0x10FFFF && !(v >= 0xD800 && v <= 0xDFFF)) {
+          char u[5]; int ul = 0;
+          if (v < 0x80) { u[0] = (char)v; ul = 1; }
+          else if (v < 0x800) {
+            u[0] = (char)(0xC0 | (v >> 6));
+            u[1] = (char)(0x80 | (v & 0x3F)); ul = 2;
+          } else if (v < 0x10000) {
+            u[0] = (char)(0xE0 | (v >> 12));
+            u[1] = (char)(0x80 | ((v >> 6) & 0x3F));
+            u[2] = (char)(0x80 | (v & 0x3F)); ul = 3;
+          } else {
+            u[0] = (char)(0xF0 | (v >> 18));
+            u[1] = (char)(0x80 | ((v >> 12) & 0x3F));
+            u[2] = (char)(0x80 | ((v >> 6) & 0x3F));
+            u[3] = (char)(0x80 | (v & 0x3F)); ul = 4;
+          }
+          u[ul] = 0;
+          strcat(out, u);
+          p = q + 1;
+          continue;
+        }
+      }
+    }
+    size_t left = sizeof(out) - strlen(out) - 1;
+    if (!left) break;
+    strncat(out, p, 1);
+    ++p;
+  }
+  snprintf(s, 192, "%s", out);
+}
+
+// Qeafbrowser v2.2: common UTF-8 punctuation the tiny font cannot draw.
+static void normalizePunct(char *s) {
+  if (!s) return;
+  char *w = s;
+  for (const unsigned char *r = (const unsigned char *)s; *r;) {
+    if (r[0] == 0xE2 && r[1] == 0x80 &&
+        (r[2] == 0x93 || r[2] == 0x94)) { *w++ = '-'; r += 3; continue; }
+    if (r[0] == 0xE2 && r[1] == 0x80 &&
+        (r[2] == 0x98 || r[2] == 0x99)) { *w++ = '\''; r += 3; continue; }
+    if (r[0] == 0xE2 && r[1] == 0x80 &&
+        (r[2] == 0x9C || r[2] == 0x9D)) { *w++ = '"'; r += 3; continue; }
+    if (r[0] == 0xC2 && r[1] == 0xA0) { *w++ = ' '; r += 2; continue; }
+    *w++ = (char)*r++;
+  }
+  *w = 0;
 }
 
 static bool htmlAttr(const char *raw, const char *wanted, char *out, size_t cap) {
@@ -802,82 +871,241 @@ static bool htmlAttr(const char *raw, const char *wanted, char *out, size_t cap)
   return false;
 }
 
+// Styles from Qeafbrowser wml.cpp heading_style().
+static uint8_t headingStyle(const char *name) {
+  if (!strncmp(name, "h1", 2) || !strncmp(name, "h2", 2)) return BR_STYLE_H1;
+  if (!strncmp(name, "h3", 2) || !strncmp(name, "h4", 2) ||
+      !strncmp(name, "h5", 2) || !strncmp(name, "h6", 2)) return BR_STYLE_H3;
+  if (!strcmp(name, "input") || !strcmp(name, "field")) return BR_STYLE_FIELD;
+  if (!strcmp(name, "folder") || !strcmp(name, "dir")) return BR_STYLE_FOLDER;
+  if (!strcmp(name, "small") || !strcmp(name, "cite")) return BR_STYLE_SMALL;
+  if (!strcmp(name, "b") || !strcmp(name, "strong")) return BR_STYLE_BOLD;
+  return BR_STYLE_BODY;
+}
+
+static bool isBlockTag(const char *t) {
+  static const char *const B[] = {
+    "p","br","div","h1","h2","h3","h4","h5","h6","tr","td","li","card","wml",
+    "html","head","body","table","ul","ol","form","do","template","fieldset",
+    "input","field","folder","dir","b","strong","em","i","small","cite","span",
+    "article","header","nav","section","footer","blockquote","pre","hr", nullptr};
+  for (int i = 0; B[i]; ++i) if (!strcmp(t, B[i])) return true;
+  return false;
+}
+
+static bool startsFocusBlock(const char *t) {
+  static const char *const B[] = {
+    "p","div","h1","h2","h3","h4","h5","h6","tr","td","li","form","fieldset",
+    "input","field","folder","dir","article","header","nav","section","footer",
+    "blockquote","pre","small","hr", nullptr};
+  for (int i = 0; B[i]; ++i) if (!strcmp(t, B[i])) return true;
+  return false;
+}
+
+static bool skipContainer(const char *t) {
+  static const char *const S[] = {
+    "script","style","noscript","svg","canvas","template","iframe","object", nullptr};
+  for (int i = 0; S[i]; ++i) if (!strcmp(t, S[i])) return true;
+  return false;
+}
+
+// Pick a real image URL from lazy/srcset/src (Qeafbrowser image_source_pick).
+static void pickImageSrc(const char *lazy, const char *srcset, const char *src,
+                         char *out, size_t cap) {
+  out[0] = 0;
+  auto usable = [](const char *u) -> bool {
+    if (!u || !u[0] || isspace((unsigned char)u[0])) return false;
+    if (!strncasecmp(u, "data:", 5) || !strncasecmp(u, "javascript:", 11)) return false;
+    size_t n = strlen(u);
+    for (size_t i = 0; i < n; ++i) if (u[i] == '?' || u[i] == '#') { n = i; break; }
+    if (n >= 4 && !strncasecmp(u + n - 4, ".gif", 4)) return false;
+    if (n >= 5 && !strncasecmp(u + n - 5, ".webp", 5)) return false;
+    if (n >= 4 && !strncasecmp(u + n - 4, ".svg", 4)) return false;
+    return true;
+  };
+  if (usable(lazy)) {
+    snprintf(out, cap, "%s", lazy);
+  } else if (srcset && srcset[0] && strncasecmp(srcset, "data:", 5)) {
+    const char *p = srcset;
+    while (*p) {
+      while (*p == ',' || isspace((unsigned char)*p)) ++p;
+      const char *start = p;
+      while (*p && *p != ',') ++p;
+      const char *end = p;
+      while (end > start && isspace((unsigned char)end[-1])) --end;
+      char candidate[192];
+      size_t n = 0;
+      const char *ue = start;
+      while (ue < end && !isspace((unsigned char)*ue) && n < sizeof(candidate) - 1)
+        candidate[n++] = *ue++;
+      candidate[n] = 0;
+      if (usable(candidate)) { snprintf(out, cap, "%s", candidate); break; }
+      if (*p == ',') ++p;
+    }
+  }
+  if (!out[0] && usable(src)) snprintf(out, cap, "%s", src);
+  decodeEntities(out);
+}
+
 void BrowserService::parseHtml(const char *src, size_t len) {
-  bool inTag = false, skip = false, inTitle = false, inAnchor = false;
+  bool inTag = false, inTitle = false, inAnchor = false;
+  bool skip = false;
+  char skipName[16] = {0};
+  int skipDepth = 0;
   char tag[256] = {0}; int tagN = 0;
   char text[192] = {0}; int textN = 0;
   char anchorHref[192] = {0};
   char anchorText[192] = {0}; int anchorN = 0;
+  uint8_t curStyle = BR_STYLE_BODY;
+  uint16_t curBlock = 0, nextBlock = 1;
+  bool isWml = false;
 
   auto flushText = [&]() {
     if (!textN) return;
-    text[textN] = 0; decodeEntities(text);
+    text[textN] = 0;
+    decodeEntities(text);
+    normalizePunct(text);
     if (inTitle) {
       trimAscii(text);
       if (text[0] && !pageTitle[0]) snprintf(pageTitle, sizeof(pageTitle), "%s", text);
-    } else if (!skip && !inAnchor) addWrappedText(text);
-    else if (inAnchor && anchorN < (int)sizeof(anchorText)-1) {
-      for (int i=0;i<textN && anchorN < (int)sizeof(anchorText)-1;++i) anchorText[anchorN++] = text[i];
+    } else if (skip) {
+      // dropped
+    } else if (inAnchor) {
+      for (int i = 0; i < textN && anchorN < (int)sizeof(anchorText) - 1; ++i)
+        anchorText[anchorN++] = text[i];
       anchorText[anchorN] = 0;
+    } else {
+      addWrappedText(text, -1, curStyle, curBlock);
     }
     textN = 0; text[0] = 0;
   };
 
   auto processTag = [&](const char *raw) {
     char lower[256]; snprintf(lower, sizeof(lower), "%s", raw);
-    for (char *p=lower; *p; ++p) *p = (char)tolower((unsigned char)*p);
+    for (char *p = lower; *p; ++p) *p = (char)tolower((unsigned char)*p);
     char *t = lower; while (*t && isspace((unsigned char)*t)) ++t;
     bool closing = *t == '/'; if (closing) ++t;
     while (*t && isspace((unsigned char)*t)) ++t;
-    char name[20] = {0}; int n=0;
-    while (*t && !isspace((unsigned char)*t) && *t!='>' && *t!='/' && n<19) name[n++]=*t++;
-    name[n]=0;
+    char name[20] = {0}; int n = 0;
+    while (*t && !isspace((unsigned char)*t) && *t != '>' && *t != '/' && n < 19) name[n++] = *t++;
+    name[n] = 0;
 
-    if (!strcmp(name,"script") || !strcmp(name,"style") || !strcmp(name,"noscript") || !strcmp(name,"svg")) {
-      skip = !closing; return;
+    // Nested skip containers (template/iframe/…) from Qeafbrowser tag_scan.
+    if (skipDepth > 0) {
+      if (!closing && skipContainer(name) && !strcmp(name, skipName)) ++skipDepth;
+      else if (closing && !strcmp(name, skipName) && --skipDepth == 0) {
+        skipName[0] = 0; skip = false;
+      }
+      return;
     }
-    if (skip) return;
-    if (!strcmp(name,"title")) { inTitle = !closing; return; }
-    if (!strcmp(name,"a")) {
+    if (!closing && skipContainer(name)) {
+      snprintf(skipName, sizeof(skipName), "%s", name);
+      skipDepth = 1; skip = true;
+      return;
+    }
+    if (!strcmp(name, "title")) { inTitle = !closing; return; }
+    if (!strcmp(name, "wml") || !strcmp(name, "card")) {
+      if (!strcmp(name, "wml")) isWml = true;
+      char titleAttr[64];
+      if (!closing && htmlAttr(raw, "title", titleAttr, sizeof(titleAttr)) &&
+          titleAttr[0] && !pageTitle[0]) {
+        decodeEntities(titleAttr);
+        snprintf(pageTitle, sizeof(pageTitle), "%s", titleAttr);
+      }
+    }
+    if (!strcmp(name, "a") || !strcmp(name, "anchor") ||
+        !strcmp(name, "go") || !strcmp(name, "prev") ||
+        (!strcmp(name, "option"))) {
+      char href[192];
       if (!closing) {
-        inAnchor = true; anchorN = 0; anchorText[0] = 0; anchorHref[0] = 0;
-        htmlAttr(raw, "href", anchorHref, sizeof(anchorHref));
-      } else {
-        inAnchor = false; anchorText[anchorN]=0; decodeEntities(anchorText); trimAscii(anchorText);
+        href[0] = 0;
+        htmlAttr(raw, "href", href, sizeof(href));
+        decodeEntities(href);
+        if (href[0]) {
+          // Split mid-paragraph text so the focus box only wraps the link.
+          if (!inAnchor && textN) flushText();
+          inAnchor = true; anchorN = 0; anchorText[0] = 0;
+          snprintf(anchorHref, sizeof(anchorHref), "%s", href);
+        }
+      } else if (inAnchor) {
+        inAnchor = false;
+        anchorText[anchorN] = 0;
+        decodeEntities(anchorText);
+        normalizePunct(anchorText);
+        trimAscii(anchorText);
         int li = addLink(anchorHref, anchorText);
-        if (anchorText[0]) addWrappedText(anchorText, li);
-        anchorN=0; anchorHref[0]=0;
+        if (anchorText[0]) addWrappedText(anchorText, li, curStyle, curBlock);
+        else if (li >= 0) addWrappedText(links[li].label, li, curStyle, curBlock);
+        anchorN = 0; anchorHref[0] = 0;
       }
       return;
     }
-    if (!closing && !strcmp(name,"img")) {
-      char alt[96];
-      if (htmlAttr(raw, "alt", alt, sizeof(alt)) && alt[0]) {
-        decodeEntities(alt);
-        addWrappedText(alt);
+    if (!closing && !strcmp(name, "img")) {
+      char alt[96] = {0}, src[192] = {0}, lazy[192] = {0}, srcset[256] = {0};
+      char picked[192] = {0};
+      htmlAttr(raw, "alt", alt, sizeof(alt));
+      htmlAttr(raw, "src", src, sizeof(src));
+      htmlAttr(raw, "data-src", lazy, sizeof(lazy));
+      if (!lazy[0]) htmlAttr(raw, "data-original", lazy, sizeof(lazy));
+      htmlAttr(raw, "srcset", srcset, sizeof(srcset));
+      if (!srcset[0]) htmlAttr(raw, "data-srcset", srcset, sizeof(srcset));
+      pickImageSrc(lazy, srcset, src, picked, sizeof(picked));
+      if (alt[0]) decodeEntities(alt);
+      if (alt[0] || picked[0]) {
+        flushText();
+        uint16_t block = nextBlock++;
+        const char *label = alt[0] ? alt : picked;
+        char shown[96];
+        snprintf(shown, sizeof(shown), "%s", label);
+        normalizePunct(shown);
+        addWrappedText(shown, -1, BR_STYLE_IMAGE, block);
+        curStyle = BR_STYLE_BODY;
       }
       return;
     }
-    if (!closing && (!strcmp(name,"br") || !strcmp(name,"p") || !strcmp(name,"div") || !strcmp(name,"li") || !strncmp(name,"h",1))) {
-      if (lineUsed < MAX_LINES && lineUsed && lines[lineUsed-1].text[0]) {
-        // Visual spacing without creating a large DOM.
+    if (!closing && !strcmp(name, "hr")) {
+      flushText();
+      uint16_t block = nextBlock++;
+      addWrappedText("------------------------", -1, BR_STYLE_SMALL, block);
+      curStyle = BR_STYLE_BODY;
+      return;
+    }
+    if (isBlockTag(name)) {
+      flushText();
+      if (startsFocusBlock(name)) curBlock = nextBlock++;
+      curStyle = headingStyle(name);
+      if (curStyle == BR_STYLE_BODY && (name[0] == 'h') &&
+          name[1] >= '1' && name[1] <= '6') {
+        // already handled by headingStyle
       }
     }
+    if (closing && (name[0] == 'h' || !strcmp(name, "folder") ||
+                    !strcmp(name, "dir") || !strcmp(name, "field") ||
+                    !strcmp(name, "input") || !strcmp(name, "b") ||
+                    !strcmp(name, "strong"))) {
+      flushText();
+      curStyle = BR_STYLE_BODY;
+    }
+    (void)isWml;
   };
 
-  for (size_t i=0;i<len;++i) {
+  for (size_t i = 0; i < len; ++i) {
     char ch = src[i];
-    if (!inTag && ch=='<') { flushText(); inTag=true; tagN=0; continue; }
+    if (!inTag && ch == '<') { flushText(); inTag = true; tagN = 0; continue; }
     if (inTag) {
-      if (ch=='>') { tag[tagN]=0; processTag(tag); inTag=false; tagN=0; }
-      else if (tagN < (int)sizeof(tag)-1) tag[tagN++]=ch;
+      if (ch == '>') { tag[tagN] = 0; processTag(tag); inTag = false; tagN = 0; }
+      else if (tagN < (int)sizeof(tag) - 1) tag[tagN++] = ch;
       continue;
     }
-    if (textN < (int)sizeof(text)-1) text[textN++]=ch;
+    if (textN < (int)sizeof(text) - 1) text[textN++] = ch;
     else flushText();
   }
   flushText();
   if (inAnchor && anchorN) {
-    anchorText[anchorN]=0; int li=addLink(anchorHref, anchorText); addWrappedText(anchorText, li);
+    anchorText[anchorN] = 0;
+    int li = addLink(anchorHref, anchorText);
+    addWrappedText(anchorText, li, curStyle, curBlock);
   }
+  if (isWml && pageTitle[0] && !strcmp(pageTitle, "Web page"))
+    snprintf(pageTitle, sizeof(pageTitle), "%s", "WML card");
 }

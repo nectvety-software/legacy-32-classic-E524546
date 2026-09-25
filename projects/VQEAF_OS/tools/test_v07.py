@@ -61,7 +61,7 @@ check('text viewer streams from file offsets', 'loadPage(AppContext &ctx, uint32
 # Qeafbrowser in-OS adapter.
 check('Browser screen/app registered', re.search(r'\bBrowser,', types) is not None and 'class BrowserApp' in apph)
 check('launcher exposes Qeafbrowser', 'Qeafbrowser keypad web' in apps and 'ScreenId::Browser' in apps)
-check('browser uses fixed line/link pools', 'MAX_LINES = 84' in browser_h and 'MAX_LINKS = 24' in browser_h)
+check('browser uses fixed line/link pools', 'MAX_LINES = 240' in browser_h and 'MAX_LINKS = 64' in browser_h)
 check('browser response buffer is bounded to 32KB', 'BODY_CAP = 32768' in browser)
 check('browser response buffer prefers PSRAM', 'heap_caps_malloc(BODY_CAP, MALLOC_CAP_SPIRAM' in browser)
 check('browser HTTP and HTTPS enabled', '#include <HTTPClient.h>' in browser and '#include <WiFiClientSecure.h>' in browser)
@@ -70,9 +70,10 @@ check('browser explicit redirect loop', 'for (int hop = 0; hop < 6; ++hop)' in b
 check('browser resolves redirects relative to current URL', 'resolveUrl(requestUrl, location.c_str()' in browser)
 check('browser preserves href case', 'htmlAttr(raw, "href"' in browser)
 check('browser renders image alt fallback', 'htmlAttr(raw, "alt"' in browser)
+check('browser WML/HTML styles from Qeafbrowser v2.2', 'BR_STYLE_H1' in browser_h and 'headingStyle' in browser and 'BR_STYLE_FOLDER' in browser)
 check('browser Opera Mini style user agent', 'Opera Mini/4.5' in browser)
 check('browser default home matches Qeafbrowser source', 'https://qeafivels.com/' in browser and 'https://qeafivels.com/' in apps)
-check('browser supports back history', 'HISTORY_MAX = 8' in browser_h and 'goBack()' in browser)
+check('browser supports back history', 'HISTORY_MAX = 16' in browser_h and 'goBack()' in browser_h+browser)
 check('browser supports keypad URL entry', 'Web address' in apps and 'TextKeyboard' in apph)
 
 # S60 app-opening interstitial and task resume.

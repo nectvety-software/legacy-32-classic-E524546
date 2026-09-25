@@ -1423,7 +1423,23 @@ void BrowserApp::redrawBody(AppContext &ctx) {
   d.fillRect(5,36,230,24,c.panel); d.drawRect(5,36,230,24,c.dim);
   d.setTextFont(1); d.setTextColor(c.dim,c.panel); String u=ctx.browser.url(); if(u.length()>38)u=u.substring(0,37)+"~"; d.setCursor(9,44); d.print(u); if(ctx.browser.pageFromCache()){d.setTextColor(c.accent,c.panel);d.setCursor(201,44);d.print("C");}
   int y=66;
-  for(int row=0;row<BROWSER_VISIBLE;++row){int i=offset+row;if(i>=ctx.browser.lineCount())break;const BrowserLine &ln=ctx.browser.lineAt(i);bool sel=ln.link>=0&&ln.link==selectedLink;uint16_t bg=sel?c.selected:c.bg;d.fillRect(4,y-2,232,15,bg);d.setTextColor(ln.link>=0?0x05FF:c.text,bg);d.setCursor(7,y);d.print(ln.text);if(sel)d.drawRect(4,y-2,232,15,c.border);y+=16;}
+  for(int row=0;row<BROWSER_VISIBLE;++row){
+    int i=offset+row;if(i>=ctx.browser.lineCount())break;
+    const BrowserLine &ln=ctx.browser.lineAt(i);
+    bool sel=ln.link>=0&&ln.link==selectedLink;
+    uint16_t bg=sel?c.selected:c.bg;
+    d.fillRect(4,y-2,232,15,bg);
+    uint16_t ink=ln.link>=0?0x05FF:c.text;
+    if(ln.style==BR_STYLE_H1) ink=sel?ink:c.accent;
+    else if(ln.style==BR_STYLE_H3||ln.style==BR_STYLE_BOLD) ink=sel?ink:0xFFFF;
+    else if(ln.style==BR_STYLE_SMALL||ln.style==BR_STYLE_IMAGE) ink=sel?ink:c.dim;
+    else if(ln.style==BR_STYLE_FOLDER) ink=sel?ink:0x9E7D;
+    d.setTextColor(ink,bg);d.setCursor(7,y);
+    if(ln.style==BR_STYLE_FOLDER)d.print("> ");
+    d.print(ln.text);
+    if(sel)d.drawRect(4,y-2,232,15,c.border);
+    y+=16;
+  }
   ctx.ui.scrollbar(ctx.browser.lineCount(),BROWSER_VISIBLE,offset,64,278);
   ctx.ui.softkeys("Options",selectedLink>=0?"Open":"","Back");
 }
