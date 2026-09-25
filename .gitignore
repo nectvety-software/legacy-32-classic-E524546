@@ -31,3 +31,6 @@ Desktop.ini
 .env
 *.pem
 *.key
+
+# Nested standalone clone of qeafivels/VQEAF-OS (has its own remote/history)
+projects/VQEAF-OS-lua/
