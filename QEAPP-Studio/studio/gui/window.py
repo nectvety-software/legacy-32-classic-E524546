@@ -153,7 +153,7 @@ class StudioWindow(QMainWindow):
     def _setup_ui(self):
         from studio.gui.theme import APP_STYLE
         from studio.gui.virtual_phone import VirtualPhone
-        self.setWindowTitle('QEAPP Studio 0.7.4 — Development Workspace')
+        self.setWindowTitle('QEAPP Studio 0.7.6 — Development Workspace')
         self.resize(1510, 920)
         self.setMinimumSize(1060, 670)
         self.setStyleSheet(APP_STYLE)
@@ -573,7 +573,7 @@ class StudioWindow(QMainWindow):
         self.page_stack.addWidget(self.home_page)
         self.setCentralWidget(self.page_stack)
         self.setStatusBar(QStatusBar(self))
-        self.statusBar().showMessage('QEAPP Studio 0.7.2  •  Lua host VM  •  Signed QEAPP/2 beta')
+        self.statusBar().showMessage('QEAPP Studio 0.7.6  •  Lua host VM  •  Signed QEAPP/2 beta')
         self.actions_when_idle = [self.act_validate, self.act_build, self.act_inspect,
                                  self.act_doctor, self.act_beta_check, self.act_test,
                                  self.act_lua, self.btn_preview, self.btn_lua,
@@ -1027,19 +1027,60 @@ class StudioWindow(QMainWindow):
         self._sync_stop_controls()
 
     def about_studio(self):
-        QMessageBox.information(self, 'QEAPP Studio 0.7.2',
+        QMessageBox.information(self, 'QEAPP Studio 0.7.6',
             'Independent PySide6 code editor and Lua 5.4 host virtual phone.\n\n'
             'Device preview executes the shared bounded host VM, not ESP32 hardware.\n'
             'Lua QEAPP/2 requires experimental vqeaf_lua_beta firmware and matching signature.\n'
             'Desktop virtual phone does not emulate SD, WiFi, browser or app installer.')
 
-    def _log(self, message: str):
+    def _log(self, message: str, kind: str | None = None):
+        """Append a line to OUTPUT. kind: 'ok' green, 'err' red, None auto-detect."""
+        text = message if message.endswith('\n') else message + '\n'
+        color = self._log_color(text, kind)
         self.logs.moveCursor(QTextCursor.End)
-        self.logs.insertPlainText(message if message.endswith('\n') else message + '\n')
+        if color is None:
+            self.logs.insertPlainText(text)
+        else:
+            fmt = QTextCharFormat()
+            fmt.setForeground(QColor(color))
+            cursor = self.logs.textCursor()
+            cursor.movePosition(QTextCursor.End)
+            cursor.insertText(text, fmt)
         self.logs.ensureCursorVisible()
 
+    @staticmethod
+    def _log_color(text: str, kind: str | None = None):
+        if kind == 'ok':
+            return '#22c55e'
+        if kind == 'err':
+            return '#ef4444'
+        if kind == 'warn':
+            return '#f59e0b'
+        lower = text.casefold()
+        err_tokens = (
+            'error', 'fail', 'failed', 'exception', 'traceback', 'invalid',
+            'rejected', 'denied', 'cannot', 'unable', 'missing', 'not found',
+            'user_cancelled', 'os_root_', 'project_invalid', 'signer_',
+            'vm_crash', 'lua_beta_required',
+        )
+        ok_tokens = (
+            'pass', 'passed', 'success', 'successful', 'ok', 'created',
+            'saved', 'installed', 'verified', 'ready', 'build passed',
+            'validate passed', 'host ready', 'signature verified',
+        )
+        # Prefer a clear FAIL/PASS or ERROR marker over mixed wording.
+        if any(tok in lower for tok in ('fail', 'error', 'exception', 'traceback', 'rejected', 'invalid')):
+            return '#ef4444'
+        if lower.lstrip().startswith(('pass', 'ok', 'success', 'created', 'saved', 'verified', 'ready')):
+            return '#22c55e'
+        if any(tok in lower for tok in err_tokens):
+            return '#ef4444'
+        if any(tok in lower for tok in ok_tokens):
+            return '#22c55e'
+        return None
+
     def _error(self, text: str):
-        self._log('ERROR: ' + text)
+        self._log('ERROR: ' + text, 'err')
         QMessageBox.warning(self, 'QEAPP Studio', text)
 
     def _set_project(self, path: Path | None):
@@ -1440,7 +1481,10 @@ class StudioWindow(QMainWindow):
     @Slot(int, str, str)
     def _job_finished(self, code: int, label: str, preview: str):
         operation = getattr(self, '_last_operation', '') or label
-        self._log(('PASS' if code == 0 else f'FAIL exit {code}') + ' — ' + label + '\n')
+        if code == 0:
+            self._log('PASS — ' + label + '\n', 'ok')
+        else:
+            self._log(f'FAIL exit {code} — ' + label + '\n', 'err')
         if code != 0:
             parsed = self._add_job_problems(label)
             if not parsed:
@@ -1509,7 +1553,9 @@ class StudioWindow(QMainWindow):
         self._last_operation = operation
         self._last_op_status = status
         self.statusBar().showMessage(f'{operation}: {status}')
-        self._log(f'[{operation}] {status}\n')
+        kind = 'ok' if any(k in status for k in ('PASSED', 'READY', 'UPDATED', 'RUNNING')) else (
+            'err' if any(k in status for k in ('FAILED', 'INVALID')) else None)
+        self._log(f'[{operation}] {status}\n', kind)
 
     def export_diagnostic_bundle(self):
         try:

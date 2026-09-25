@@ -1,3 +1,10 @@
+# v0.7.6 — 2026-09-25 — Colored OUTPUT log + Bien Muc Lite sample
+
+- feat(gui): OUTPUT panel log lines are colored — **green** for success (`PASS`, `Created`, `BUILD PASSED`, `Signature verified`), **red** for errors (`ERROR`, `FAIL exit N`, `exception`, `rejected`, `BUILD FAILED`); `_log(..., kind)` also accepts explicit `ok`/`err`/`warn`.
+- fix(gui): job finish and operation-status lines use the same color rules.
+- sample: `projects/bienmuc-lua` — Bien Muc Lite (doodle sea duel port of Chetaslua Biển Mực) as signed `type=lua` QEAPP/2, 32×32 RGB565 icon, key-id `0x544c5541`.
+- test: `test_gui_offscreen.py` adds `test_log_colors_success_green_error_red`.
+
 # v0.7.5 — 2026-09-25 — New Project, build recovery, phone window
 
 - feat(project): New Project dialog (LuaS30-style) — Project name, Display name, unique random **App ID** (Random button, no collisions), template or blank; standard Lua scaffold (`main.lua`, `assets/icon.png` 32×32, `tests/`, `docs/`).

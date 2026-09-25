@@ -54,6 +54,23 @@ class QtSmoke(unittest.TestCase):
         self.assertFalse(view.btn_stop.isEnabled())
         view.close()
 
+    def test_log_colors_success_green_error_red(self):
+        from studio.gui.window import StudioWindow
+        view=StudioWindow()
+        c=StudioWindow._log_color
+        self.assertEqual(c('','ok'),'#22c55e')
+        self.assertEqual(c('','err'),'#ef4444')
+        self.assertEqual(c('PASS — Build signed QEAPP','ok'),'#22c55e')
+        self.assertEqual(c('ERROR: bad key',None),'#ef4444')
+        self.assertEqual(c('FAIL exit 2 — Validate',None),'#ef4444')
+        self.assertEqual(c('Created project demo',None),'#22c55e')
+        self.assertIsNone(c('Project: /tmp/x',None))
+        view._log('PASS — sample job\n','ok')
+        view._log('ERROR: sample failure\n','err')
+        self.assertIn('PASS', view.logs.toPlainText())
+        self.assertIn('ERROR', view.logs.toPlainText())
+        view.close()
+
     def test_v072_diagnostics_vm_controls_and_repair(self):
         from studio.gui.window import StudioWindow
         w=StudioWindow()

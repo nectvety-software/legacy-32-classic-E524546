@@ -1,0 +1,9 @@
+{
+  "project_format": 1,
+  "id": "bienmuc_lite",
+  "name": "Bien Muc Lite",
+  "version": "0.1.0",
+  "type": "lua",
+  "content": "main.lua",
+  "icon": "icon.png"
+}
