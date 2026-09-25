@@ -1,2 +1,0 @@
-[console_scripts]
-py65mon = py65.monitor:main
