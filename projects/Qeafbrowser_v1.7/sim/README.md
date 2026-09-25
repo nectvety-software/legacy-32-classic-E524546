@@ -15,6 +15,37 @@ powershell -File build_sim.ps1
 .\qeafbrowser_sim.exe --fetch URL  # mở URL thật để thử firmware
 ```
 
+## Build harness headless trên Windows (MinGW/MSYS2)
+
+Các harness `*_main.cpp` biên dịch trực tiếp `src/*.cpp` (không phải mock UI) và
+xuất framebuffer 240×320 ra BMP. Trên Windows cần thêm `-D_POSIX_THREAD_SAFE_FUNCTIONS=1`
+và cả `C:\msys64\usr\bin` trong `PATH` (collect2 cần nó):
+
+```bash
+export PATH="/c/msys64/mingw64/bin:/c/msys64/usr/bin:$PATH"
+COMMON="-O2 -std=gnu++17 -static -D_POSIX_THREAD_SAFE_FUNCTIONS=1 -Isim/shims -Iinclude"
+SRC="src/main.cpp src/wml.cpp src/http.cpp src/store.cpp src/launcher.cpp"
+
+# theme Symbian S60 (xem README chính, mục “Symbian S60 interface”)
+g++ $COMMON -o sim/qb_s60.exe sim/s60_main.cpp sim/sim_arduino.cpp $SRC -lws2_32
+./sim/qb_s60.exe            # -> sim/s60_out/*.bmp
+
+# launcher Retro-Go (theme JSON + tabs + art)
+g++ $COMMON -o sim/qb_launcher.exe sim/launcher_main.cpp sim/sim_arduino.cpp $SRC -lws2_32
+./sim/qb_launcher.exe       # -> sim/launcher_out/*.bmp
+
+# các regression cũ (chạy từ thư mục gốc dự án)
+g++ $COMMON -o sim/qb_headless.exe sim/headless_main.cpp sim/sim_arduino.cpp $SRC -lws2_32
+./sim/qb_headless.exe
+```
+
+`sim/inspect_bmp.py` in layout/màu của một BMP ra terminal (bands/ascii/zoom) khi
+không mở được cửa sổ ảnh:
+
+```bash
+python sim/inspect_bmp.py sim/s60_out/02_speed_dial_list.bmp bands
+```
+
 ## Menu (chọn nguồn chạy thử)
 
 | File | Ý nghĩa |

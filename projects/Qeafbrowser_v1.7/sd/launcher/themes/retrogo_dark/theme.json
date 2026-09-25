@@ -1,0 +1,50 @@
+{
+  "_comment": "Theme Retro-Go dark cho Qeafbrowser launcher. RGB565: so hoac '0x....', 'transparent' = giu mac dinh.",
+  "dialog": {
+    "background": "0x0010",
+    "foreground": "0xFFFF",
+    "border": "0x6B4D",
+    "header": "0x39E7",
+    "scrollbar": "0x7BEF",
+    "shadow": "0x0000",
+    "item_standard": "0x39E7",
+    "item_disabled": "0x8C71",
+    "item_message": "0x8C71"
+  },
+  "launcher_1": {
+    "_name": "Apps",
+    "background": "0x0010",
+    "foreground": "0xFFFF",
+    "list_standard_bg": "0x0010",
+    "list_standard_fg": "0xC618",
+    "list_selected_bg": "0x39E7",
+    "list_selected_fg": "0x0000"
+  },
+  "launcher_2": {
+    "_name": "Games",
+    "background": "0x0000",
+    "foreground": "0xFFFF",
+    "list_standard_bg": "0x0000",
+    "list_standard_fg": "0xC618",
+    "list_selected_bg": "0x39E7",
+    "list_selected_fg": "0x0000"
+  },
+  "launcher_3": {
+    "_name": "Favorites",
+    "background": "0x0000",
+    "foreground": "0xFFFF",
+    "list_standard_bg": "0x0000",
+    "list_standard_fg": "0xC618",
+    "list_selected_bg": "0x39E7",
+    "list_selected_fg": "0x0000"
+  },
+  "launcher_4": {
+    "_name": "Settings",
+    "background": "0x1042",
+    "foreground": "0xFFFF",
+    "list_standard_bg": "0x1042",
+    "list_standard_fg": "0xC618",
+    "list_selected_bg": "0x39E7",
+    "list_selected_fg": "0x0000"
+  }
+}

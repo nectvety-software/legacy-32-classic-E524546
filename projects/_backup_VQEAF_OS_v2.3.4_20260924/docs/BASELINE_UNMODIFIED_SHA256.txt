@@ -1,0 +1,8 @@
+Unmodified baseline files (v2.1 -> v2.2, SHA-256):
+b938ef71f980e093297bbd8f15cc25003dedb9cd087dcd25562191d8b1cf6f58  include/BoardConfig.h
+b50e360e1242e7be01cef013746a4f0ff49b51161f29100d5c7c3dde3600783a  platformio.ini
+851f51ab009b790c3b4648a37d7e0d310830956bca4c65e7aaa0e9b66739b332  src/core/InputManager.cpp
+5b4b1901dffcb5c4dc78f189c8c3e8116cda4dbee3ec29e0365c4ae6d4904ba0  src/services/QeappFormat.cpp
+efeca9d30ac851456901e0da9ac1f6d164fc38f6dded8d28dbbc775569a81310  src/services/QeappSignature.cpp
+6ad6c8c7669df05047b8369961028027d9e6a45735afab4b3b27235597f307e3  src/services/AppInstallerService.cpp
+19a0b277de6d6ec650106b5c8de954ef521a3eccdd4562fec619d5a388d0d5cb  src/services/WiFiConnectionService.cpp

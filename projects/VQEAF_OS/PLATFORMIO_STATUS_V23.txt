@@ -1,0 +1,2 @@
+PlatformIO target environment check:
+pio: NOT INSTALLED - target build not run

@@ -1,0 +1,99 @@
+Symbian S3 OS v1.3.0 TEST REPORT
+Date: 2026-09-24
+
+Scope: Nokia-like bold UI, SD layout, browser cache/downloads, theme/media path integration.
+
+PASS: scan 5 valid-sized themes, dedup, palette imports, BOM, safe fallback, invalid/oversized/path rejection
+PASS: portrait 240x320
+PASS: Nokia-like bold helper
+PASS: bold title/list/grid/softkeys
+PASS: no custom font asset dependency
+PASS: storage path CACHE_WEB
+PASS: storage path CACHE_THUMBS
+PASS: storage path THEMES
+PASS: storage path APPS_INSTALLED
+PASS: storage path APPS_INBOX
+PASS: storage path DOWNLOADS
+PASS: storage path LOGS
+PASS: storage path TEMP
+PASS: storage path MUSIC
+PASS: storage path PICTURES
+PASS: storage path DOCUMENTS
+PASS: layout created after SD mount
+PASS: atomic SD write
+PASS: bounded web cache
+PASS: offline browser cache
+PASS: streamed browser downloads
+PASS: download routing themes
+PASS: download routing app inbox
+PASS: download routing general
+PASS: part-file finalize
+PASS: browser UI download action
+PASS: browser cache marker
+PASS: Files quick folders
+PASS: Applications App inbox
+PASS: media preferred roots
+PASS: theme preferred system folder
+PASS: shell layout/cache commands
+PASS: browser initialized after SD mount
+PASS: v1.3 version
+PASS: artifact sd/System/Themes/amoled_red.vqeaf
+PASS: artifact sd/System/Themes/s60_green.vqeaf
+PASS: artifact sd/System/Apps/Inbox/README.txt
+PASS: artifact docs/SD_STORAGE_V13.md
+PASS: artifact docs/BROWSER_DOWNLOADS_V13.md
+PASS: balanced src/apps/Apps.cpp
+PASS: balanced src/apps/Apps.h
+PASS: balanced src/core/InputManager.cpp
+PASS: balanced src/core/InputManager.h
+PASS: balanced src/core/SymbianUI.cpp
+PASS: balanced src/core/SymbianUI.h
+PASS: balanced src/core/TextKeyboard.cpp
+PASS: balanced src/core/TextKeyboard.h
+PASS: balanced src/core/Theme.h
+PASS: balanced src/core/Types.h
+PASS: balanced src/main.cpp
+PASS: balanced src/services/BrowserService.cpp
+PASS: balanced src/services/BrowserService.h
+PASS: balanced src/services/ImageViewerService.cpp
+PASS: balanced src/services/ImageViewerService.h
+PASS: balanced src/services/MusicService.cpp
+PASS: balanced src/services/MusicService.h
+PASS: balanced src/services/NotificationService.cpp
+PASS: balanced src/services/NotificationService.h
+PASS: balanced src/services/SettingsStore.cpp
+PASS: balanced src/services/SettingsStore.h
+PASS: balanced src/services/ShellService.cpp
+PASS: balanced src/services/ShellService.h
+PASS: balanced src/services/StorageService.cpp
+PASS: balanced src/services/StorageService.h
+PASS: balanced src/services/SystemService.cpp
+PASS: balanced src/services/SystemService.h
+PASS: balanced src/services/ThemeFileService.h
+PASS: balanced src/services/WiFiProfileStore.cpp
+PASS: balanced src/services/WiFiProfileStore.h
+PASS: native VQEAF loader regression
+v1.3 gates complete
+
+Regression:
+PASS: scan 5 valid-sized themes, dedup, palette imports, BOM, safe fallback, invalid/oversized/path rejection
+PASS: 240x320 portrait retained
+PASS: theme application on launcher
+PASS: theme path returned from File Manager
+PASS: theme application via OK button
+PASS: WiFi + battery compact header unchanged
+PASS: boot theme restore after SD mount
+PASS: partial malformed theme cannot change palette
+PASS: theme format is data only
+PASS: bounded parser and scan
+PASS: fallback when saved theme missing
+PASS: persistent selection
+PASS: pixel palette icon
+PASS: microSD theme samples
+PASS: system app lifecycle knows Themes
+PASS: native C++ loader runtime tests
+v1.2 theme gates complete
+
+PlatformIO target build: NOT RUN (PlatformIO toolchain is not installed in this environment).
+Native C++ coverage: VQEAF loader runtime compiled and executed with g++ via tools/test_v13.py.
+Other v1.3 gates are source/structure regressions and are not a substitute for pio run on ESP32-S3.

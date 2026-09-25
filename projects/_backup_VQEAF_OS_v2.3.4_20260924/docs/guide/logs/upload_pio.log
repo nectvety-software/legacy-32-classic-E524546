@@ -1,0 +1,141 @@
+Processing vqeaf_os (platform: espressif32@6.10.0; board: vqeaf_s3_n16r8; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/vqeaf_s3_n16r8.html
+PLATFORM: Espressif 32 (6.10.0) > VQEAF OS - ESP32-S3-WROOM-1 N16R8 (16MB QIO / 8MB OPI PSRAM)
+HARDWARE: ESP32S3 240MHz, 320KB RAM, 6.25MB Flash
+DEBUG: Current (esp-builtin) On-board (esp-builtin) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - tool-mkfatfs @ 2.0.1 
+ - tool-mklittlefs @ 1.203.210628 (2.3) 
+ - tool-mkspiffs @ 2.230.0 (2.30) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ deep+, Compatibility ~ strict
+Found 37 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- TFT_eSPI @ 2.5.43
+|-- NimBLE-Arduino @ 2.3.6
+|-- TJpg_Decoder @ 1.1.0
+|-- PNGdec @ 1.1.6
+|-- WiFi @ 2.0.0
+|-- SPI @ 2.0.0
+|-- FS @ 2.0.0
+|-- Preferences @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- SD_MMC @ 2.0.0
+|-- HTTPClient @ 2.0.0
+|-- LittleFS @ 2.0.0
+|-- SPIFFS @ 2.0.0
+|-- SD @ 2.0.0
+Building in release mode
+Retrieving maximum program size .pio\build\vqeaf_os\firmware.elf
+Checking size .pio\build\vqeaf_os\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [===       ]  26.6% (used 87172 bytes from 327680 bytes)
+Flash: [==        ]  22.5% (used 1472765 bytes from 6553600 bytes)
+Configuring upload protocol...
+AVAILABLE: cmsis-dap, esp-bridge, esp-builtin, esp-prog, espota, esptool, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa
+CURRENT: upload_protocol = esptool
+Looking for upload port...
+Auto-detected: COM3
+Uploading .pio\build\vqeaf_os\firmware.bin
+esptool.py v4.5.1
+Serial port COM3
+Connecting....
+Chip is ESP32-S3 (revision v0.2)
+Features: WiFi, BLE
+Crystal is 40MHz
+MAC: fc:01:2c:cc:eb:6c
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00000000 to 0x00003fff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Flash will be erased from 0x0000e000 to 0x0000ffff...
+Flash will be erased from 0x00010000 to 0x00177fff...
+Compressed 15104 bytes to 10429...
+Writing at 0x00000000... (100 %)
+Wrote 15104 bytes (10429 compressed) at 0x00000000 in 0.4 seconds (effective 329.5 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 146...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (146 compressed) at 0x00008000 in 0.0 seconds (effective 651.7 kbit/s)...
+Hash of data verified.
+Compressed 8192 bytes to 47...
+Writing at 0x0000e000... (100 %)
+Wrote 8192 bytes (47 compressed) at 0x0000e000 in 0.1 seconds (effective 1016.2 kbit/s)...
+Hash of data verified.
+Compressed 1473136 bytes to 952946...
+Writing at 0x00010000... (1 %)
+Writing at 0x00019c7b... (3 %)
+Writing at 0x00020eaa... (5 %)
+Writing at 0x000283bb... (6 %)
+Writing at 0x00034928... (8 %)
+Writing at 0x0003f1fa... (10 %)
+Writing at 0x00048a9a... (11 %)
+Writing at 0x00052098... (13 %)
+Writing at 0x0006117f... (15 %)
+Writing at 0x00067240... (16 %)
+Writing at 0x0006d881... (18 %)
+Writing at 0x00073487... (20 %)
+Writing at 0x000792ed... (22 %)
+Writing at 0x0007ebef... (23 %)
+Writing at 0x00084fa5... (25 %)
+Writing at 0x0008b321... (27 %)
+Writing at 0x00090ae0... (28 %)
+Writing at 0x00096346... (30 %)
+Writing at 0x0009b7d3... (32 %)
+Writing at 0x000a1278... (33 %)
+Writing at 0x000a6bc7... (35 %)
+Writing at 0x000ac027... (37 %)
+Writing at 0x000b1d75... (38 %)
+Writing at 0x000b77bf... (40 %)
+Writing at 0x000bcee5... (42 %)
+Writing at 0x000c286f... (44 %)
+Writing at 0x000c7d65... (45 %)
+Writing at 0x000ccec1... (47 %)
+Writing at 0x000d1da8... (49 %)
+Writing at 0x000d6e6e... (50 %)
+Writing at 0x000dbc7f... (52 %)
+Writing at 0x000e0c49... (54 %)
+Writing at 0x000e5fca... (55 %)
+Writing at 0x000eb819... (57 %)
+Writing at 0x000f0ef1... (59 %)
+Writing at 0x000f6468... (61 %)
+Writing at 0x000fb464... (62 %)
+Writing at 0x00100566... (64 %)
+Writing at 0x00105333... (66 %)
+Writing at 0x0010a61e... (67 %)
+Writing at 0x00110247... (69 %)
+Writing at 0x00115410... (71 %)
+Writing at 0x0011a6fc... (72 %)
+Writing at 0x0011f5b2... (74 %)
+Writing at 0x001246f6... (76 %)
+Writing at 0x001297d8... (77 %)
+Writing at 0x0012eabd... (79 %)
+Writing at 0x00133fe3... (81 %)
+Writing at 0x00139bb8... (83 %)
+Writing at 0x0013f0be... (84 %)
+Writing at 0x00144e52... (86 %)
+Writing at 0x0014a1ee... (88 %)
+Writing at 0x0015274e... (89 %)
+Writing at 0x0015ae02... (91 %)
+Writing at 0x00160905... (93 %)
+Writing at 0x00165c08... (94 %)
+Writing at 0x0016b0ed... (96 %)
+Writing at 0x00170aac... (98 %)
+Writing at 0x001768d0... (100 %)
+Wrote 1473136 bytes (952946 compressed) at 0x00010000 in 21.4 seconds (effective 550.0 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
+========================= [SUCCESS] Took 78.16 seconds =========================

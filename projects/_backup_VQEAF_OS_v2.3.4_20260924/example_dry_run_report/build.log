@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: target_build
+Would run: pio run -e vqeaf_os -v
+Result: SIMULATED_PASS
+Would compile/link ESP32-S3 firmware; no tool executed.

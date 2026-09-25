@@ -1,0 +1,37 @@
+Symbian S3 OS v1.7.0 — Saved WiFi Auto Connect
+Target: ESP32-S3 N16R8 / ST7789 portrait 240x320
+
+Changes
+-------
+- Asynchronous startup scan across all saved SSIDs; strongest measured RSSI first.
+- Last successful SSID only breaks equal-signal ties.
+- Per-network 12s association deadline; fallback to next saved AP.
+- Recover from link drop after 5s; back off 30/60/120s on exhausted scans.
+- Safe Mode, Settings and explicit user Disconnect disable automatic selection.
+- S60 Idle shows scanning / joining SSID / SSID RSSI / retry countdown.
+- Status line partial redraw (205x15) + compact 45px WiFi/battery corner.
+- Foreground titlebar WiFi status updated from cached chrome without a fullscreen redraw.
+- Shell direct WiFi commands cannot race the background selector.
+- No additional full-screen framebuffer, no new FreeRTOS thread.
+
+Tests run in this environment
+-----------------------------
+v1.6 WiFi service: PASS (12 mocked RF cases; 16 integration source assertions)
+v1.7 auto WiFi: PASS (10 mocked RF scenarios)
+v1.7 source wiring: PASS (28 source integration assertions)
+GNU++11 full host translation-unit compile: PASS (19/19 C++ units)
+GNU++11 full host link with TFT_DC/TFT_CS/TFT_RST conflict macros: PASS
+Prior Themes parser regression: PASS
+Prior signed Installer regression: PASS
+Prior Installer integration: PASS (20/20 source checks)
+Archive extraction/integrity: checked when building ZIP.
+
+Limits
+------
+All RF scenarios were simulated with a fake Arduino WiFi API. GNU++11
+compilation/link used stubbed Arduino/TFT interfaces. Real PlatformIO
+espressif32 build and tests with actual WiFi access points were NOT run
+because PlatformIO ESP32 toolchain is unavailable in this environment.
+
+Image previews are generated UI illustrations, not photos/LCD captures.
+See docs/WIFI_V17_AUTOCONNECT.md for intended behavior and device test cases.

@@ -1,0 +1,40 @@
+Symbian S3 OS v0.5.1 - Linker Symbol Hotfix
+=============================================
+
+Reported PlatformIO linker failure:
+  libnet80211.a(wl_offchan.o): multiple definition of `ctx`
+  src/main.cpp.o: main.cpp:25: first defined here
+
+Root cause
+----------
+The firmware declared a namespace/global variable:
+  AppContext ctx{...};
+
+ESP32-S3 WiFi libnet80211 also exports a global symbol named `ctx`.
+Both symbols reached the final ELF link, so ld rejected the duplicate definition.
+
+Fix
+---
+1. Renamed firmware context to `appCtx`.
+2. Made `appCtx` file-local using `static`.
+3. Made the other runtime objects/state in main.cpp file-local (`static`) as a defensive measure against future collisions with ESP-IDF/Arduino libraries.
+4. No GPIO values, UI layout, settings schema, or storage behavior changed.
+
+Regression results
+------------------
+PASS: tools/test_grid_nav.py
+PASS: tools/test_v04.py (7/7)
+PASS: tools/test_v05.py (9/9)
+PASS: tools/test_v051.py (6/6)
+PASS: synthetic linker smoke test with an external `ctx` symbol plus file-local `appCtx`
+
+Expected user rebuild sequence
+------------------------------
+pio run -t clean
+pio run
+pio run -t upload
+pio device monitor -b 115200
+
+Note
+----
+PlatformIO itself is not installed in this execution environment, so the real ESP32-S3 framework link step could not be run here. The exact colliding firmware symbol has been removed/internalized, and regression/linkage checks pass.

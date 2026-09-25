@@ -1,0 +1,415 @@
+Processing vqeaf_os (platform: espressif32@6.10.0; board: vqeaf_s3_n16r8; framework: arduino)
+--------------------------------------------------------------------------------
+Verbose mode can be enabled via `-v, --verbose` option
+CONFIGURATION: https://docs.platformio.org/page/boards/espressif32/vqeaf_s3_n16r8.html
+PLATFORM: Espressif 32 (6.10.0) > VQEAF OS - ESP32-S3-WROOM-1 N16R8 (16MB QIO / 8MB OPI PSRAM)
+HARDWARE: ESP32S3 240MHz, 320KB RAM, 6.25MB Flash
+DEBUG: Current (esp-builtin) On-board (esp-builtin) External (cmsis-dap, esp-bridge, esp-prog, iot-bus-jtag, jlink, minimodule, olimex-arm-usb-ocd, olimex-arm-usb-ocd-h, olimex-arm-usb-tiny-h, olimex-jtag-tiny, tumpa)
+PACKAGES: 
+ - framework-arduinoespressif32 @ 3.20017.241212+sha.dcc1105b 
+ - tool-esptoolpy @ 1.40501.0 (4.5.1) 
+ - toolchain-riscv32-esp @ 8.4.0+2021r2-patch5 
+ - toolchain-xtensa-esp32s3 @ 8.4.0+2021r2-patch5
+LDF: Library Dependency Finder -> https://bit.ly/configure-pio-ldf
+LDF Modes: Finder ~ deep+, Compatibility ~ strict
+Found 37 compatible libraries
+Scanning dependencies...
+Dependency Graph
+|-- TFT_eSPI @ 2.5.43
+|-- NimBLE-Arduino @ 2.3.6
+|-- TJpg_Decoder @ 1.1.0
+|-- PNGdec @ 1.1.6
+|-- WiFi @ 2.0.0
+|-- SPI @ 2.0.0
+|-- FS @ 2.0.0
+|-- Preferences @ 2.0.0
+|-- WiFiClientSecure @ 2.0.0
+|-- SD_MMC @ 2.0.0
+|-- HTTPClient @ 2.0.0
+|-- LittleFS @ 2.0.0
+|-- SPIFFS @ 2.0.0
+|-- SD @ 2.0.0
+Building in release mode
+Compiling .pio\build\vqeaf_os\src\apps\Apps.cpp.o
+Compiling .pio\build\vqeaf_os\src\apps\LauncherGrid.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\InputManager.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\SymbianUI.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\TextKeyboard.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\UiScreenAtlas.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\VqeafIconRenderer.cpp.o
+Compiling .pio\build\vqeaf_os\src\core\VqeafIconSelfTest.cpp.o
+Compiling .pio\build\vqeaf_os\src\launcher\LauncherView.cpp.o
+Compiling .pio\build\vqeaf_os\src\main.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\AppInstallerService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\BoardDiagnostics.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\BrowserService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\CalculatorEngine.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\ImageViewerService.cpp.o
+In file included from src/core/VqeafIconRenderer.cpp:7:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+In file included from src/main.cpp:2:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+In file included from src/core/SymbianUI.h:3,
+                 from src/core/SymbianUI.cpp:1:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+In file included from src/core/SymbianUI.h:3,
+                 from src/core/TextKeyboard.h:3,
+                 from src/core/TextKeyboard.cpp:1:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+In file included from src/launcher/LauncherView.h:3,
+                 from src/launcher/LauncherView.cpp:1:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+Compiling .pio\build\vqeaf_os\src\services\MusicService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\NotificationService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\QeappDataService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\QeappFormat.cpp.o
+In file included from src/apps/../core/SymbianUI.h:3,
+                 from src/apps/Apps.h:5,
+                 from src/apps/Apps.cpp:1:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+In file included from src/apps/../core/SymbianUI.h:3,
+                 from src/apps/Apps.h:5,
+                 from src/apps/LauncherGrid.cpp:3:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+Compiling .pio\build\vqeaf_os\src\services\QeappSignature.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\QeappVersion.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\SettingsStore.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\ShellService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\StorageService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\SystemService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\ThemeFileService.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\TrustedTls.cpp.o
+Compiling .pio\build\vqeaf_os\src\services\WiFiConnectionService.cpp.o
+In file included from src/services/ImageViewerService.h:4,
+                 from src/services/ImageViewerService.cpp:1:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+Compiling .pio\build\vqeaf_os\src\services\WiFiProfileStore.cpp.o
+Building .pio\build\vqeaf_os\bootloader.bin
+Generating partitions .pio\build\vqeaf_os\partitions.bin
+Compiling .pio\build\vqeaf_os\lib041\SPI\SPI.cpp.o
+esptool.py v4.5.1
+Creating esp32s3 image...
+Merged 1 ELF section
+Successfully created esp32s3 image.
+Compiling .pio\build\vqeaf_os\lib86b\TFT_eSPI\TFT_eSPI.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLE2904.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEAddress.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEAdvertisedDevice.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEAdvertisementData.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEAdvertising.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEAttValue.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEBeacon.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLECharacteristic.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEClient.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEDescriptor.cpp.o
+Archiving .pio\build\vqeaf_os\lib041\libSPI.a
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEDevice.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEEddystoneTLM.cpp.o
+In file included from .pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.cpp:16:
+.pio/libdeps/vqeaf_os/TFT_eSPI/TFT_eSPI.h:973:8: warning: #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available! [-Wcpp]
+       #warning >>>>------>> TOUCH_CS pin not defined, TFT_eSPI touch functions will not be available!
+        ^~~~~~~
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEExtAdvertising.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEHIDDevice.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEL2CAPChannel.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEL2CAPServer.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLERemoteCharacteristic.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLERemoteDescriptor.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLERemoteService.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLERemoteValueAttribute.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEScan.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEServer.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEService.cpp.o
+Archiving .pio\build\vqeaf_os\lib86b\libTFT_eSPI.a
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEUUID.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\NimBLEUtils.cpp.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\esp_port\esp-hci\src\esp_nimble_hci.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\esp_port\esp-hci\src\na_hci_driver.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\esp_port\esp-hci\src\na_hci_transport.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\esp_port\port\src\exp_nimble_mem.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\aes_decrypt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\aes_encrypt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\cbc_mode.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ccm_mode.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\cmac_mode.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ctr_mode.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ctr_prng.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_dh.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_dsa.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\ecc_platform_specific.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\hmac.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\hmac_prng.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\sha256.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\ext\tinycrypt\src\utils.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_adv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_conn.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_conn_hci.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_crypto.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_ctrl.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_dtm.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_ev.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_supp_cmd.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_hci_vs.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_iso.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_iso_big.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_isoal.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_pdu.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_rand.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_resolv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_rfmgmt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_scan.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_scan_aux.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_sched.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_sync.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_trace.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_utils.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\controller\src\ble_ll_whitelist.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf51\src\ble_hw.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf51\src\ble_phy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_hw.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_phy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\ble_phy_trace.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\nrf52\phy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\drivers\nrf5x\src\nrf53\phy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\access.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv_ext.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\adv_legacy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\aes-ccm.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\app_keys.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\beacon.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\cdb.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg_cli.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\cfg_srv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\crypto.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\friend.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\glue.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\health_cli.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\health_srv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\heartbeat.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\light_model.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\lpn.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\mesh.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\model_cli.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\model_srv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\msg.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\net.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_adv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_gatt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\pb_gatt_srv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\prov.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\prov_device.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\provisioner.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy_msg.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\proxy_srv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\rpl.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\settings.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\shell.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\subnet.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\testing.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\mesh\src\transport.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\services\gap\src\ble_svc_gap.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\services\gatt\src\ble_svc_gatt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_aes_ccm.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_att.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_att_clt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_att_cmd.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_att_svr.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_dtm.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_ead.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_eatt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_eddystone.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gap.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc_cache.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gattc_cache_conn.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gatts.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_gatts_lcl.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_adv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_atomic.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_cfg.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_conn.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_flow.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_cmd.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_evt.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_hci_util.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_id.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_log.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_mbuf.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_misc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_mqueue.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_periodic_sync.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_pvcy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_resolv.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_shutdown.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_startup.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_hs_stop.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_ibeacon.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_coc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_sig.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_l2cap_sig_cmd.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_sm.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_alg.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_cmd.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_lgcy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_sm_sc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_store.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_store_util.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\src\ble_uuid.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_config.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_config_conf.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\store\config\src\ble_store_nvs.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\store\ram\src\ble_store_ram.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\host\util\src\addr.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\common\hci_h4\src\hci_h4.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\common\hci_ipc\src\hci_ipc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\esp_ipc\src\hci_esp_ipc.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\esp_ipc_legacy\src\hci_esp_ipc_legacy.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\nrf5340\src\nrf5340_ble_hci.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\nimble\transport\src\transport.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\endian.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\hal_timer.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\mem.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\nimble_port.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\os_cputime.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\os_cputime_pwr2.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\os_mbuf.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\os_mempool.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\nimble\src\os_msys_init.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\npl\freertos\src\nimble_port_freertos.c.o
+Compiling .pio\build\vqeaf_os\libe3c\NimBLE-Arduino\nimble\porting\npl\freertos\src\npl_os_freertos.c.o
+Compiling .pio\build\vqeaf_os\lib9f6\FS\FS.cpp.o
+Compiling .pio\build\vqeaf_os\lib9f6\FS\vfs_api.cpp.o
+Compiling .pio\build\vqeaf_os\lib150\LittleFS\LittleFS.cpp.o
+Compiling .pio\build\vqeaf_os\lib683\SPIFFS\SPIFFS.cpp.o
+Compiling .pio\build\vqeaf_os\libd4b\SD\SD.cpp.o
+Compiling .pio\build\vqeaf_os\libd4b\SD\sd_diskio.cpp.o
+Compiling .pio\build\vqeaf_os\libd4b\SD\sd_diskio_crc.c.o
+Compiling .pio\build\vqeaf_os\libdab\TJpg_Decoder\TJpg_Decoder.cpp.o
+Archiving .pio\build\vqeaf_os\libe3c\libNimBLE-Arduino.a
+Compiling .pio\build\vqeaf_os\libdab\TJpg_Decoder\tjpgd.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\PNGdec.cpp.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\adler32.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\crc32.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\infback.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\inffast.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\inflate.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\inftrees.c.o
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\s3_simd_rgb565.S.o
+Archiving .pio\build\vqeaf_os\lib9f6\libFS.a
+Archiving .pio\build\vqeaf_os\lib150\libLittleFS.a
+Compiling .pio\build\vqeaf_os\lib1cd\PNGdec\zutil.c.o
+Archiving .pio\build\vqeaf_os\lib683\libSPIFFS.a
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFi.cpp.o
+Archiving .pio\build\vqeaf_os\libd4b\libSD.a
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiAP.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiClient.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiGeneric.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiMulti.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiSTA.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiScan.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiServer.cpp.o
+Compiling .pio\build\vqeaf_os\libaa6\WiFi\WiFiUdp.cpp.o
+Archiving .pio\build\vqeaf_os\libdab\libTJpg_Decoder.a
+Compiling .pio\build\vqeaf_os\lib0d4\Preferences\Preferences.cpp.o
+Archiving .pio\build\vqeaf_os\lib1cd\libPNGdec.a
+Compiling .pio\build\vqeaf_os\libca7\WiFiClientSecure\WiFiClientSecure.cpp.o
+Compiling .pio\build\vqeaf_os\libca7\WiFiClientSecure\esp_crt_bundle.c.o
+Compiling .pio\build\vqeaf_os\libca7\WiFiClientSecure\ssl_client.cpp.o
+Compiling .pio\build\vqeaf_os\lib855\SD_MMC\SD_MMC.cpp.o
+Compiling .pio\build\vqeaf_os\lib250\HTTPClient\HTTPClient.cpp.o
+Archiving .pio\build\vqeaf_os\libaa6\libWiFi.a
+Compiling .pio\build\vqeaf_os\FrameworkArduino\Esp.cpp.o
+Archiving .pio\build\vqeaf_os\lib0d4\libPreferences.a
+Compiling .pio\build\vqeaf_os\FrameworkArduino\FirmwareMSC.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\FunctionalInterrupt.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\HWCDC.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\HardwareSerial.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\IPAddress.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\IPv6Address.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\MD5Builder.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\Print.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\Stream.cpp.o
+Archiving .pio\build\vqeaf_os\libca7\libWiFiClientSecure.a
+Compiling .pio\build\vqeaf_os\FrameworkArduino\StreamString.cpp.o
+Archiving .pio\build\vqeaf_os\lib855\libSD_MMC.a
+Compiling .pio\build\vqeaf_os\FrameworkArduino\Tone.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\USB.cpp.o
+Archiving .pio\build\vqeaf_os\lib250\libHTTPClient.a
+Compiling .pio\build\vqeaf_os\FrameworkArduino\USBCDC.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\USBMSC.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\WMath.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\WString.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\base64.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\cbuf.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-adc.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-bt.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-cpu.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-dac.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-gpio.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-i2c-slave.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-i2c.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-ledc.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-matrix.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-misc.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-psram.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-rgb-led.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-rmt.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-sigmadelta.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-spi.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-time.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-timer.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-tinyusb.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-touch.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\esp32-hal-uart.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\firmware_msc_fat.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\libb64\cdecode.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\libb64\cencode.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\main.cpp.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\stdlib_noniso.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\wiring_pulse.c.o
+Compiling .pio\build\vqeaf_os\FrameworkArduino\wiring_shift.c.o
+Archiving .pio\build\vqeaf_os\libFrameworkArduino.a
+Linking .pio\build\vqeaf_os\firmware.elf
+Retrieving maximum program size .pio\build\vqeaf_os\firmware.elf
+Checking size .pio\build\vqeaf_os\firmware.elf
+Advanced Memory Usage is available via "PlatformIO Home > Project Inspect"
+RAM:   [===       ]  26.6% (used 87244 bytes from 327680 bytes)
+Flash: [==        ]  22.6% (used 1482361 bytes from 6553600 bytes)
+Building .pio\build\vqeaf_os\firmware.bin with action:
+  "$PYTHONEXE" "$OBJCOPY" --chip esp32s3 elf2image --flash_mode ${__get_board_flash_mode(__env__)} --flash_freq ${__get_board_f_image(__env__)} --flash_size 16MB --elf-sha256-offset 0xb0 -o $TARGET $SOURCES
+Building .pio\build\vqeaf_os\firmware.bin
+esptool.py v4.5.1
+Creating esp32s3 image...
+Merged 2 ELF sections
+Successfully created esp32s3 image.
+======================== [SUCCESS] Took 320.72 seconds ========================
+
+Environment    Status    Duration
+-------------  --------  ------------
+vqeaf_os       SUCCESS   00:05:20.725
+========================= 1 succeeded in 00:05:20.725 =========================

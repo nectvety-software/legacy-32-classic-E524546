@@ -1,0 +1,56 @@
+Symbian S3 OS v1.0.1 - Centered S60 Statusbar Test Report
+===========================================================
+
+Target contract
+---------------
+- ESP32-S3-WROOM-1 N16R8
+- ST7789 portrait 240x320
+- TFT_ROTATION=0
+- Status indicators: WiFi + battery only; no SIM/cellular icon
+
+Title/statusbar changes
+-----------------------
+- 27 px S60 top bar retained.
+- LCD width is split into three equal 80 px zones:
+    0..79   application title
+    80..159 centered clock
+    160..239 WiFi + battery status
+- Clock X is calculated from complete screen width: (240 - textWidth(time)) / 2.
+- WiFi and battery each occupy an equal 40 px slot inside the right status zone.
+- Title text is clipped by rendered pixel width so it cannot overlap the clock.
+- Active Standby/Home uses the same title/status geometry.
+- RSSI changes repaint only the right 80 px status region; full-screen redraw is not used.
+
+Regression suites
+-----------------
+PASS tools/test_grid_nav.py
+PASS tools/test_v04.py       7/7
+PASS tools/test_v051.py      6/6
+PASS tools/test_v05.py       9/9
+PASS tools/test_v06.py       53/53
+PASS tools/test_v061.py      62/62
+PASS tools/test_v07.py       82/82
+PASS tools/test_v08.py       79/79
+PASS tools/test_v09.py       62/62
+PASS tools/test_v10.py       72/72
+PASS tools/test_v101.py      41/41
+
+All regression scripts passed: 473 numbered assertions plus the grid navigation smoke test.
+
+Host C++ validation
+-------------------
+PASS: 14/14 src/*.cpp translation units compile with GNU++11 host stubs.
+PASS: validation repeated with TFT_DC=47, TFT_CS=14, TFT_RST=3 build macros.
+PASS: full host link of all firmware translation units and runtime stubs.
+PASS: previous TFT macro and libnet80211 ctx linker fixes remain intact.
+
+PlatformIO note
+---------------
+PlatformIO/ESP32 target toolchain is not installed in this execution environment,
+so real target compilation and ST7789 hardware timing were not executed here.
+Run on the target PC before flashing:
+
+  pio run -t clean
+  pio run
+  pio run -t upload
+  pio device monitor -b 115200

@@ -1,0 +1,16 @@
+@vqeaf 1.0
+<theme id="blue_s60" name="Blue S60">
+    metadata { author: "Symbian S3 OS" version: "1.2.0" }
+    palette {
+        shellTop: "#17345F"
+        shellBottom: "#102040"
+        screen: "#172B4D"
+        key: "#254365"
+        keyPressed: "#426B91"
+        keyBorder: "#A5B6C9"
+        keyText: "#FFFFFF"
+        subText: "#CDD5E0"
+        accent: "#50C8FF"
+        glow: "#FF7070"
+    }
+</theme>

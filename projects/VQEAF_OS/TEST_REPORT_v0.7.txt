@@ -1,0 +1,150 @@
+Symbian S3 OS v0.7 Test Report
+Generated: 2026-09-24
+
+Scope
+- Portrait ESP32-S3 OS source checks
+- S60 WiFi+battery-only status policy
+- Crash Recovery / Safe Mode
+- Gallery / Library / Text Viewer
+- Qeafbrowser v1.7 in-OS adapter
+- S60 app-opening interstitial
+- Previous TFT macro and libnet80211 ctx linker regressions
+
+== Legacy compatibility gates ==
+PASS: S60 3x3 launcher navigation and edge wrapping
+PASS: check_portrait_layout
+PASS: check_pin_conflicts
+PASS: check_grid_navigation
+PASS: check_keyboard_fit
+PASS: check_features_present
+PASS: check_build_macro_safety
+PASS: check_cpp11_safe_initialization
+PASS: 7/7 v0.4 regression gates
+PASS: legacy global AppContext ctx removed
+PASS: application context renamed and file-local
+PASS: main.cpp contains no standalone ctx identifier
+PASS: runtime objects use internal linkage
+PASS: README preserves v0.5.1 linker hotfix documentation
+PASS: CHANGELOG documents ctx collision fix
+PASS: 6/6 v0.5.1 linker regression gates
+
+== v0.7 gates ==
+PASS: portrait board remains 240x320
+PASS: titlebar status draws WiFi
+PASS: titlebar status draws battery
+PASS: titlebar status omits BLE and SD indicators
+PASS: idle status omits BLE and SD indicators
+PASS: lock status has WiFi and battery only
+PASS: recovery state bootPending
+PASS: recovery state crashStreak
+PASS: recovery state forceSafe
+PASS: watchdog panic brownout resets recognized
+PASS: automatic safe mode after repeated crashes
+PASS: stable boot clears crash-loop marker
+PASS: hardware A recovery chord
+PASS: safe mode disables risky apps
+PASS: safe mode skips audio runtime
+PASS: safe mode disables WiFi autoconnect
+PASS: recovery app screen exists
+PASS: recovery can clear flags and restart
+PASS: Gallery and TextViewer screens registered
+PASS: launcher exposes Gallery and Library
+PASS: file manager routes images to Gallery
+PASS: file manager routes text to TextViewer
+PASS: gallery scans BMP JPEG PNG
+PASS: gallery image decoder supports BMP
+PASS: gallery image decoder supports JPEG via Qeafbrowser decoder
+PASS: gallery image decoder supports PNG via Qeafbrowser decoder
+PASS: image buffers prefer PSRAM
+PASS: JPEG edge clipping preserves MCU source stride
+PASS: text viewer uses bounded page buffers
+PASS: text viewer streams from file offsets
+PASS: Browser screen/app registered
+PASS: launcher exposes Qeafbrowser
+PASS: browser uses fixed line/link pools
+PASS: browser response buffer is bounded to 32KB
+PASS: browser response buffer prefers PSRAM
+PASS: browser HTTP and HTTPS enabled
+PASS: browser TLS compatibility follows source
+PASS: browser explicit redirect loop
+PASS: browser resolves redirects relative to current URL
+PASS: browser preserves href case
+PASS: browser renders image alt fallback
+PASS: browser Opera Mini style user agent
+PASS: browser default home matches Qeafbrowser source
+PASS: browser supports back history
+PASS: browser supports keypad URL entry
+PASS: opening application renderer exists
+PASS: resume interstitial text exists
+PASS: launcher/idle/files/task sources show opening screen
+PASS: task switcher can resume app state
+PASS: JPEG and PNG libraries pinned
+PASS: AppContext uses explicit C++11 constructor
+PASS: ctx linker collision remains fixed
+PASS: TFT macro collision fix remains
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 80/80 v0.7 gates
+
+== GNU++11 syntax ==
+PASS: src/apps/Apps.cpp
+PASS: src/core/InputManager.cpp
+PASS: src/core/SymbianUI.cpp
+PASS: src/core/TextKeyboard.cpp
+PASS: src/main.cpp
+PASS: src/services/BrowserService.cpp
+PASS: src/services/ImageViewerService.cpp
+PASS: src/services/MusicService.cpp
+PASS: src/services/NotificationService.cpp
+PASS: src/services/SettingsStore.cpp
+PASS: src/services/StorageService.cpp
+PASS: src/services/SystemService.cpp
+PASS: src/services/WiFiProfileStore.cpp
+PASS: 13/13 C++ translation units
+
+== Full host link ==
+PASS: linked every src/*.cpp together under GNU++11
+PASS: linked with -DTFT_DC=47 -DTFT_CS=14 -DTFT_RST=3
+PASS: no duplicate ctx/static-constexpr linker symbols
+PASS: host startup executable returned code 0
+
+== RAM/PSRAM design checks ==
+PASS: Browser line/link/history pools allocated once from PSRAM (fallback internal RAM)
+PASS: Browser page body uses temporary 32 KB PSRAM buffer and frees after parse
+PASS: Gallery JPEG/PNG/BMP working buffers use PSRAM and are released after draw
+PASS: Text Viewer streams 15-line pages; it does not load whole documents
+PASS: no 240x320 RGB565 full-screen framebuffer added
+PASS: Safe Mode skips browser-pool allocation, audio, BLE, browser and WiFi auto-connect
+
+== Target build ==
+PlatformIO is not installed in this execution environment, so the real Espressif toolchain link/upload was not run here.
+Run on the target PC:
+  pio run -t clean
+  pio run
+  pio run -t upload
+  pio device monitor -b 115200

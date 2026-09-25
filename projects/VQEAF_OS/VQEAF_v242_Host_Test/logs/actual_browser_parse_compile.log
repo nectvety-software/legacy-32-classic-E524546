@@ -1,0 +1,8 @@
+$ g++ -std=c++17 -Wall -Wextra -Werror -Wno-deprecated-declarations -Wno-error=return-type -I/mnt/data/VQEAF_v242_acceptance_work/tests -I/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/v19_browser_host -Itools/host_stubs -Isrc -Iinclude /mnt/data/VQEAF_v242_acceptance_work/tests/browser_capture.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/v19_browser_host/extra.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/services/BrowserService.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/services/TrustedTls.cpp -o /mnt/data/VQEAF_v242_acceptance_work/actual_browser_parse
+In file included from /mnt/data/VQEAF_v242_acceptance_work/tests/browser_capture.cpp:3:
+/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/v19_browser_host/test_browser_v242.cpp: In function ‘int original_browser_suite_main()’:
+/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/v19_browser_host/test_browser_v242.cpp:48:1: warning: control reaches end of non-void function [-Wreturn-type]
+   48 | }
+      | ^
+
+[exit] 0

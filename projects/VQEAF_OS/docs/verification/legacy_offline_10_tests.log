@@ -1,0 +1,16 @@
+legacy_offline_tests_count 10
+test_buildfs_missing_data_reports_clearly (tools.test_offline_build.OfflineBuildTest.test_buildfs_missing_data_reports_clearly) ... ok
+test_compiler_failure_classified (tools.test_offline_build.OfflineBuildTest.test_compiler_failure_classified) ... ok
+test_complete_cache_check_only (tools.test_offline_build.OfflineBuildTest.test_complete_cache_check_only) ... ok
+test_incomplete_cache_blocks_without_attempt (tools.test_offline_build.OfflineBuildTest.test_incomplete_cache_blocks_without_attempt) ... ok
+test_mismatched_library_prevents_build (tools.test_offline_build.OfflineBuildTest.test_mismatched_library_prevents_build) ... ok
+test_mock_buildfs_success (tools.test_offline_build.OfflineBuildTest.test_mock_buildfs_success) ... ok
+test_mock_success_creates_sha_and_clean (tools.test_offline_build.OfflineBuildTest.test_mock_success_creates_sha_and_clean) ... ok
+test_success_without_binary_is_failure (tools.test_offline_build.OfflineBuildTest.test_success_without_binary_is_failure) ... ok
+test_wrong_framework_version_prevents_build (tools.test_offline_build.OfflineBuildTest.test_wrong_framework_version_prevents_build) ... ok
+test_wrong_platform_version_prevents_build (tools.test_offline_build.OfflineBuildTest.test_wrong_platform_version_prevents_build) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 24.496s
+
+OK

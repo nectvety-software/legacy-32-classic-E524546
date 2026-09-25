@@ -6,8 +6,10 @@
 #include <LittleFS.h>
 #include <FS.h>
 #include <esp_heap_caps.h>               // cap bo nho cho hist/book/scratch tu PSRAM
+#include "launcher_config.h"             // LC_DIR_THEMES cho store_theme_list
 
 String cfg_ssid = "", cfg_pass = "", cfg_home = "https://qeafivels.com/", cfg_tz = "ICT-7";
+bool cfg_text_mode = false;
 
 static fs::FS *fs_sel = nullptr;
 static const char *DIR = "/Qeafbrowser";
@@ -115,7 +117,7 @@ void store_init() {
   // Cap bo nho cho hist/book TRUOC khi load (PSRAM, fallback malloc).
   if (!hist) hist = (Entry *)store_alloc(sizeof(Entry) * HIST_MAX);
   if (!book) book = (Entry *)store_alloc(sizeof(Entry) * BOOK_MAX);
-  if (!hist || !book) Serial.println("[store] NGUY HIEM: khong cap duoc hist/book trong PSRAM");
+  if (!hist || !book) Serial.println("[store] CRITICAL: cannot alloc hist/book in PSRAM");
   // LittleFS.begin(false) = khong format (format co the treo man boot)
   if (LittleFS.begin(false)) {
     fs_sel = &LittleFS;
@@ -130,11 +132,36 @@ void store_init() {
   if (fs_sel) {
     fs_sel->mkdir("/Qeafbrowser");
     fs_sel->mkdir("/Qeafbrowser/thumbcache");
+    fs_sel->mkdir("/launcher");
+    fs_sel->mkdir("/launcher/themes");
     char pth[64];
     snprintf(pth, sizeof pth, "%s/history.txt", DIR);
     entries_load(hist, HIST_MAX, &hist_n, pth);
     snprintf(pth, sizeof pth, "%s/bookmark.txt", DIR);
     entries_load(book, BOOK_MAX, &book_n, pth);
+    if (book) {
+      static const char *DEF_BM[][2] = {
+        { "http://tranlong.hexat.com/",  "TL - Bookmark" },
+        { "http://schema.mw.lt/",        "Schema Generator" },
+        { "https://wapvxp.xtgem.com/",   "WapVXP.XtGem.com" },
+      };
+      int added = 0;
+      for (size_t i = 0; i < sizeof DEF_BM / sizeof DEF_BM[0]; i++) {
+        bool have = false;
+        for (int j = 0; j < book_n; j++)
+          if (!strcmp(book[j].url, DEF_BM[i][0])) { have = true; break; }
+        if (have || book_n >= BOOK_MAX) continue;
+        Entry &e = book[book_n++];
+        strncpy(e.url, DEF_BM[i][0], sizeof e.url - 1); e.url[sizeof e.url - 1] = 0;
+        strncpy(e.title, DEF_BM[i][1], sizeof e.title - 1); e.title[sizeof e.title - 1] = 0;
+        e.used = true;
+        added++;
+      }
+      if (added) {
+        entries_save(book, book_n, pth);
+        Serial.printf("[store] seeded %d default bookmarks (total %d)\n", added, book_n);
+      }
+    }
     cookies_load();
   }
   {
@@ -150,6 +177,7 @@ void store_init() {
           else if (!strcmp(p, "wifi_pass")) cfg_pass = eq + 1;
           else if (!strcmp(p, "home_url")) cfg_home = eq + 1;
           else if (!strcmp(p, "timezone")) cfg_tz = eq + 1;
+          else if (!strcmp(p, "text_mode")) cfg_text_mode = (eq[1] == '1');
         }
         p = strtok(0, "\r\n");
       }
@@ -163,16 +191,18 @@ void store_init() {
 // Ghi bo nho tam cau hinh ra SD (wizard WiFi goi sau khi ket noi thanh cong).
 // Neu khong co SD/LFS thi van giu trong RAM (cfg_* String) cho den khi reset.
 void config_save() {
-  if (!fs_sel) { Serial.println("[store] config_save: khong co FS, chi giu RAM"); return; }
+  if (!fs_sel) { Serial.println("[store] config_save: no FS, RAM only"); return; }
   char buf[512];
   int o = snprintf(buf, sizeof buf,
                    "; Qeafbrowser config — tu dong sinh boi wizard WiFi\n"
-                   "wifi_ssid=%s\nwifi_pass=%s\nhome_url=%s\ntimezone=%s\n",
+                   "wifi_ssid=%s\nwifi_pass=%s\nhome_url=%s\ntimezone=%s\n"
+                   "text_mode=%d\n",
                    cfg_ssid.c_str(), cfg_pass.c_str(),
                    cfg_home.length() ? cfg_home.c_str() : "https://qeafivels.com/",
-                   cfg_tz.length() ? cfg_tz.c_str() : "ICT-7");
+                   cfg_tz.c_str(), cfg_text_mode ? 1 : 0);
   if (f_write_all("/Qeafbrowser/config.ini", buf, o))
-    Serial.printf("[store] config.ini da luu (ssid=%s)\n", cfg_ssid.c_str());
+    Serial.printf("[store] config.ini saved (ssid=%s text_mode=%d)\n",
+                  cfg_ssid.c_str(), cfg_text_mode ? 1 : 0);
 }
 
 
@@ -372,4 +402,145 @@ void cookie_get(const char *domain, char *out, size_t cap) {
       if (o >= cap - 2) break;
     }
   }
+}
+
+// ================= Launcher FS helpers (dung chung fs_sel) =================
+// Launcher khong can biet duoi cung la SD_MMC hay LittleFS: moi doc/ghi di qua
+// cac ham nay. SD_MMC 1-bit (chan trong pins.h) duoc mount truoc; that bai thi
+// van con LittleFS cua store_init().
+#include <SD_MMC.h>
+
+static bool sd_mounted = false;
+
+bool store_fs_mount_sd() {
+  if (sd_mounted) return true;
+#if defined(ARDUINO)
+  // SD_MMC 1-bit: DAT0=9, CMD=11, CLK=13; DAT3/CD=10 (khong pull-up trong mount).
+  if (SD_MMC.begin("/sdcard", true)) {
+    sd_mounted = true;
+    Serial.printf("[store] SD mounted, %llu MB\n", (unsigned long long)(SD_MMC.cardSize() / (1024ULL * 1024ULL)));
+    SD_MMC.mkdir("/launcher");
+    SD_MMC.mkdir("/launcher/themes");
+    SD_MMC.mkdir("/launcher/art");
+    return true;
+  }
+  Serial.println("[store] SD mount failed -> chi dung LittleFS");
+#else
+  // sim: SimFS SD_MMC root la sim_sd/, chi dam bao thu muc ton tai
+  SD_MMC.mkdir("/launcher");
+  SD_MMC.mkdir("/launcher/themes");
+  SD_MMC.mkdir("/launcher/art");
+  sd_mounted = true;
+#endif
+  return false;
+}
+
+// Chon FS cho launcher: SD neu co, khong thi LittleFS cua store.
+static fs::FS *launcher_fs() {
+  if (sd_mounted) return (fs::FS *)&SD_MMC;
+  return fs_sel;
+}
+
+// Theme VQEAF: LUON LittleFS (fs_sel) — khong doc tu SD.
+bool store_theme_read(const char *path, char *buf, size_t cap, size_t *len) {
+  if (!fs_sel || !path || !buf || cap < 2) return false;
+  File f = fs_sel->open(path, FILE_READ);
+  if (!f) return false;
+  size_t n = 0;
+  for (;;) {
+    int c = f.read();
+    if (c < 0) break;
+    if (n >= cap - 1) break;
+    buf[n++] = (char)c;
+  }
+  buf[n] = 0;
+  if (len) *len = n;
+  f.close();
+  return true;
+}
+
+static bool has_ext(const char *name, const char *ext) {
+  size_t n = strlen(name), e = strlen(ext);
+  if (n <= e) return false;
+  return strcasecmp(name + n - e, ext) == 0;
+}
+
+// Liet ke /launcher/themes/*.vqeaf (khong gom duong dan, max 8 ten).
+int store_theme_list(char names[][24], int maxn) {
+  if (!fs_sel || !names || maxn <= 0) return 0;
+  int n = 0;
+#if defined(ARDUINO)
+  File root = fs_sel->open(LC_DIR_THEMES);
+  if (root && root.isDirectory()) {
+    for (File e = root.openNextFile(); e && n < maxn; e = root.openNextFile()) {
+      if (e.isDirectory()) continue;
+      const char *nm = e.name();
+      const char *slash = strrchr(nm, '/');
+      if (slash) nm = slash + 1;
+      slash = strrchr(nm, '\\');
+      if (slash) nm = slash + 1;
+      if (!has_ext(nm, LC_THEME_EXT)) continue;
+      // luu ten khong duoi .vqeaf (vd "amoled_red")
+      snprintf(names[n], 24, "%s", nm);
+      size_t L = strlen(names[n]);
+      if (L > 6 && !strcasecmp(names[n] + L - 6, LC_THEME_EXT))
+        names[n][L - 6] = 0;
+      n++;
+    }
+    root.close();
+  }
+#else
+  // sim: SimFS khong co Dir — quet ten .vqeaf da biet
+  static const char *KNOWN[] = {
+    "retrogo_dark", "s60_green", "amoled_red", "blue_s60", "retrogo_light", 0
+  };
+  for (int i = 0; KNOWN[i] && n < maxn; i++) {
+    char p[96];
+    char probe[8];
+    size_t got = 0;
+    snprintf(p, sizeof p, LC_DIR_THEMES "/%s" LC_THEME_EXT, KNOWN[i]);
+    if (store_theme_read(p, probe, sizeof probe, &got) && got > 0) {
+      snprintf(names[n], 24, "%s", KNOWN[i]);
+      n++;
+    }
+  }
+#endif
+  return n;
+}
+
+bool store_fs_read(const char *path, char *buf, size_t cap, size_t *len) {
+  fs::FS *fsx = launcher_fs();
+  if (!fsx || !path || !buf || cap < 2) return false;
+  File f = fsx->open(path, FILE_READ);
+  if (!f) return false;
+  size_t n = 0;
+  for (;;) {
+    int c = f.read();
+    if (c < 0) break;
+    if (n >= cap - 1) break;
+    buf[n++] = (char)c;
+  }
+  buf[n] = 0;
+  if (len) *len = n;
+  f.close();
+  return true;
+}
+
+bool store_fs_write(const char *path, const char *data, size_t n) {
+  fs::FS *fsx = launcher_fs();
+  if (!fsx || !path || !data) return false;
+  File f = fsx->open(path, FILE_WRITE);
+  if (!f) return false;
+  size_t w = f.write((const uint8_t *)data, n);
+  f.close();
+  return w == n;
+}
+
+bool store_fs_exists(const char *path) {
+  fs::FS *fsx = launcher_fs();
+  if (!fsx || !path) return false;
+  File f = fsx->open(path, FILE_READ);
+  if (!f) return false;
+  f.close();
+  return true;
 }

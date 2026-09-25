@@ -1,0 +1,134 @@
+[
+  {
+    "id": 0,
+    "name": "wifi",
+    "legacy": "Wi",
+    "rect": [
+      0,
+      0,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 1,
+    "name": "bluetooth",
+    "legacy": "BLE",
+    "rect": [
+      24,
+      0,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 2,
+    "name": "music",
+    "legacy": "Mus",
+    "rect": [
+      48,
+      0,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 3,
+    "name": "files",
+    "legacy": "Dir",
+    "rect": [
+      72,
+      0,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 4,
+    "name": "gallery",
+    "legacy": "Pic",
+    "rect": [
+      0,
+      24,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 5,
+    "name": "internet",
+    "legacy": "Web",
+    "rect": [
+      24,
+      24,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 6,
+    "name": "shell",
+    "legacy": "Term",
+    "rect": [
+      48,
+      24,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 7,
+    "name": "recovery",
+    "legacy": "Rec",
+    "rect": [
+      72,
+      24,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 8,
+    "name": "settings",
+    "legacy": "Set",
+    "rect": [
+      0,
+      48,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 9,
+    "name": "themes",
+    "legacy": "Th",
+    "rect": [
+      24,
+      48,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 10,
+    "name": "apps",
+    "legacy": "App",
+    "rect": [
+      48,
+      48,
+      24,
+      24
+    ]
+  },
+  {
+    "id": 11,
+    "name": "library",
+    "legacy": "Col",
+    "rect": [
+      72,
+      48,
+      24,
+      24
+    ]
+  }
+]

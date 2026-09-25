@@ -1,0 +1,26 @@
+Symbian S3 OS v2.0.0 — Host regression and unverified target work
+
+Commands executed: python tools/test_v20_storage_tls.py
+Result:
+PASS: seven pinned DER fingerprint comparisons and PEM inventory
+PASS: OpenSSL verification of all bundled roots
+PASS: OpenSSL rejection of a freshly generated untrusted self-signed certificate
+PASS: GNU++11 production TrustedTls adapter clock gate and setCACert stub
+PASS: Browser + Shell verified TLS / HTTPS downgrade source checks
+PASS: actual production StorageService.cpp simulated: staged-write corruption,
+      FAT backup rollback, read-time recovery, cache pruning/clearing,
+      read-only card-loss probe, guarded busy-music behavior, 5/15s retry,
+      no-card boot then insertion/recovery
+PASS: v1.9 consolidated regression (includes prior theme, WiFi, app-signature tests)
+PASS: 21/21 C++11 production translation units + full synthetic host link
+PASS: ZIP integrity (after packaging)
+
+LIMITATIONS:
+- Host TLS tests verify public PEM trust anchors and adapter wiring; they DO NOT
+  simulate mbedTLS's live hostname/certificate-chain handshake on ESP32.
+- No local PlatformIO Xtensa toolchain or physical E524546 board available.
+  Actual target build, SD hot-swap, WiFi RF, NTP and HTTPS live-certificate
+  verification remain REQUIRED prior to release/use with sensitive data.
+- Seven roots do not cover every possible public website.
+- No hardware card-detect pin; polling/remount is best effort; not safe to
+  remove an SD while any write is in progress.

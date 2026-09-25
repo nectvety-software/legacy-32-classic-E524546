@@ -1,0 +1,6 @@
+$ /mnt/data/VQEAF_v242_acceptance_work/actual_theme_parser /mnt/data/VQEAF_v242_acceptance_work/emulated_sd/System/Themes/s60_green.vqeaf /mnt/data/VQEAF_v242_acceptance_work/theme_palette.json
+THEME_SCANNED|1
+THEME_APPLIED|S60 Green|36420
+BAD_THEME_REJECTED|1
+
+[exit] 0

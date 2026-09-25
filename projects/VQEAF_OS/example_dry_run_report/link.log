@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: link
+Would run: xtensa-esp32s3-elf-g++ [objects] -o firmware.elf
+Result: SIMULATED_PASS
+Object addresses, linker script and actual symbols unknown in simulation.

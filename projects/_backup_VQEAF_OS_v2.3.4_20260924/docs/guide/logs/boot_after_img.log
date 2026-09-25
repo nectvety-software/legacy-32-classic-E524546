@@ -1,0 +1,12 @@
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3808,len:0x4bc
+load:0x403c9700,len:0xbd8
+load:0x403cc700,len:0x2a0c
+entry 0x403c98d0
+[   493][E][Preferences.cpp:483] getString(): nvs_get_str len fail: themeFile NOT_FOUND
+[   501][E][Preferences.cpp:483] getString(): nvs_get_str len fail: note NOT_FOUND
+[   513][E][Preferences.cpp:483] getString(): nvs_get_str len fail: last NOT_FOUND

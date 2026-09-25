@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: platformio_version
+Would run: pio --version
+Result: SIMULATED
+Expected: PlatformIO Core CLI already installed; version NOT measured.

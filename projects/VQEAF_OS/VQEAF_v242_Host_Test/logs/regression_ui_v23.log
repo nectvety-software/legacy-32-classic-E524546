@@ -1,0 +1,31 @@
+PASS: 240x320 Home/Menu real C++ host raster + screenshot RGB565 sample + two-cell dirty + Vietnamese UTF-8 + 12 icons
+PASS CHECK home: 65275/67854 screenshot palette-grounded pixels align (96.20%); min 94% (intentionally updated icon rectangles excluded)
+PASS CHECK menu: 55894/58105 screenshot palette-grounded pixels align (96.19%); min 95% (intentionally updated icon rectangles excluded)
+ew-only WiFi scan resumes on exit; explicit disconnect blocks retry
+PASS: existing browser WLAN survives boot auto manager startup
+PASS: Shell shared-radio override stops competing boot scan
+PASS: Safe Mode / disabled preference does not scan or auto-join
+PASS: 10 auto WiFi integration scenarios
+PASS: WiFi auto-selection host test suite (10 scenarios)
+TEST: test_v18_core.py
+PASS: calculator + stopwatch + bounded playlist repeat/shuffle
+PASS: portrait panel
+PASS: calculator screen routed
+PASS: stopwatch screen routed
+PASS: utility apps in Applications
+PASS: music auto-next in loop
+PASS: WAV end drains DMA
+PASS: bounded playlist no heap and nonrepeating shuffle
+PASS: music repeats Off/All/One
+PASS: gallery slideshow tick
+PASS: gallery outside library path
+PASS: BLE strongest results
+PASS: BLE details has return state
+PASS: safe mode audio guard unchanged
+PASS: TFT no full-screen sprite
+PASS: 14 v1.8 source integration checks
+TEST: test_v201_boarddiag.py
+PASS: real scratch readback, data collision, offline SD, TLS no-network honesty
+PASS v2.0.1 host diagnostics; physical card removal and live TLS are PENDING
+VQEAF 2.2 HOST TESTS PASS. ESP32 PlatformIO build and physical board PENDING.
+PASS VQEAF v2.3 source/host. PlatformIO firmware & board still PENDING.

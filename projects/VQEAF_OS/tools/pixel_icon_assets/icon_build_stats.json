@@ -1,0 +1,495 @@
+{
+  "baseline_version": "2.3.4",
+  "version": "2.3.5",
+  "pixel_output": "exact RGB565 parity with v2.3.4, preserving original 24 PNG sources",
+  "asset_count": 24,
+  "pixels_checked_expected": 22464,
+  "baseline_payload_bytes": 8260,
+  "optimized_payload_bytes": 6443,
+  "total_flash_bytes": 6443,
+  "saved_payload_bytes": 1817,
+  "saved_percent": 22.0,
+  "descriptor_size_esp32_before_and_after": 16,
+  "assets": {
+    "wifi_24": {
+      "old_bytes": 194,
+      "new_bytes": 149,
+      "stream_bytes": 109,
+      "palette_bytes": 40,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        4,
+        18,
+        15
+      ],
+      "full_size": 24,
+      "source_png_sha256": "44462407a09d1b7807d02d761e4d87e50bd6331b43af4761e823fcf447dce3e2",
+      "opaque_pixels": 111,
+      "bytes": 149,
+      "rle_bytes": 109,
+      "colors": 19,
+      "size": 24
+    },
+    "bluetooth_24": {
+      "old_bytes": 244,
+      "new_bytes": 145,
+      "stream_bytes": 117,
+      "palette_bytes": 28,
+      "codec": "nibble4",
+      "bbox_xywh": [
+        5,
+        3,
+        13,
+        18
+      ],
+      "full_size": 24,
+      "source_png_sha256": "ea33d99733564e42a6ee36e4f643f8b6001d0472d7e6e8e097aee8f0fe2d03c0",
+      "opaque_pixels": 232,
+      "bytes": 145,
+      "rle_bytes": 117,
+      "colors": 13,
+      "size": 24
+    },
+    "music_24": {
+      "old_bytes": 240,
+      "new_bytes": 194,
+      "stream_bytes": 152,
+      "palette_bytes": 42,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        17,
+        18
+      ],
+      "full_size": 24,
+      "source_png_sha256": "bfaa32b732bde2fbafb629af88940283b038e3ce23a026e94752ccb276bdc773",
+      "opaque_pixels": 180,
+      "bytes": 194,
+      "rle_bytes": 152,
+      "colors": 20,
+      "size": 24
+    },
+    "files_24": {
+      "old_bytes": 207,
+      "new_bytes": 153,
+      "stream_bytes": 121,
+      "palette_bytes": 32,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        5,
+        18,
+        14
+      ],
+      "full_size": 24,
+      "source_png_sha256": "bc675b845c37b6d672298f32041a4c0eb49ecc3bfa7cbcec20df7652f9090d34",
+      "opaque_pixels": 229,
+      "bytes": 153,
+      "rle_bytes": 121,
+      "colors": 15,
+      "size": 24
+    },
+    "gallery_24": {
+      "old_bytes": 242,
+      "new_bytes": 176,
+      "stream_bytes": 132,
+      "palette_bytes": 44,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        18,
+        17
+      ],
+      "full_size": 24,
+      "source_png_sha256": "2a7a16a8db73a7553b68a7bd10df818f9ec50095ec4174793e256fa0332f175a",
+      "opaque_pixels": 298,
+      "bytes": 176,
+      "rle_bytes": 132,
+      "colors": 21,
+      "size": 24
+    },
+    "internet_24": {
+      "old_bytes": 276,
+      "new_bytes": 233,
+      "stream_bytes": 173,
+      "palette_bytes": 60,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        17,
+        18
+      ],
+      "full_size": 24,
+      "source_png_sha256": "fb5b999bf1375674f9dace42947fe0e17e1cfd92645716d4ff816e5f15351d69",
+      "opaque_pixels": 233,
+      "bytes": 233,
+      "rle_bytes": 173,
+      "colors": 29,
+      "size": 24
+    },
+    "shell_24": {
+      "old_bytes": 227,
+      "new_bytes": 171,
+      "stream_bytes": 137,
+      "palette_bytes": 34,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        4,
+        18,
+        15
+      ],
+      "full_size": 24,
+      "source_png_sha256": "0ac38154ccc8aaa0bf59a3783ea209b6a5b93d97748779b37d4bd7bcbe16ed40",
+      "opaque_pixels": 269,
+      "bytes": 171,
+      "rle_bytes": 137,
+      "colors": 16,
+      "size": 24
+    },
+    "recovery_24": {
+      "old_bytes": 261,
+      "new_bytes": 225,
+      "stream_bytes": 179,
+      "palette_bytes": 46,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        17,
+        18
+      ],
+      "full_size": 24,
+      "source_png_sha256": "7a5f8b34bfc874e9139d2b260849f2e865c7de6785cb046120657c7a588a8a49",
+      "opaque_pixels": 233,
+      "bytes": 225,
+      "rle_bytes": 179,
+      "colors": 22,
+      "size": 24
+    },
+    "settings_24": {
+      "old_bytes": 294,
+      "new_bytes": 250,
+      "stream_bytes": 202,
+      "palette_bytes": 48,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        17,
+        18
+      ],
+      "full_size": 24,
+      "source_png_sha256": "d5541990f65b1ccac5e0cd4e4723795a9110e9fb66bc656ceeffb02129a31d4a",
+      "opaque_pixels": 235,
+      "bytes": 250,
+      "rle_bytes": 202,
+      "colors": 23,
+      "size": 24
+    },
+    "themes_24": {
+      "old_bytes": 229,
+      "new_bytes": 183,
+      "stream_bytes": 143,
+      "palette_bytes": 40,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        4,
+        18,
+        15
+      ],
+      "full_size": 24,
+      "source_png_sha256": "24fc3311bdfe0b2c3e270c88115995c6f026ab7dce935f4b3dc08c4a75956c8d",
+      "opaque_pixels": 228,
+      "bytes": 183,
+      "rle_bytes": 143,
+      "colors": 19,
+      "size": 24
+    },
+    "apps_24": {
+      "old_bytes": 221,
+      "new_bytes": 168,
+      "stream_bytes": 126,
+      "palette_bytes": 42,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        4,
+        18,
+        16
+      ],
+      "full_size": 24,
+      "source_png_sha256": "78ef860ae2969c47f58ba0c4d3051604495078d1d7ec4e68542990f5197d089f",
+      "opaque_pixels": 275,
+      "bytes": 168,
+      "rle_bytes": 126,
+      "colors": 20,
+      "size": 24
+    },
+    "library_24": {
+      "old_bytes": 257,
+      "new_bytes": 208,
+      "stream_bytes": 168,
+      "palette_bytes": 40,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        3,
+        3,
+        18,
+        17
+      ],
+      "full_size": 24,
+      "source_png_sha256": "cd68596db275b626a7a14e98d78424c4a1a44aee41afc7b164232cc537babfc9",
+      "opaque_pixels": 285,
+      "bytes": 208,
+      "rle_bytes": 168,
+      "colors": 19,
+      "size": 24
+    },
+    "wifi_36": {
+      "old_bytes": 356,
+      "new_bytes": 257,
+      "stream_bytes": 219,
+      "palette_bytes": 38,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        6,
+        28,
+        24
+      ],
+      "full_size": 36,
+      "source_png_sha256": "ae4e28e372bc15a79a2655c7505156e2f823f7f3244cca58bdca69b43a67ecea",
+      "opaque_pixels": 280,
+      "bytes": 257,
+      "rle_bytes": 219,
+      "colors": 18,
+      "size": 36
+    },
+    "bluetooth_36": {
+      "old_bytes": 442,
+      "new_bytes": 306,
+      "stream_bytes": 280,
+      "palette_bytes": 26,
+      "codec": "nibble4",
+      "bbox_xywh": [
+        8,
+        4,
+        20,
+        28
+      ],
+      "full_size": 36,
+      "source_png_sha256": "9e61c1337c7ed633e03a261ffe468ff2894e3a048fce7d6dda592a099e950785",
+      "opaque_pixels": 554,
+      "bytes": 306,
+      "rle_bytes": 280,
+      "colors": 12,
+      "size": 36
+    },
+    "music_36": {
+      "old_bytes": 448,
+      "new_bytes": 373,
+      "stream_bytes": 329,
+      "palette_bytes": 44,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        5,
+        4,
+        26,
+        28
+      ],
+      "full_size": 36,
+      "source_png_sha256": "7cac8a4f4f047825e7da845e337b7fc0849c0c24ec885a669c322f06bd5f1cd2",
+      "opaque_pixels": 438,
+      "bytes": 373,
+      "rle_bytes": 329,
+      "colors": 21,
+      "size": 36
+    },
+    "files_36": {
+      "old_bytes": 426,
+      "new_bytes": 312,
+      "stream_bytes": 268,
+      "palette_bytes": 44,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        7,
+        28,
+        21
+      ],
+      "full_size": 36,
+      "source_png_sha256": "fb8f5b5e8911c4f05b9bab3883225a7dea969c42deb27f937544ea700b999a0c",
+      "opaque_pixels": 539,
+      "bytes": 312,
+      "rle_bytes": 268,
+      "colors": 21,
+      "size": 36
+    },
+    "gallery_36": {
+      "old_bytes": 395,
+      "new_bytes": 274,
+      "stream_bytes": 230,
+      "palette_bytes": 44,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        4,
+        28,
+        27
+      ],
+      "full_size": 36,
+      "source_png_sha256": "e9eb4f2c9fa6e7e185cad4215b4dcf552c33b79faef58d160b3ff528b8ef4c99",
+      "opaque_pixels": 738,
+      "bytes": 274,
+      "rle_bytes": 230,
+      "colors": 21,
+      "size": 36
+    },
+    "internet_36": {
+      "old_bytes": 505,
+      "new_bytes": 420,
+      "stream_bytes": 358,
+      "palette_bytes": 62,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        5,
+        4,
+        26,
+        28
+      ],
+      "full_size": 36,
+      "source_png_sha256": "6dc31dd3f4ad45ea7bed20e01b92391e2f7ed6aab6b5dd2b06cbed402f6b17bf",
+      "opaque_pixels": 566,
+      "bytes": 420,
+      "rle_bytes": 358,
+      "colors": 30,
+      "size": 36
+    },
+    "shell_36": {
+      "old_bytes": 445,
+      "new_bytes": 338,
+      "stream_bytes": 302,
+      "palette_bytes": 36,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        6,
+        28,
+        24
+      ],
+      "full_size": 36,
+      "source_png_sha256": "33f11ca9e74cd79c09a0fa7e3ae0853ef09d02fafa8cae9898254770c43bcf7e",
+      "opaque_pixels": 671,
+      "bytes": 338,
+      "rle_bytes": 302,
+      "colors": 17,
+      "size": 36
+    },
+    "recovery_36": {
+      "old_bytes": 451,
+      "new_bytes": 376,
+      "stream_bytes": 332,
+      "palette_bytes": 44,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        5,
+        4,
+        26,
+        28
+      ],
+      "full_size": 36,
+      "source_png_sha256": "34cb88e4c2161b816bbcfaad97ba604086076c2eef8a39bac285fc76be4792c1",
+      "opaque_pixels": 565,
+      "bytes": 376,
+      "rle_bytes": 332,
+      "colors": 21,
+      "size": 36
+    },
+    "settings_36": {
+      "old_bytes": 555,
+      "new_bytes": 479,
+      "stream_bytes": 431,
+      "palette_bytes": 48,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        4,
+        27,
+        28
+      ],
+      "full_size": 36,
+      "source_png_sha256": "b72aac82221289fa60b3f23fe48f3fbb3aeded778a5fee9fbe41134dcbe6cf27",
+      "opaque_pixels": 591,
+      "bytes": 479,
+      "rle_bytes": 431,
+      "colors": 23,
+      "size": 36
+    },
+    "themes_36": {
+      "old_bytes": 432,
+      "new_bytes": 338,
+      "stream_bytes": 298,
+      "palette_bytes": 40,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        6,
+        28,
+        24
+      ],
+      "full_size": 36,
+      "source_png_sha256": "47d30d21209f033eb9c16041632c9ac4f51d7d5f222c3bf8e432cf10a173bcda",
+      "opaque_pixels": 568,
+      "bytes": 338,
+      "rle_bytes": 298,
+      "colors": 19,
+      "size": 36
+    },
+    "apps_36": {
+      "old_bytes": 408,
+      "new_bytes": 304,
+      "stream_bytes": 264,
+      "palette_bytes": 40,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        5,
+        28,
+        25
+      ],
+      "full_size": 36,
+      "source_png_sha256": "fdd17ccd7d7032218ce1422348edaf5bb0c7b0f80cb01794e77ce953a2c9dd10",
+      "opaque_pixels": 665,
+      "bytes": 304,
+      "rle_bytes": 264,
+      "colors": 19,
+      "size": 36
+    },
+    "library_36": {
+      "old_bytes": 505,
+      "new_bytes": 411,
+      "stream_bytes": 363,
+      "palette_bytes": 48,
+      "codec": "cropped_flat_rle5",
+      "bbox_xywh": [
+        4,
+        4,
+        28,
+        27
+      ],
+      "full_size": 36,
+      "source_png_sha256": "6459a76adf420911587e47eb16a5efe1f9f74604d4c942eeddb9b68970a65ce5",
+      "opaque_pixels": 716,
+      "bytes": 411,
+      "rle_bytes": 363,
+      "colors": 23,
+      "size": 36
+    }
+  }
+}

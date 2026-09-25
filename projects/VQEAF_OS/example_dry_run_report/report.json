@@ -1,0 +1,160 @@
+{
+  "timestamp_utc": "2026-09-24T12:24:41+00:00",
+  "project": "VQEAF OS v2.3.3",
+  "environment": "vqeaf_os",
+  "mode": "dry_run_simulation",
+  "pio_home": "/this/path/has/no/packages",
+  "dry_run": true,
+  "simulated_failure": "none",
+  "board_preflight": "PASS_STATIC",
+  "dependency_cache": "SIMULATED_PASS_NOT_VERIFIED",
+  "platformio_version": "SIMULATED_NOT_QUERIED",
+  "host_tests": "SIMULATED_NOT_EXECUTED",
+  "clean": "SIMULATED_PASS",
+  "target_build": "SIMULATED_PASS_NOT_BUILT",
+  "buildfs": "SIMULATED_PASS_NOT_BUILT",
+  "firmware_bin": "SIMULATED_NOT_GENERATED",
+  "status": "DRY_RUN_COMPLETE",
+  "missing": [],
+  "warnings": [],
+  "diagnostics": [],
+  "artifacts": [],
+  "commands": [
+    "/opt/pyvenv/bin/python3 tools/check_board_config.py"
+  ],
+  "network_guard": "not_applicable_no_platformio_process",
+  "execution_policy": "STATIC_BOARD_CHECK_ONLY; NO_PLATFORMIO_OR_TOOLCHAIN_EXECUTION",
+  "simulated_steps": [
+    {
+      "step": "dependency_cache",
+      "command": "inspect espressif32@6.10.0 + preinstalled Xtensa/Arduino/esptool/SCons + 4 pinned libraries",
+      "result": "SIMULATED",
+      "executed": false,
+      "detail": "Predicted version requirements only; see observed_cache. NO packages installed."
+    },
+    {
+      "step": "platformio_version",
+      "command": "pio --version",
+      "result": "SIMULATED",
+      "executed": false,
+      "detail": "Expected: PlatformIO Core CLI already installed; version NOT measured."
+    },
+    {
+      "step": "host_tests",
+      "command": "/opt/pyvenv/bin/python3 tools/test_v14_build.py",
+      "result": "SIMULATED",
+      "executed": false,
+      "detail": "Host C++ unit tests would run here; not run in dry-run."
+    },
+    {
+      "step": "clean",
+      "command": "pio run -e vqeaf_os -t clean",
+      "result": "SIMULATED",
+      "executed": false,
+      "detail": ""
+    },
+    {
+      "step": "compile",
+      "command": "xtensa-esp32s3-elf-g++ [project translation units]",
+      "result": "SIMULATED_PASS",
+      "executed": false,
+      "detail": "Compilation command illustrative; real commands would be visible in pio -v output."
+    },
+    {
+      "step": "link",
+      "command": "xtensa-esp32s3-elf-g++ [objects] -o firmware.elf",
+      "result": "SIMULATED_PASS",
+      "executed": false,
+      "detail": "Object addresses, linker script and actual symbols unknown in simulation."
+    },
+    {
+      "step": "target_build",
+      "command": "pio run -e vqeaf_os -v",
+      "result": "SIMULATED_PASS",
+      "executed": false,
+      "detail": "Would compile/link ESP32-S3 firmware; no tool executed."
+    },
+    {
+      "step": "verify_artifact",
+      "command": ".pio/build/vqeaf_os/firmware.bin size + SHA-256 + freshness",
+      "result": "SIMULATED",
+      "executed": false,
+      "detail": "Verification only planned; no file created, no hash invented."
+    },
+    {
+      "step": "buildfs",
+      "command": "pio run -e vqeaf_os -t buildfs",
+      "result": "SIMULATED_PASS",
+      "executed": false,
+      "detail": "Would require data/ + tool-mklittlefs cache; no filesystem image generated."
+    }
+  ],
+  "planned_commands": [
+    "inspect espressif32@6.10.0 + preinstalled Xtensa/Arduino/esptool/SCons + 4 pinned libraries",
+    "pio --version",
+    "/opt/pyvenv/bin/python3 tools/test_v14_build.py",
+    "pio run -e vqeaf_os -t clean",
+    "xtensa-esp32s3-elf-g++ [project translation units]",
+    "xtensa-esp32s3-elf-g++ [objects] -o firmware.elf",
+    "pio run -e vqeaf_os -v",
+    ".pio/build/vqeaf_os/firmware.bin size + SHA-256 + freshness",
+    "pio run -e vqeaf_os -t buildfs"
+  ],
+  "observed_cache": {
+    "platformio_cli_detected": false,
+    "platform": {
+      "present": false,
+      "version": null
+    },
+    "packages": {
+      "toolchain-xtensa-esp32s3": {
+        "present": false,
+        "version": null
+      },
+      "framework-arduinoespressif32": {
+        "present": false,
+        "version": null
+      },
+      "tool-esptoolpy": {
+        "present": false,
+        "version": null
+      },
+      "tool-scons": {
+        "present": false,
+        "version": null
+      }
+    },
+    "libraries": {
+      "TFT_eSPI": {
+        "present": false,
+        "version": null,
+        "required": "2.5.43"
+      },
+      "NimBLE-Arduino": {
+        "present": false,
+        "version": null,
+        "required": "2.3.6"
+      },
+      "TJpg_Decoder": {
+        "present": false,
+        "version": null,
+        "required": "1.1.0"
+      },
+      "PNGdec": {
+        "present": false,
+        "version": null,
+        "required": "1.1.6"
+      }
+    },
+    "data_folder_present": false
+  },
+  "would_generate": [
+    ".pio/build/vqeaf_os/firmware.bin",
+    ".pio/build/vqeaf_os/firmware.elf",
+    ".pio/build/vqeaf_os/littlefs.bin"
+  ],
+  "board_check_executed": true,
+  "firmware_created": false,
+  "finished_utc": "2026-09-24T12:24:41+00:00",
+  "exit_code": 0
+}

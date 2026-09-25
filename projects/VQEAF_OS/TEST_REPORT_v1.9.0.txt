@@ -1,0 +1,46 @@
+SYMBIAN S3 OS v1.9.0 - RELEASE TEST REPORT
+Date: 2026-09-24
+Target: ESP32-S3 N16R8 / ST7789 / 240x320 portrait
+
+SCOPE: Concrete source audit and reliability bug fixes to v1.8.0. Full source
+is included in the ZIP. Legacy core, media, Themes and signed QEAPP/2 persist.
+
+REAL CODE TESTS PERFORMED IN THIS ENVIRONMENT:
+ - Production BrowserService URL normalization + redirect resolution C++: PASS.
+ - Production BrowserService fake HTTP client: no-first-byte 8-second timeout,
+   HTTP 404 errors, 32KB bound, truncated declared-length and successful HTML: PASS.
+ - Production StorageService using POSIX-backed mock SD: interrupted rename,
+   last-copy rollback, boot recovery, bounded prune of 36 files, 45-file
+   cache clear and protected non-cache directories: PASS.
+ - Production WiFiProfileStore with counted fake NVS: corrupt length/profile/
+   duplicate repair and 100 unchanged successful joins without flash rewrites: PASS.
+ - C++11 host compilation + link with mock Arduino APIs and conflicting TFT
+   macros: 20/20 translation units PASS.
+ - Regression: grid nav, VQEAF runtime, WiFi wizard, WiFi auto-connect, v1.8
+   calculator/stopwatch/media model: PASS.
+ - Signed QEAPP/2: production parser/installer + OpenSSL ECDSA-SHA256
+   verification, demo packages, tampered/foreign signing key negatives: PASS.
+ - ZIP CRC tested after packaging; no source or private developer signing key
+   intentionally added by this release.
+
+EXISTING HISTORICAL STRUCTURAL GATES:
+ - Some v0.5-v1.1 source-string assertions are stale (they expect exact old
+   implementation layouts / version banners). They are not counted as passing
+   release gates. Use tools/test_v19_stability.py for the current release.
+
+NOT VERIFIED:
+ - PlatformIO ESP32-S3 compiler/link against target Arduino/IDF libraries.
+ - Physical RF/BLE, ST7789 flicker, I2S DAC, SD power-cut wear or heap soak.
+ - Web TLS certificate authentication: Browser and Shell still setInsecure().
+ - Battery percent: hardware pin/gauge is unknown; UI icon is not a real gauge.
+ - Audio underruns during synchronous TLS or slow browser network calls.
+
+On Windows with PlatformIO installed:
+  cd SymbianS3_OS
+  pio run -t clean
+  pio run
+  pio run -t upload
+  pio device monitor -b 115200
+
+Host regression with g++, OpenSSL and python cryptography available:
+  python tools/test_v19_stability.py

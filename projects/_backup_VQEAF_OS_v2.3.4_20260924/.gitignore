@@ -1,0 +1,12 @@
+.pio/
+__pycache__/
+*.pyc
+# NEVER accidentally commit publisher private signing keys
+*.pem
+*.key
+*.p12
+*.pfx
+*private*.json
+
+# Build output created locally by offline tool
+build_reports/offline/

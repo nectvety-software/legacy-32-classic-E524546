@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: clean
+Would run: pio run -e vqeaf_os -t clean
+Result: SIMULATED
+

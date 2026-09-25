@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: dependency_cache
+Would run: inspect espressif32@6.10.0 + preinstalled Xtensa/Arduino/esptool/SCons + 4 pinned libraries
+Result: SIMULATED
+Predicted version requirements only; see observed_cache. NO packages installed.

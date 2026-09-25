@@ -1,0 +1,37 @@
+Symbian S3 OS v1.2.0 -- microSD VQEAF Theme Application
+Hardware target: ESP32-S3 N16R8, ST7789 portrait 240x320
+
+Code added and integrated:
+ - ThemeFileService: scans /Themes then SD root to bounded depth for .vqeaf.
+ - 16 item limit, 32-KiB file limit, 400 line limit, 319 bytes per line.
+ - VQEAF @vqeaf 1.x palette parser maps known fields to RGB565.
+ - Unknown future palette fields ignored; malformed recognized colors rejected.
+ - Theme list (built-in + SD) with D-pad, Apply, Rescan, Details.
+ - Themes app reachable from 3x4 launcher, Applications, Settings, File Manager.
+ - Preferences stores selected theme path; boot restores theme after SD mount.
+ - Failure falls back visually to built-in S60 Green without overwriting saved path.
+ - No full-screen theme framebuffer; WiFi and battery compact status retained.
+
+Validation performed here:
+ PASS -- tools/test_v12.py: 16 PASS output lines (includes native g++ runtime
+         tests of actual ThemeFileService parser with positive and negative
+         sample data, oversized files, BOM, duplicate scan and path rejection).
+ PASS -- tools/test_grid_nav.py: 3x4 grid navigation.
+ PASS -- tools/test_v04.py: 7/7 v0.4 targeted checks.
+ PASS -- tools/test_v051.py: 6/6 linker-hotfix targeted checks.
+ PASS -- all 15 translation units compiled GNU++11 with mock Arduino/TFT/
+         WiFi APIs and historical collision macros TFT_DC=47, TFT_CS=14,
+         TFT_RST=3, then linked together with mock entry/global objects.
+ PASS -- mock host executable ran through one setup + loop without nonzero exit.
+ PASS -- rendered layout preview exactly 240x320; no SIM status icon.
+
+Scope and limitations:
+ - Native host mocks do NOT establish compatibility with the actual ESP32
+   framework's Arduino/SD_MMC/TFT APIs or the attached custom PCB.
+ - PlatformIO ESP32 target compilation, real SD card, NVS persistence across
+   true reboots, power-on behavior and camera screenshots were NOT tested here.
+ - Several old tests embed v1.0/v1.1 version-string assumptions or count literal
+   braces inside string constants; those scripts need updating for v1.2 and
+   should not be represented as full-regression PASS in this release.
+ - Themes from VQEAF Theme Studio import flat palette colors only. Effects,
+   phone frame geometry, external images and keypad textures are unsupported.

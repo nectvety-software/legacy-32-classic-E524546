@@ -1,0 +1,36 @@
+Symbian S3 OS v0.4.1 Portrait Edition - Build Fix Test Report
+Date: 2026-09-23
+
+[Issue reproduced from user PlatformIO log]
+- TFT_eSPI build macros TFT_DC/TFT_CS/TFT_RST collided with constants of the same names in BoardConfig.h.
+- GNU++11 rejected brace-assignment/return patterns for BtnState, KeyEvent and FsEntry because those structs used default member initializers.
+
+[Fixes]
+- Board TFT constants renamed to TFT_LEDK_PIN/TFT_DC_PIN/TFT_CS_PIN/TFT_SCL_PIN/TFT_SDA_PIN/TFT_RST_PIN.
+- GPIO values are unchanged: LEDK=39, DC=47, CS=14, SCL=48, SDA=12, RST=3.
+- BtnState, KeyEvent and FsEntry now use explicit constructors compatible with GNU++11.
+
+[Python regression]
+PASS: check_portrait_layout
+PASS: check_pin_conflicts
+PASS: check_grid_navigation
+PASS: check_keyboard_fit
+PASS: check_features_present
+PASS: check_build_macro_safety
+PASS: check_cpp11_safe_initialization
+PASS: 7/7 v0.4 regression gates
+
+[C++11 host syntax check with PlatformIO/TFT_eSPI macro definitions]
+PASS: src/core/InputManager.cpp
+PASS: src/core/SymbianUI.cpp
+PASS: src/core/TextKeyboard.cpp
+PASS: src/services/MusicService.cpp
+PASS: src/services/SettingsStore.cpp
+PASS: src/services/StorageService.cpp
+PASS: src/apps/Apps.cpp
+PASS: src/main.cpp
+
+[PlatformIO]
+SKIP in this execution environment because PlatformIO is not installed here.
+The original Windows build log reached compilation successfully before failing on the fixed source-level errors.
+Run `pio run` first, then `pio run -t upload` on the development PC.

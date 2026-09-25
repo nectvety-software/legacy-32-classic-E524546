@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: host_tests
+Would run: /opt/pyvenv/bin/python3 tools/test_v14_build.py
+Result: SIMULATED
+Host C++ unit tests would run here; not run in dry-run.

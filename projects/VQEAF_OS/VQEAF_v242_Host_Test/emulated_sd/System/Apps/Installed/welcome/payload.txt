@@ -1,0 +1,7 @@
+Welcome to Symbian S3 OS!
+
+This sample is an installed text application.
+It launches the built-in, read-only Text viewer.
+Install/uninstall it through Applications > App installer.
+
+QEAPP is declarative: downloaded machine code is never executed.

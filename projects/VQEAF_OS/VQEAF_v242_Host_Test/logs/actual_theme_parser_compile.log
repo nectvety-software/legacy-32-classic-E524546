@@ -1,0 +1,8 @@
+$ g++ -std=c++17 -Wall -Wextra -Werror -Wno-deprecated-declarations -Wno-error=return-type -I/mnt/data/VQEAF_v242_acceptance_work/tests -I/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/theme_host -Isrc -Iinclude /mnt/data/VQEAF_v242_acceptance_work/tests/theme_capture.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/services/ThemeFileService.cpp -o /mnt/data/VQEAF_v242_acceptance_work/actual_theme_parser
+In file included from /mnt/data/VQEAF_v242_acceptance_work/tests/theme_capture.cpp:3:
+/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/theme_host/test_theme_runtime.cpp: In function ‘int old_theme_test_main(int, char**)’:
+/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/theme_host/test_theme_runtime.cpp:88:1: warning: control reaches end of non-void function [-Wreturn-type]
+   88 | }
+      | ^
+
+[exit] 0

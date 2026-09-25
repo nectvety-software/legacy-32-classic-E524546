@@ -1,0 +1,14 @@
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce3808,len:0x4bc
+load:0x403c9700,len:0xbd8
+load:0x403cc700,len:0x2a0c
+entry 0x403c98d0
+[   506][E][Preferences.cpp:483] getString(): nvs_get_str len fail: themeFile NOT_FOUND
+[   514][E][Preferences.cpp:483] getString(): nvs_get_str len fail: note NOT_FOUND
+E (925) sdmmc_common: sdmmc_init_ocr: send_op_cond (1) returned 0x107
+E (925) vfs_fat_sdmmc: sdmmc_card_init failed (0x107).
+[  1206][E][SD_MMC.cpp:148] begin(): Failed to initialize the card (0x107). Make sure SD card lines have pull-up resistors in place.

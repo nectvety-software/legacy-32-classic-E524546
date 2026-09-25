@@ -29,6 +29,7 @@ extern "C" {
 #include "pins.h"
 #include "browser.h"
 #include "LGFX_ESP32S3_ST7789.h"
+#include "launcher.h"
 
 // loopTask stack: go_url -> http_get -> TLS -> doc_parse -> thumb_prefetch (http_get lai)
 // tran 8KB mac dinh -> Stack canary. SET_LOOP_TASK_STACK_SIZE override weak getArduinoLoopTaskStackSize.
@@ -36,28 +37,27 @@ extern "C" {
 SET_LOOP_TASK_STACK_SIZE(32768);
 #endif
 
-// ---------------- UI palette (RGB565) — theo legacy keypad browser_GFX_Accuracy_Comparison ----------------
-// UI — UC Browser / Opera Mini (OSNews)
-#define UI_TITLE  0xC800    // red title
-#define UI_SOFT   0x0000    // black status bar
-#define UI_BG     0xFFFF    // white article
-#define UI_FG     0x0000
-#define UI_LINK   0x001F    // blue
-#define UI_HOT    0xF800    // red
-#define UI_SEL    0xC800
-#define UI_SELFG  0xFFFF
-#define UI_FIELD  0xD6D7
-#define UI_BORDER 0x8C71
-#define UI_DIM    0x8C71
-#define UI_WHITE  0xFFFF
-#define UI_ROW    0xEF7C
-#define UI_SHADOW 0x4A69
-#define UI_ARROW  0xB5B6
+// ---------------- UI palette — Symbian S60 (Nokia feature phone) ----------------
+// Toan bo mau nam trong include/ui_s60.h de firmware va simulator dung chung
+// MOT dinh nghia theme duy nhat. Cac ten UI_* cu duoc giu lai lam alias nen moi
+// diem goi cu van hoat dong, chi doi gia tri.
+#include "ui_s60.h"
 
-#define UI_HDR_H  22
-#define UI_FTR_H  18
-#define UI_PAD    8       // le trai/phai chuan
-#define UI_ROWS_Y (UI_HDR_H + 6)
+#define UI_TITLE  S60_PANE_MID
+#define UI_SOFT   S60_SOFT_BOT
+#define UI_BG     S60_BG
+#define UI_FG     S60_FG
+#define UI_LINK   S60_LINK
+#define UI_HOT    S60_RED
+#define UI_SEL    S60_SEL_BOT
+#define UI_SELFG  S60_SEL_TEXT
+#define UI_FIELD  S60_FIELD
+#define UI_BORDER S60_RULE
+#define UI_DIM    S60_DIM
+#define UI_WHITE  S60_WHITE
+#define UI_ROW    S60_SCROLL_BG
+#define UI_SHADOW S60_SHADOW
+#define UI_ARROW  S60_KEY_BOT
 
 LGFX_ESP32S3_ST7789 disp;
 // Kieu cu the cho init()/setBrightness() — dung duoc ca tren device lan sim.
@@ -73,6 +73,135 @@ static lgfx::LovyanGFX *gfx_dst = &disp;   // "disp." duong dan den day
 static bool frame_ok = false;
 #define disp (*gfx_dst)                    // tu day xuong: disp = target hien tai
 #endif
+
+// Chon font noi dung theo style WML — font mac dinh LovyanGFX (Font4/Font0/Font2).
+static void set_text_font(int style);
+static void wifi_rssi_poll();
+static void draw_icon_wifi(int x, int y);
+static void draw_title_bar(bool loading_bar);
+static void draw_status_pane();
+// Khi != null: dong trang thai ("Receiving...", "Connecting...") hien thay title.
+static const char *g_pane_status = nullptr;
+
+static void set_text_font_impl(int style) {
+  if (style == 2)      disp.setTextFont(4);   // h1/h2
+  else if (style == 5) disp.setTextFont(1);   // small/meta
+  else                 disp.setTextFont(2);   // body
+}
+static void set_text_font(int style) { set_text_font_impl(style); }
+
+// ======================= Symbian S60 theme engine =======================
+// Nokia 2700 / S60 dung font sans DAM. Thay vi nhung them mot bo bitmap font
+// thu hai (ton flash + lech so do wrap cua wml.cpp), theme nay lam day net chu
+// bang cach ve lai chuoi glyph lech 1 px sang phai. O co 5x7/6x8 thi net doc
+// thanh 2 px that -> dung chat "dam net" cua Nokia, khong ton them RAM, va cho
+// ra KET QUA GIONG NHAU tren ESP32 va tren simulator.
+static bool s60_bold = true;
+
+static void s60_text(const char *s, int x, int y) {
+  if (!s) return;
+  disp.drawString(s, x, y);
+  if (s60_bold) disp.drawString(s, x + S60_BOLD_PX, y);
+}
+static int s60_text_w(const char *s) {
+  return disp.textWidth(s) + (s60_bold ? S60_BOLD_PX : 0);
+}
+static void s60_text_center(const char *s, int cx, int y) { s60_text(s, cx - s60_text_w(s) / 2, y); }
+static void s60_text_right(const char *s, int right_x, int y) { s60_text(s, right_x - s60_text_w(s), y); }
+
+// Cat chuoi theo be rong do duoc, khong cat giua mot codepoint UTF-8.
+static void s60_fit(const char *s, char *out, int cap, int maxw) {
+  int n = s ? (int)strlen(s) : 0;
+  if (n > cap - 1) n = cap - 1;
+  if (n > 0) memcpy(out, s, (size_t)n);
+  out[n] = 0;
+  while (n > 0 && s60_text_w(out) > maxw) {
+    n--;
+    while (n > 0 && ((unsigned char)out[n] & 0xC0) == 0x80) n--;
+    out[n] = 0;
+  }
+}
+
+// ---- RGB565 gradient helpers (no sprite, no framebuffer) ----
+static inline uint16_t s60_mix565(uint16_t a, uint16_t b, int t) {
+  int ar = (a >> 11) & 0x1F, ag = (a >> 5) & 0x3F, ab = a & 0x1F;
+  int br = (b >> 11) & 0x1F, bg = (b >> 5) & 0x3F, bb = b & 0x1F;
+  int r = ar + ((br - ar) * t) / 255;
+  int g = ag + ((bg - ag) * t) / 255;
+  int bl = ab + ((bb - ab) * t) / 255;
+  return (uint16_t)((r << 11) | (g << 5) | bl);
+}
+// Doan gradient cua mot thanh doc cao full_h bat dau tai full_top. Cho phep ve
+// lai MOT PHAN (dong ho, progress, text) ma van dung mau cua ca thanh.
+static void s60_grad_slice(int x, int y, int w, int h, int full_top, int full_h,
+                           uint16_t c0, uint16_t c1) {
+  if (h <= 0 || w <= 0) return;
+  for (int i = 0; i < h; i++) {
+    int row = y + i - full_top;
+    if (row < 0) row = 0; else if (row > full_h - 1) row = full_h - 1;
+    int t = full_h > 1 ? (row * 255) / (full_h - 1) : 0;
+    disp.fillRect(x, y + i, w, 1, s60_mix565(c0, c1, t));
+  }
+}
+static void s60_grad_v(int x, int y, int w, int h, uint16_t c0, uint16_t c1) {
+  s60_grad_slice(x, y, w, h, y, h, c0, c1);
+}
+
+// Application pane (status pane + title bar) and softkey bar are single bands:
+// every partial repaint must go through these so the gradient stays continuous.
+static void s60_pane_fill(int x, int y, int w, int h) {
+  s60_grad_slice(x, y, w, h, 0, S60_PANE_H, S60_PANE_TOP, S60_PANE_BOT);
+}
+static void s60_soft_fill(int x, int y, int w, int h) {
+  s60_grad_slice(x, y, w, h, SCR_H - S60_SOFT_H, S60_SOFT_H, S60_SOFT_TOP, S60_SOFT_BOT);
+}
+
+// ---- S60 list highlight: blue gradient + light top rule + dark bottom rule ----
+static void s60_sel_bar(int x, int y, int w, int h) {
+  s60_grad_v(x, y, w, h, S60_SEL_TOP, S60_SEL_BOT);
+  if (h > 2) { disp.fillRect(x, y, w, 1, S60_SEL_LINE); disp.fillRect(x, y + h - 1, w, 1, S60_SEL_BOT); }
+}
+
+// ---- Rounded S60 panel (menus, notes) with a soft drop shadow ----
+static void s60_panel(int x, int y, int w, int h, uint16_t bg, uint16_t line) {
+  disp.fillRoundRect(x + 2, y + 2, w, h, 4, S60_SHADOW);
+  disp.fillRoundRect(x, y, w, h, 4, bg);
+  disp.drawRoundRect(x, y, w, h, 4, line);
+}
+
+// ---- S60 key cap used by the on-screen keypad ----
+static void s60_key(int x, int y, int w, int h, const char *label, bool sel, bool dim) {
+  if (sel) {
+    s60_grad_v(x, y, w, h, S60_SEL_TOP, S60_SEL_BOT);
+    disp.drawRoundRect(x, y, w, h, 2, S60_SEL_LINE);
+  } else {
+    s60_grad_v(x, y, w, h, S60_KEY_TOP, S60_KEY_BOT);
+    disp.drawRoundRect(x, y, w, h, 2, S60_KEY_LINE);
+  }
+  set_text_font(0);
+  disp.setTextColor(sel ? S60_SEL_TEXT : (dim ? S60_KEY_DIM : S60_KEY_TEXT));
+  s60_text_center(label, x + w / 2, y + (h - 8) / 2);
+}
+
+// Truncate + draw the title of the current page inside the application pane.
+// Dung lc_font (Tahoma VN) de title tieng Viet co dau hien dung.
+static void s60_pane_title(const char *t, int x, int maxw, int y) {
+  char clip[96];
+  const char *src = (t && t[0]) ? t : "Qeafbrowser";
+  int n = (int)strlen(src);
+  if (n > (int)sizeof clip - 1) n = (int)sizeof clip - 1;
+  if (n > 0) memcpy(clip, src, (size_t)n);
+  clip[n] = 0;
+  while (n > 0 && gui_text_width(clip, 1) > maxw) {
+    n--;
+    while (n > 0 && ((unsigned char)clip[n] & 0xC0) == 0x80) n--;
+    clip[n] = 0;
+  }
+  // lc_font_vn12 height 14 vs Font0 height 8: canh giua pane 22px
+  int ty = y;
+  if (y == 5) ty = (UI_HDR_H - gui_font_height(1)) / 2;
+  gui_draw_text_bold(x, ty, S60_PANE_TEXT, 0, clip, 1);
+}
 
 // ---- ban phim ao D-pad (giong E524546-OS / LegacyOS TextEditor / Pochita Keyboard) ----
 static void go_url(const char *url);
@@ -100,6 +229,16 @@ static const char *VK_SYM[] = {
 };
 // hang dac biet: SHF SYM SPACE DEL GO
 enum { VK_SHF = 0, VK_SYM_K, VK_SPC, VK_DEL, VK_GO, VK_SP_N };
+// shortcut TLD khi nhap URL (khong hien khi search/password)
+static const char *VK_TLD[] = { ".com", ".net", ".org" };
+enum { VK_TLD_N = 3, VK_TLD_ROW = 5 };
+
+static bool vkey_show_tld() {
+  return vkey_open && !vkey_is_pass && !vkey_is_search;
+}
+static int vkey_max_row() {
+  return vkey_show_tld() ? VK_TLD_ROW : 4;
+}
 
 static const char **vkey_rows() {
   return vkey_sym ? VK_SYM : (vkey_shift ? VK_UPPER : VK_LOWER);
@@ -122,25 +261,13 @@ static void vkey_submit();
 
 // --- ve ban phim ---
 static void vkey_draw_key(int x, int y, int w, int h, const char *label, bool sel, bool dim) {
-  uint16_t bg = sel ? UI_SEL : UI_FIELD;
-  uint16_t fg = sel ? UI_SELFG : (dim ? UI_DIM : UI_FG);
-  disp.fillRect(x, y, w, h, bg);
-  disp.fillRect(x, y, w, 1, UI_BORDER);
-  disp.fillRect(x, y + h - 1, w, 1, UI_BORDER);
-  disp.fillRect(x, y, 1, h, UI_BORDER);
-  disp.fillRect(x + w - 1, y, 1, h, UI_BORDER);
-  disp.setTextFont(2); disp.setTextColor(fg);
-  int tw = disp.textWidth(label);
-  disp.drawString(label, x + (w - tw) / 2, y + (h - 8) / 2);
+  s60_key(x, y, w, h, label, sel, dim);
 }
 
 static void vkey_draw() {
-  // truong nhap
-  disp.fillRect(UI_PAD, UI_HDR_H + 6, SCR_W - 2 * UI_PAD, 30, UI_FIELD);
-  disp.fillRect(UI_PAD, UI_HDR_H + 6, SCR_W - 2 * UI_PAD, 1, UI_BORDER);
-  disp.fillRect(UI_PAD, UI_HDR_H + 35, SCR_W - 2 * UI_PAD, 1, UI_BORDER);
-  disp.fillRect(UI_PAD, UI_HDR_H + 6, 1, 30, UI_BORDER);
-  disp.fillRect(SCR_W - UI_PAD - 1, UI_HDR_H + 6, 1, 30, UI_BORDER);
+  // truong nhap kieu S60: nen sang, vien xanh nhat
+  disp.fillRect(UI_PAD, UI_HDR_H + 6, SCR_W - 2 * UI_PAD, 30, S60_FIELD);
+  disp.drawRoundRect(UI_PAD, UI_HDR_H + 6, SCR_W - 2 * UI_PAD, 30, 3, S60_FIELD_LINE);
   char shown[72];
   int vn = vkey_n ? *vkey_n : 0;
   int copy = vn < 28 ? vn : 28;
@@ -148,8 +275,8 @@ static void vkey_draw() {
   else memcpy(shown, vkey_buf, copy);
   shown[copy] = 0;
   if (copy < 28) { shown[copy] = '_'; shown[copy + 1] = 0; }
-  disp.setTextFont(2); disp.setTextColor(UI_FG);
-  disp.drawString(shown, UI_PAD + 6, UI_HDR_H + 13);
+  set_text_font(0); disp.setTextColor(S60_FG);
+  s60_text(shown, UI_PAD + 6, UI_HDR_H + 13);
 
   // 4 hang chu
   const char **rows = vkey_rows();
@@ -172,21 +299,30 @@ static void vkey_draw() {
     bool sel = (vkey_row == 4 && vkey_col == i);
     bool on = (i == VK_SHF && vkey_shift) || (i == VK_SYM_K && vkey_sym);
     vkey_draw_key(UI_PAD + i * sw, ky, sw - 2, 30, SP[i], sel, on ? false : (i < 2));
-    if (on) disp.fillRect(UI_PAD + i * sw + 2, ky + 27, sw - 6, 2, UI_SEL);
+    if (on) disp.fillRect(UI_PAD + i * sw + 2, ky + 27, sw - 6, 2, S60_ACCENT);
+  }
+  // shortcut TLD: .com / .net / .org (chi hop nhap URL)
+  if (vkey_show_tld()) {
+    const int tw = (SCR_W - 2 * UI_PAD) / VK_TLD_N;
+    int ty = ky + 34;
+    for (int i = 0; i < VK_TLD_N; i++) {
+      bool sel = (vkey_row == VK_TLD_ROW && vkey_col == i);
+      vkey_draw_key(UI_PAD + i * tw, ty, tw - 2, 30, VK_TLD[i], sel, false);
+    }
+    ky = ty;
   }
   // ghi chu
-  disp.setTextFont(2); disp.setTextColor(UI_DIM);
-  disp.drawString(vkey_is_search ? "UP/DOWN/LEFT/RIGHT chon, OK=go" : "OK=ky tu, A=huy, GO=xong",
-                  UI_PAD, ky + 36);
+  set_text_font(0); disp.setTextColor(S60_DIM);
+  s60_text(vkey_is_search ? "UP/DOWN/LEFT/RIGHT select, OK=go" : "OK=char, A=cancel, GO=done",
+           UI_PAD, ky + 36);
 }
 // vkey_submit nam sau wifi_result (can nets/pass_in)
 
 // ---------------- font/text helper (wml.cpp khai bao extern "C") ----------------
+// Do width bang lc_font (Tahoma VN) de wrap khop voi gui_draw_text khi render.
 extern "C" int gfx_textWidth(const char *nul_term, int style) {
-  if (style == 2) disp.setTextFont(4);
-  else if (style == 5) disp.setTextFont(1);
-  else disp.setTextFont(2);
-  return disp.textWidth(nul_term);
+  int size = (style == 2) ? 2 : 1;
+  return gui_text_width(nul_term, size);
 }
 static int line_h(int style) {
   if (style == 1) return 22;
@@ -238,6 +374,8 @@ static bool menu_in_sub = false;
 // Opera Mini 4: virtual mouse + page overview
 static bool mouse_on = false;
 static int  mouse_x = 120, mouse_y = 160;
+#define MOUSE_CURSOR_VIS_W 13
+#define MOUSE_CURSOR_VIS_H 19
 static bool overview_on = false;
 static int  ov_ox = 0, ov_oy = 0;     // target viewport origin in page lines
 static int  overview_zoom = 1;          // target zoom 1..8
@@ -286,29 +424,38 @@ static void load_fmt_size(long n, char *out, size_t cap) {
     snprintf(out, cap, "%ld.%ldK", n / 1024L, ((n % 1024L) * 10) / 1024L);
 }
 
+// Thanh softkey S60: nen gradient toi, 1 px ke sang, 2 nhan DAM hai ben.
+static void s60_softkey_bar(const char *l, const char *r) {
+  int fy = SCR_H - S60_SOFT_H;
+  s60_soft_fill(0, fy, SCR_W, S60_SOFT_H);
+  disp.fillRect(0, fy, SCR_W, 1, S60_SOFT_LINE);
+  int sy = fy + (S60_SOFT_H - 8) / 2;
+  set_text_font(0);
+  disp.setTextColor(S60_SOFT_TEXT);
+  s60_text(l, 6, sy);
+  s60_text_right(r, SCR_W - 6, sy);
+}
+
 // Footer thay dong gio bang progress + so KB khi dang load (Opera Mini 4 / UC style).
 static void load_paint_footer() {
-  int fy = SCR_H - UI_FTR_H;
-  int sy = fy + (UI_FTR_H - 8) / 2;
   disp.startWrite();
-  disp.fillRect(0, fy, SCR_W, UI_FTR_H, UI_SOFT);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-  disp.drawString("Menu", UI_PAD, sy);
-  const char *r = "Back";
-  disp.drawString(r, SCR_W - disp.textWidth(r) - UI_PAD, sy);
-  // vung giua: [progress bar] + KB
-  int cx0 = UI_PAD + 30;
-  int cx1 = SCR_W - UI_PAD - 30;
+  s60_softkey_bar("Menu", "Back");
+  // vung giua: [progress bar] + KB, kieu S60: track toi + fill xanh sang
+  int fy = SCR_H - S60_SOFT_H;
+  int sy = fy + (S60_SOFT_H - 8) / 2;
+  int cx0 = UI_PAD + 32;
+  int cx1 = SCR_W - UI_PAD - 28;
   int kb_w = (int)strlen(load_paint_kb) * 6 + 6;
   int bw = cx1 - cx0 - kb_w;
   if (bw < 32) bw = 32;
-  int by = fy + (UI_FTR_H - 8) / 2 - 1;
+  int by = fy + (S60_SOFT_H - 8) / 2 - 1;
   if (by < fy + 2) by = fy + 2;
-  disp.fillRect(cx0, by, bw, 8, 0x4208);              // track
-  int fw = load_pct * bw / 100;
-  if (fw > 0) disp.fillRect(cx0, by, fw, 8, UI_LINK); // blue fill
-  disp.setTextColor(UI_WHITE);
-  disp.drawString(load_paint_kb, cx0 + bw + 4, sy);
+  disp.fillRect(cx0, by, bw, 8, S60_TRACK);
+  disp.drawRect(cx0, by, bw, 8, S60_SOFT_LINE);
+  int fw = load_pct * (bw - 2) / 100;
+  if (fw > 0) disp.fillRect(cx0 + 1, by + 1, fw, 6, S60_ACCENT);
+  disp.setTextColor(S60_SOFT_TEXT);
+  s60_text(load_paint_kb, cx0 + bw + 4, sy);
   disp.endWrite();
 }
 
@@ -342,13 +489,13 @@ static void on_http_progress(long got, long total) {
 
   if (!load_phase_recv && got > 0) {
     load_phase_recv = true;
-    disp.fillRect(16, (UI_HDR_H - 13) / 2, 150, 14, UI_TITLE);
-    disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-    disp.drawString("Receiving...", 18, (UI_HDR_H - 13) / 2);
+    wifi_rssi_poll();
+    g_pane_status = "Receiving...";
+    draw_status_pane();
   }
-  // thanh 3px duoi title
-  disp.fillRect(0, UI_HDR_H - 3, SCR_W, 3, UI_TITLE);
-  disp.fillRect(0, UI_HDR_H - 3, SCR_W * load_pct / 100, 3, UI_WHITE);
+  // thanh progress 3px nam trong application pane
+  disp.fillRect(0, S60_PANE_H - 3, SCR_W, 3, S60_TRACK);
+  disp.fillRect(0, S60_PANE_H - 3, SCR_W * load_pct / 100, 3, S60_ACCENT);
   load_paint_footer();
 }
 
@@ -390,7 +537,8 @@ static ThumbDecodeCtx g_thumb_ctx;
 #endif
 #if QB_HAS_PNGDEC
 static PNG *g_png = nullptr;           // PSRAM: giam ~45KB RAM noi bo (ucZLIB 32KB...)
-static uint16_t g_png_line[1024];
+static uint16_t *g_png_line = nullptr;
+static int g_png_line_pixels = 0;
 #endif
 static void build_doc(const char *html);
 static void resolve_url(const char *href, char *out, size_t cap);
@@ -412,6 +560,7 @@ static void build_docf(const char *fmt, ...);
 static void render();
 static void ensure_focus_visible();
 static void urlin_show();
+static void cli_doc();
 
 static bool clock_read_local(char out[8], bool blink_colon) {
   struct tm ti;
@@ -466,11 +615,28 @@ static void clock_update_cache() {
 }
 
 #if defined(ARDUINO)
+// Ve lai MOT PHAN cua thanh softkey tren mot LovyanGFX bat ky (panel hoac
+// backbuffer PSRAM) sao cho gradient cua ca thanh van lien tuc.
+static void s60_soft_slice_g(lgfx::LovyanGFX *g, int x, int y, int w, int h) {
+  const int top = SCR_H - S60_SOFT_H;
+  for (int i = 0; i < h; i++) {
+    int row = y + i - top;
+    if (row < 0) row = 0; else if (row > S60_SOFT_H - 1) row = S60_SOFT_H - 1;
+    int t = S60_SOFT_H > 1 ? (row * 255) / (S60_SOFT_H - 1) : 0;
+    g->fillRect(x, y + i, w, 1, s60_mix565(S60_SOFT_TOP, S60_SOFT_BOT, t));
+  }
+}
+// Chu DAM khong phu thuoc doi tuong ve (panel that hoac backbuffer).
+static void s60_text_g(lgfx::LovyanGFX *g, const char *s, int x, int y, int fg) {
+  g->setTextColor(fg);
+  g->drawString(s, x, y);
+  if (s60_bold) g->drawString(s, x + S60_BOLD_PX, y);
+}
 static void clock_paint(lgfx::LovyanGFX *g, int sy, int cx) {
   g->startWrite();
-  g->fillRect(cx - 30, SCR_H - UI_FTR_H, 60, UI_FTR_H, UI_SOFT);
-  g->setTextFont(2); g->setTextColor(UI_WHITE);
-  g->drawString(clock_cache, cx - g->textWidth(clock_cache) / 2, sy);
+  s60_soft_slice_g(g, cx - 30, SCR_H - UI_FTR_H, 60, UI_FTR_H);
+  g->setTextFont(2);
+  s60_text_g(g, clock_cache, cx - g->textWidth(clock_cache) / 2, sy, S60_SOFT_TEXT);
   g->endWrite();
 }
 static void clock_draw_footer_only() {
@@ -492,9 +658,9 @@ static void clock_draw_footer_only() {
   int sy = SCR_H - UI_FTR_H + (UI_FTR_H - 8) / 2;
   const int cx = SCR_W / 2;
   disp.startWrite();
-  disp.fillRect(cx - 30, SCR_H - UI_FTR_H, 60, UI_FTR_H, UI_SOFT);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-  disp.drawString(clock_cache, cx - disp.textWidth(clock_cache) / 2, sy);
+  s60_soft_fill(cx - 30, SCR_H - UI_FTR_H, 60, UI_FTR_H);
+  set_text_font(0); disp.setTextColor(S60_SOFT_TEXT);
+  s60_text_center(clock_cache, cx, sy);
   disp.endWrite();
 }
 #endif
@@ -578,7 +744,7 @@ static int mt_find(const char *k) {
 }
 
 static void wifi_scan() {
-  Serial.println("[wifi] quet mang THAT (WiFi.scanNetworks)...");
+  Serial.println("[wifi] scan real networks (WiFi.scanNetworks)...");
   WiFi.mode(WIFI_STA);
   // Chi ngat ket noi khi CHUA ket noi — refresh danh sach khong duoc mat WiFi dang dung.
   if (WiFi.status() != WL_CONNECTED) WiFi.disconnect();
@@ -597,7 +763,7 @@ static void wifi_scan() {
     for (int j = i + 1; j < net_n; j++)
       if (nets[j].rssi > nets[i].rssi) { Net t = nets[i]; nets[i] = nets[j]; nets[j] = t; }
   net_cursor = 0;
-  Serial.printf("[wifi] thay %d mang THAT\n", net_n);
+  Serial.printf("[wifi] found %d real networks\n", net_n);
 }
 
 // Buffer WML tam dung chung cho History/Bookmark/WiFi list (PSRAM, giam ~14KB noi bo).
@@ -622,16 +788,16 @@ static void wifi_list_focus() {
 static void wifi_list_show() {
   char *buf = page_scratch();
   if (!buf) {
-    build_doc("<wml><card title=\"WiFi\"><p>Khong du bo nho RAM.</p></card></wml>");
+    build_doc("<wml><card title=\"WiFi\"><p>Not enough RAM.</p></card></wml>");
     scr = SCR_WIFI_LIST; top = 0; focus_i = 0; cursor_link = -1;
     return;
   }
   int o = snprintf(buf, 6000,
-    "<wml><card title=\"WiFi\"><p>Chon mang WiFi:<br/></p><p>");
+    "<wml><card title=\"WiFi\"><p>Select a network:<br/></p><p>");
   for (int i = 0; i < net_n; i++)
     o += snprintf(buf + o, 6000 - o, "<a href=\"mtt:wifisel#%d\">%s %s</a><br/>",
-                  i, nets[i].ssid, nets[i].open ? "(mo)" : "");
-  if (!net_n) o += snprintf(buf + o, 6000 - o, "(khong thay mang nao — OPTION de quen lai)");
+                  i, nets[i].ssid, nets[i].open ? "(open)" : "");
+  if (!net_n) o += snprintf(buf + o, 6000 - o, "(no networks — OPTION to rescan)");
   snprintf(buf + o, 6000 - o, "</p></card></wml>");
   build_doc(buf);
   scr = SCR_WIFI_LIST; top = 0;
@@ -651,7 +817,7 @@ static bool wifi_try_connect(const char *ssid, const char *pass) {
     int sec = (int)((millis() - t0) / 1000);
     if (sec != last_sec) {              // chi ve lai khi doi giay -> khong nhap nhay
       last_sec = sec;
-      snprintf(connect_msg, sizeof connect_msg, "Dang ket noi %s...%ds", ssid, sec);
+      snprintf(connect_msg, sizeof connect_msg, "Connecting to %s...%ds", ssid, sec);
       build_docf("<wml><card title=\"WiFi\"><p>%s</p></card></wml>", connect_msg);
       render();
     }
@@ -665,8 +831,8 @@ static bool wifi_try_connect(const char *ssid, const char *pass) {
 static void wifi_pass_show() {
   char buf[256];
   snprintf(buf, sizeof buf,
-    "<wml><card title=\"WiFi\"><p>Mang: %s%s</p></card></wml>",
-    nets[net_cursor].ssid, nets[net_cursor].open ? " (mo)" : "");
+    "<wml><card title=\"WiFi\"><p>Network: %s%s</p></card></wml>",
+    nets[net_cursor].ssid, nets[net_cursor].open ? " (open)" : "");
   build_doc(buf);
   scr = SCR_WIFI_PASS; top = 0; cursor_link = 0;
   vkey_bind(pass_in, &pass_n, (int)sizeof pass_in, true, false);
@@ -679,13 +845,13 @@ static void wifi_result(bool ok) {
     config_save();                       // luu bo nho tam -> SD
     wifi_up = true;
     clock_start_ntp();
-    build_docf("<wml><card title=\"WiFi\"><p>KET NOI THANH CONG<br/>%s<br/>IP %s<br/>"
-               "Cau hinh da luu va /Qeafbrowser/config.ini</p></card></wml>",
-               cfg_ssid.c_str(), WiFi.localIP().toString().c_str());
+    build_docf("<wml><card title=\"WiFi\"><p>CONNECTED<br/>%s<br/>Pass: %s<br/>IP %s<br/>"
+               "Saved to /Qeafbrowser/config.ini</p></card></wml>",
+               cfg_ssid.c_str(), cfg_pass.c_str(), WiFi.localIP().toString().c_str());
   } else {
     wifi_up = false;
-    build_docf("<wml><card title=\"WiFi\"><p>KET NOI THAT BAI<br/>%s<br/>"
-               "Kiểm tra mat khau.<br/>OK = thu lai, A = quay lai danh sach</p></card></wml>",
+    build_docf("<wml><card title=\"WiFi\"><p>FAILED<br/>%s<br/>"
+               "Check password.<br/>OK = retry, A = back to list</p></card></wml>",
                nets[net_cursor].ssid);
   }
   scr = SCR_WIFI_RESULT; top = 0; cursor_link = 0;
@@ -701,7 +867,7 @@ static void open_search_query(const char *raw) {
   if (!raw || !raw[0]) { go_url("mtt:start"); return; }
   char enc[192], u[256];
   url_encode_query(raw, enc, sizeof enc);
-  snprintf(u, sizeof u, "https://www.google.com/search?q=%s", enc);
+  snprintf(u, sizeof u, "https://www.google.com/search?q=%s&hl=en&gl=us", enc);
   go_url(u);
 }
 
@@ -716,13 +882,16 @@ static void vkey_submit() {
   }
   if (vkey_is_pass) {
     if (net_cursor >= 0 && net_cursor < net_n) {
-      Serial.printf("[wifi] thu ket noi '%s' pass='%s'\n", nets[net_cursor].ssid, pass_in);
+      Serial.printf("[wifi] try connect '%s' pass='%s'\n", nets[net_cursor].ssid, pass_in);
       wifi_result(wifi_try_connect(nets[net_cursor].ssid, nets[net_cursor].open ? "" : pass_in));
       render();
     }
     return;
   }
-  if (vkey_buf && vkey_buf[0]) open_user_url(vkey_buf);
+  // GO khi chi con prefill https:// -> ve trang chu (khong mo host rong)
+  if (vkey_buf && vkey_buf[0] &&
+      strcmp(vkey_buf, "https://") && strcmp(vkey_buf, "http://"))
+    open_user_url(vkey_buf);
   else go_url("mtt:start");
 }
 
@@ -740,30 +909,49 @@ static bool t9mode = false;
 
 static void (*key_cb)(const char *k) = nullptr;
 
+// ---- auto-repeat: giu phim cuon (up/down) de list di chuyen lien tuc ----
+// Chi ap dung cho launcher (browser cu giu hanh vi edge-triggered nhu cu).
+static unsigned long repeat_next[NKEYS];   // moc millis cho lan lap ke tiep
+
 static void keys_init() {
   for (int i = 0; i < NKEYS; i++) {
     pinMode(KEYS[i].pin, INPUT_PULLUP);
     last_state[i] = HIGH; last_change[i] = 0; press_start[i] = 0;
+    repeat_next[i] = 0;
   }
 }
 static void keys_poll() {
   unsigned long now = millis();
   for (int i = 0; i < NKEYS; i++) {
     bool v = digitalRead(KEYS[i].pin);
-    if (v == last_state[i]) continue;
+    if (v == last_state[i]) {
+      // giu phim: auto-repeat cho launcher (up/down hoat dong nhieu nhat)
+      if (v == LOW && launcher_active() && key_cb &&
+          (KEYS[i].pin == KEY_UP || KEYS[i].pin == KEY_DOWN)) {
+        if (repeat_next[i] && now >= repeat_next[i]) {
+          repeat_next[i] = now + LC_REPEAT_RATE_MS;
+          key_cb(t9mode ? KEYS[i].t9 : KEYS[i].game);
+        }
+      }
+      continue;
+    }
     if (now - last_change[i] <= 25) continue;
     last_state[i] = v; last_change[i] = now;
     bool is_select = (KEYS[i].pin == KEY_SELECT);
     if (v == LOW) {
       press_start[i] = now;
+      repeat_next[i] = now + LC_REPEAT_DELAY_MS;
       if (!is_select && key_cb) key_cb(t9mode ? KEYS[i].t9 : KEYS[i].game);
-    } else if (is_select) {              // SELECT: phat khi nha (can do thoi gian giu)
-      if (now - press_start[i] >= 600) { // giu >600ms: dao che do + phat "mode"
-        t9mode = !t9mode;
-        Serial.printf("[key] che do: %s\n", t9mode ? "T9" : "GAME");
-        if (key_cb) key_cb("mode");
-      } else {                           // nhan ngan: "0" (T9) hoac "mode" (Game)
-        if (key_cb) key_cb(t9mode ? "0" : "mode");
+    } else {
+      repeat_next[i] = 0;
+      if (is_select) {              // SELECT: phat khi nha (can do thoi gian giu)
+        if (now - press_start[i] >= 600) { // giu >600ms: dao che do + phat "mode"
+          t9mode = !t9mode;
+          Serial.printf("[key] mode: %s\n", t9mode ? "T9" : "GAME");
+          if (key_cb) key_cb("mode");
+        } else {                           // nhan ngan: "0" (T9) hoac "mode" (Game)
+          if (key_cb) key_cb(t9mode ? "0" : "mode");
+        }
       }
     }
   }
@@ -782,34 +970,39 @@ static const char *PAGE_START =
   "<p><folder><a href=\"https://www.google.com/\">Google</a></folder></p>"
   "<p><folder><a href=\"https://m.facebook.com/\">Facebook</a></folder></p>"
   "<p><folder><a href=\"https://en.m.wikipedia.org/\">Wikipedia</a></folder></p>"
+  "<p><folder><a href=\"https://simple.wikipedia.org/\">Simple Wiki</a></folder></p>"
   "<p><folder><a href=\"https://m.youtube.com/\">YouTube</a></folder></p>"
-  "<p><folder><a href=\"https://qeafivels.com/\">Qeafivels Home</a></folder></p>"
   "<p><folder><a href=\"http://m.weather.com/\">Weather</a></folder></p>"
-  "<p><folder><a href=\"http://tubidy.mobi/\">Tubidy</a></folder></p>"
+  "<p><folder><a href=\"mtt:feeds\">News RSS</a></folder></p>"
   "<p><folder><a href=\"mtt:web\">More Sites</a></folder></p>"
   "</card></wml>";
 
 static const char *PAGE_ABOUT =
   "<wml><card title=\"About\">"
-  "<p>Qeafbrowser 2.0<br/>Opera Mini 4 style mode<br/>"
-  "HTTP + HTTPS / HTML + WML<br/><br/>"
+  "<p>Qeafbrowser 2.1<br/>Opera Mini 4 style mode<br/>"
+  "HTTP + HTTPS / HTML + WML + RSS<br/>"
+  "Text-only / WAP / XHTML-MP ready<br/><br/>"
   "Default home: https://qeafivels.com/<br/>ESP32-S3 port.</p></card></wml>";
 
 static const char *PAGE_HELP =
-  "<wml><card title=\"Help\"><p>UP/DOWN: cuoc trang<br/>LEFT/RIGHT: link truoc/sau<br/>"
-  "OK: mo link<br/>BACK: lui<br/>MENU: ve trang chu<br/>OPTION: menu<br/>"
+  "<wml><card title=\"Help\"><p>UP/DOWN: scroll page<br/>LEFT/RIGHT: prev/next link<br/>"
+  "OK: open link<br/>BACK: back<br/>MENU: home<br/>OPTION: menu<br/>"
   "(Bmrk/Optn/Navg/Tool/Sett/Help/Exit)<br/>"
-  "SELECT giu: doi T9<br/><br/>"
-  "Nhap URL: Tool &gt; InpURL<br/>domain tu dong HTTPS<br/>Tools &gt; Forward de tien trang<br/>"
-  "multi-tap hoac ban phim PC (sim)<br/>"
-  "WiFi: Sett &gt; WiFi</p></card></wml>";
+  "Hold SELECT: switch T9<br/><br/>"
+  "Enter URL: Tool &gt; Input URL<br/>domains auto-HTTPS<br/>Tools &gt; Forward to go forward<br/>"
+  "multi-tap or PC keyboard (sim)<br/>"
+  "WiFi: Sett &gt; WiFi<br/>"
+  "Text mode: Sett &gt; Text (no images)<br/>"
+  "RSS/Atom feeds: Home &gt; News RSS</p></card></wml>";
 
 static const char *PAGE_CONFIG =
-  "<wml><card title=\"Settings\"><p>WiFi: %s<br/>SSID: %s<br/>Home: %s<br/>Timezone: %s<br/><br/>"
-  "<a href=\"mtt:wifi\">&gt;&gt; Ket noi WiFi (quet mang)</a><br/>"
-  "<a href=\"mtt:wifi\">&gt;&gt; Doi mat khau WiFi</a><br/><br/>"
-  "Mac dinh tu dong ket noi lai mang da luu.<br/>"
-  "Sua sau: /Qeafbrowser/config.ini tren the SD</p></card></wml>";
+  "<wml><card title=\"Settings\"><p>WiFi: %s<br/>SSID: %s<br/>Pass: %s<br/>Home: %s<br/>Timezone: %s<br/>Text mode: %s<br/><br/>"
+  "<a href=\"mtt:wifi\">&gt;&gt; Connect WiFi (scan)</a><br/>"
+  "<a href=\"mtt:textmode\">&gt;&gt; Toggle text mode (images on/off)</a><br/>"
+  "<a href=\"mtt:wifi\">&gt;&gt; Change WiFi password</a><br/><br/>"
+  "Text mode = hide images, faster text-only.<br/>"
+  "Auto-reconnects to saved network.<br/>"
+  "Edit later: /Qeafbrowser/config.ini</p></card></wml>";
 
 static const char *PAGE_WEB =
   "<wml><card title=\"Qeafbrowser Web\"><p>"
@@ -819,6 +1012,10 @@ static const char *PAGE_WEB =
   "<a href=\"http://wap.yahoo.com/\">Yahoo!</a><br/>"
   "<a href=\"http://tubidy.mobi/\">Tubidy</a><br/>"
   "<a href=\"http://wap.c2.hu/\">C2 Mail</a><br/>"
+  "<a href=\"https://m.wikipedia.org/\">Wikipedia Mobile</a><br/>"
+  "<a href=\"https://simple.wikipedia.org/\">Simple Wikipedia</a><br/>"
+  "<a href=\"https://en.wikipedia.org/wiki/Special:Random\">Wiki Random</a><br/>"
+  "<a href=\"mtt:feeds\">News RSS feeds</a><br/>"
   "<a href=\"https://qeafivels.com/\">Qeafivels Home</a></p></card></wml>";
 
 static const char *PAGE_SITES =
@@ -826,7 +1023,18 @@ static const char *PAGE_SITES =
   "<p><a href=\"http://m.google.com/\">Google Mobile</a><br/>"
   "<a href=\"http://m.facebook.com/\">Facebook</a><br/>"
   "<a href=\"http://m.youtube.com/\">YouTube</a><br/>"
-  "<a href=\"http://en.m.wikipedia.org/\">Wikipedia</a></p></card></wml>";
+  "<a href=\"http://en.m.wikipedia.org/\">Wikipedia</a><br/>"
+  "<a href=\"https://m.wikipedia.org/\">Wikipedia Mobile</a><br/>"
+  "<a href=\"https://simple.wikipedia.org/\">Simple Wikipedia</a></p></card></wml>";
+
+static const char *PAGE_FEEDS =
+  "<wml><card title=\"News RSS\"><p>"
+  "<a href=\"https://feeds.bbci.co.uk/news/rss.xml\">BBC News</a><br/>"
+  "<a href=\"https://rss.cnn.com/rss/edition.rss\">CNN World</a><br/>"
+  "<a href=\"https://www.reddit.com/.rss\">Reddit Front</a><br/>"
+  "<a href=\"https://hn.algolia.com/rss\">Hacker News</a><br/>"
+  "<a href=\"https://simple.wikipedia.org/wiki/Special:Export\">Simple Wiki XML</a><br/>"
+  "<a href=\"mtt:start\">Back to Speed Dial</a></p></card></wml>";
 
 static const char *PAGE_FB =
   "<wml><card title=\"Facebook\"><p>"
@@ -840,11 +1048,12 @@ static const char *PAGE_TOOLS =
   "<a href=\"mtt:menu#refresh\">Refresh</a><br/>"
   "<a href=\"mtt:forward\">Forward</a><br/>"
   "<a href=\"mtt:history\">History</a><br/>"
-  "<a href=\"mtt:bookmark\">Bookmark</a></p></card></wml>";
+  "<a href=\"mtt:bookmark\">Bookmark</a><br/>"
+  "<a href=\"mtt:feeds\">News RSS</a></p></card></wml>";
 
 static const char *PAGE_DL =
-  "<wml><card title=\"Downloads\"><p>Khong co download.<br/>"
-  "Lich su da xem o <a href=\"mtt:history\">History</a></p></card></wml>";
+  "<wml><card title=\"Downloads\"><p>No downloads.<br/>"
+  "Visited pages in <a href=\"mtt:history\">History</a></p></card></wml>";
 
 static const char *PAGE_ERROR =
   "<wml><card title=\"Connection Timeout\"><p>%s<br/><br/>"
@@ -885,7 +1094,11 @@ static bool jpg_thumb_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint1
 }
 static bool decode_thumb_jpeg_ram(ThumbCache *t, const uint8_t *buf, size_t len) {
   uint16_t sw = 0, sh = 0;
-  if (!TJpgDec.getJpgSize(&sw, &sh, buf, len) || !sw || !sh) return false;
+  JRESULT jr = TJpgDec.getJpgSize(&sw, &sh, buf, len);
+  if (jr != JDR_OK || !sw || !sh) {
+    Serial.printf("[thumb] jpeg size rc=%d %ux%u\n", (int)jr, (unsigned)sw, (unsigned)sh);
+    return false;
+  }
   uint8_t scale = 1;
   while (scale < 8 && ((sw / scale) > THUMB_W || (sh / scale) > THUMB_H)) scale <<= 1;
   int out_w = sw / scale; if (out_w < 1) out_w = 1;
@@ -894,10 +1107,10 @@ static bool decode_thumb_jpeg_ram(ThumbCache *t, const uint8_t *buf, size_t len)
   g_thumb_ctx = { t, (int)sw, (int)sh, out_w, out_h, (THUMB_W - out_w) / 2, (THUMB_H - out_h) / 2, false };
   TJpgDec.setCallback(jpg_thumb_output);
   TJpgDec.setJpgScale(scale);
-  // TJpg_Decoder 1.1.0 accepts an in-memory JPEG buffer and uint32_t length.
   if (len > 0xFFFFFFFFu) return false;
-  TJpgDec.drawJpg(0, 0, buf, (uint32_t)len);
-  t->ok = g_thumb_ctx.ok;
+  jr = TJpgDec.drawJpg(0, 0, buf, (uint32_t)len);
+  t->ok = (jr == JDR_OK) && g_thumb_ctx.ok;
+  if (!t->ok) Serial.printf("[thumb] jpeg draw rc=%d\n", (int)jr);
   return t->ok;
 }
 #endif
@@ -916,10 +1129,27 @@ static PNG *png_obj() {
 // PNGdec 1.1.6 defines PNG_DRAW_CALLBACK as int(PNGDRAW*).
 // Keep the callback signature exact because older examples on the web often use void.
 // Return 1 to continue decoding the next scanline.
+static uint16_t *png_line_buffer(int width) {
+  if (width < 1) return nullptr;
+  if (g_png_line && g_png_line_pixels >= width) return g_png_line;
+  if (g_png_line) {
+    free(g_png_line);
+    g_png_line = nullptr;
+    g_png_line_pixels = 0;
+  }
+  void *p = heap_caps_malloc((size_t)width * sizeof(uint16_t), MALLOC_CAP_SPIRAM);
+  if (!p) p = malloc((size_t)width * sizeof(uint16_t));
+  if (p) {
+    g_png_line = (uint16_t*)p;
+    g_png_line_pixels = width;
+  }
+  return g_png_line;
+}
+
 static int png_thumb_draw(PNGDRAW *pDraw) {
   ThumbDecodeCtx &c = g_thumb_ctx;
   if (!g_png || !pDraw || !c.t || c.src_w < 1 || c.src_h < 1 ||
-      c.src_w > (int)(sizeof g_png_line / sizeof g_png_line[0])) return 1;
+      c.src_w > g_png_line_pixels) return 1;
   g_png->getLineAsRGB565(pDraw, g_png_line, PNG_RGB565_LITTLE_ENDIAN, 0xFFFFFFFF);
   int dy = c.dy + (pDraw->y * c.out_h) / c.src_h;
   if (dy < 0 || dy >= THUMB_H) return 1;
@@ -939,7 +1169,7 @@ static bool decode_thumb_png_ram(ThumbCache *t, const uint8_t *buf, size_t len) 
   int rc = png->openRAM((uint8_t*)buf, (int)len, draw_cb);
   if (rc != PNG_SUCCESS) return false;
   int sw = png->getWidth(), sh = png->getHeight();
-  if (sw < 1 || sh < 1 || sw > (int)(sizeof g_png_line / sizeof g_png_line[0])) { png->close(); return false; }
+  if (sw < 1 || sh < 1 || !png_line_buffer(sw)) { png->close(); return false; }
   int out_w = THUMB_W, out_h = (sh * THUMB_W) / sw;
   if (out_h > THUMB_H) { out_h = THUMB_H; out_w = (sw * THUMB_H) / sh; }
   if (out_w < 1) out_w = 1;
@@ -1058,14 +1288,20 @@ static ThumbCache *thumb_find(const char *abs_url) {
     return t;
   }
 #elif defined(ARDUINO)
-  // Buffer lay anh 32KB dat trong PSRAM (lazy) — giam 32KB RAM noi bo cho WiFi.
   static uint8_t *ibuf = nullptr;
-  const size_t IBUF_CAP = 32768;
+  const size_t IBUF_CAP = 128 * 1024;
   if (!ibuf) ibuf = (uint8_t*)heap_caps_malloc(IBUF_CAP, MALLOC_CAP_SPIRAM);
   if (!ibuf) ibuf = (uint8_t*)malloc(IBUF_CAP);
   if (!ibuf) { t->ok = false; return t; }
   HttpMeta meta; memset(&meta, 0, sizeof meta); size_t len = 0;
-  if (!http_get(abs_url, (char*)ibuf, IBUF_CAP, &len, &meta) || !len) { t->ok = false; return t; }
+  bool got = http_get(abs_url, (char*)ibuf, IBUF_CAP, &len, &meta);
+  if (!got || !len || meta.status < 200 || meta.status >= 300 || meta.gzipped || meta.truncated) {
+    Serial.printf("[thumb] fetch fail status=%d len=%u type=%s trunc=%d gz=%d\n",
+                  meta.status, (unsigned)len, meta.content_type,
+                  meta.truncated ? 1 : 0, meta.gzipped ? 1 : 0);
+    t->ok = false;
+    return t;
+  }
   bool is_png = (len > 8 && ibuf[0] == 0x89 && ibuf[1] == 'P' && ibuf[2] == 'N' && ibuf[3] == 'G') || strstr(meta.content_type, "png") || ends_with(abs_url, ".png");
   bool is_jpg = (len > 2 && ibuf[0] == 0xFF && ibuf[1] == 0xD8) || strstr(meta.content_type, "jpeg") || strstr(meta.content_type, "jpg") || ends_with(abs_url, ".jpg") || ends_with(abs_url, ".jpeg");
   #if QB_HAS_PNGDEC
@@ -1074,6 +1310,7 @@ static ThumbCache *thumb_find(const char *abs_url) {
   #if QB_HAS_TJPEG
   if (is_jpg && decode_thumb_jpeg_ram(t, ibuf, len)) { thumb_commit_persistent(t); return t; }
   #endif
+  if (!is_png && !is_jpg) Serial.printf("[thumb] unsupported type=%s\n", meta.content_type);
 #endif
   t->ok = false;
   return t;
@@ -1131,11 +1368,8 @@ static bool overview_anim_tick() {
 static void draw_mini_map(int x, int y, int h) {
   int n = doc.nlines > 0 ? doc.nlines : 1;
   int w = 10;
-  disp.fillRect(x, y, w, h, 0xEF7C);
-  disp.fillRect(x, y, w, 1, UI_BORDER);
-  disp.fillRect(x, y + h - 1, w, 1, UI_BORDER);
-  disp.fillRect(x, y, 1, h, UI_BORDER);
-  disp.fillRect(x + w - 1, y, 1, h, UI_BORDER);
+  disp.fillRect(x, y, w, h, S60_SCROLL_BG);
+  disp.drawRect(x, y, w, h, S60_FIELD_LINE);
   for (int i = 0; i < n; i++) {
     int yy = y + 1 + (i * (h - 2)) / n;
     uint16_t c = (doc.lines[i].style == 7) ? UI_BORDER : (doc.lines[i].link >= 0 ? UI_LINK : UI_DIM);
@@ -1168,21 +1402,15 @@ static void draw_mini_map(int x, int y, int h) {
   }
   if (vh < 5) vh = 5;
   if (vy + vh > y + h - 1) vh = y + h - 1 - vy;
-  disp.fillRect(x + 1, vy, w - 2, 1, UI_HOT);
-  disp.fillRect(x + 1, vy + vh - 1, w - 2, 1, UI_HOT);
-  disp.fillRect(x + 1, vy, 1, vh, UI_HOT);
-  disp.fillRect(x + w - 2, vy, 1, vh, UI_HOT);
+  disp.drawRect(x + 1, vy, w - 2, vh, S60_ACCENT);
 }
 
 static void draw_scrollbar(int x, int y, int h, int total, int start, int visible) {
   if (total < 1) total = 1;
   if (visible < 1) visible = 1;
   if (visible > total) visible = total;
-  disp.fillRect(x, y, 6, h, 0xDEFB);
-  disp.fillRect(x, y, 6, 1, UI_BORDER);
-  disp.fillRect(x, y + h - 1, 6, 1, UI_BORDER);
-  disp.fillRect(x, y, 1, h, UI_BORDER);
-  disp.fillRect(x + 5, y, 1, h, UI_BORDER);
+  disp.fillRect(x, y, 6, h, S60_SCROLL_BG);
+  disp.drawRect(x, y, 6, h, S60_FIELD_LINE);
   // Small up/down caps like feature-phone browsers.
   disp.drawPixel(x + 2, y + 3, UI_DIM); disp.drawPixel(x + 3, y + 3, UI_DIM);
   disp.drawPixel(x + 2, y + h - 4, UI_DIM); disp.drawPixel(x + 3, y + h - 4, UI_DIM);
@@ -1199,9 +1427,9 @@ static void draw_scrollbar(int x, int y, int h, int total, int start, int visibl
     if (d) { int step = d / 3; if (!step) step = d > 0 ? 1 : -1; smooth_fp += step; }
   }
   int gy = ty + (smooth_fp * (th - grip)) / 1024;
-  disp.fillRect(x + 1, gy, 4, grip, 0x9D9F);
-  disp.fillRect(x + 1, gy, 4, 1, UI_LINK);
-  disp.fillRect(x + 1, gy + grip - 1, 4, 1, UI_LINK);
+  disp.fillRect(x + 1, gy, 4, grip, S60_SCROLL_FG);
+  disp.fillRect(x + 1, gy, 4, 1, S60_ACCENT);
+  disp.fillRect(x + 1, gy + grip - 1, 4, 1, S60_ACCENT);
   // Grip ribs make movement readable on 240x320 LCD.
   for (int yy = gy + 3; yy < gy + grip - 2; yy += 4) disp.fillRect(x + 2, yy, 2, 1, UI_WHITE);
 }
@@ -1247,7 +1475,7 @@ static void draw_overview_mosaic(int x, int y, int w, int h) {
   if (tw < 34) tw = 34;
   if (th < 30) th = 30;
 
-  disp.fillRect(x, y, w, h, 0xEF7C);
+  disp.fillRect(x, y, w, h, S60_SCROLL_BG);
   disp.fillRect(x, y, w, 1, UI_BORDER);
   disp.fillRect(x, y + h - 1, w, 1, UI_BORDER);
 
@@ -1287,9 +1515,9 @@ static void draw_overview_mosaic(int x, int y, int w, int h) {
     disp.fillRect(tx + tw - 1, ty, 1, th, UI_BORDER);
     disp.fillRect(tx + 2, ty + 2, tw - 4, 3, UI_TITLE);
     // Tiny page number tab, like feature-phone page tiles.
-    disp.setTextFont(1); disp.setTextColor(UI_DIM);
+    set_text_font(5); disp.setTextColor(S60_DIM);
     char pn[5]; snprintf(pn, sizeof pn, "%d", t + 1);
-    disp.drawString(pn, tx + tw - 8, ty + 6);
+    s60_text_right(pn, tx + tw - 3, ty + 6);
 
     int ix = tx + 3, iy = ty + 8, iw = tw - 6, ih = th - 11;
     int py = 0;
@@ -1530,10 +1758,11 @@ static void go_url(const char *url) {
   }
   if (!strcmp(url, "#") || !strcmp(url, "mtt:menu#url")) {
     // hop nhap URL kieu he thong (multi-tap + host keyboard o sim)
-    url_in_n = 0; url_in[0] = 0;
+    is_search_box = false;
+    // mac dinh https:// de user chi can go host
+    memcpy(url_in, "https://", 8); url_in[8] = 0; url_in_n = 8;
     mt_bind(url_in, &url_in_n, (int)sizeof url_in, MT_URL, (int)(sizeof MT_URL / sizeof MT_URL[0]));
     pass_t9_prev = t9mode;
-    is_search_box = false;
     if (!strcmp(url, "#")) {
       strncpy(menu_src_url, cur_url, sizeof menu_src_url - 1);
       menu_src_url[sizeof menu_src_url - 1] = 0;
@@ -1545,16 +1774,16 @@ static void go_url(const char *url) {
   if (!strcmp(full, "#")) {
     strncpy(menu_src_url, cur_url, sizeof menu_src_url - 1);
     menu_src_url[sizeof menu_src_url - 1] = 0;
-    url_in_n = 0; url_in[0] = 0;
+    is_search_box = false;
+    memcpy(url_in, "https://", 8); url_in[8] = 0; url_in_n = 8;
     mt_bind(url_in, &url_in_n, (int)sizeof url_in, MT_URL, (int)(sizeof MT_URL / sizeof MT_URL[0]));
     pass_t9_prev = t9mode;
-    is_search_box = false;
     urlin_show();
     render(); return;
   }
   if (!strncmp(full, "mtt:", 4)) {
     if (!strcmp(full, "mtt:forward")) {
-      if (!nav_forward()) show_msg("Khong co trang Forward.");
+      if (!nav_forward()) show_msg("No Forward page.");
       return;
     }
     nav_record_new(full);
@@ -1563,9 +1792,16 @@ static void go_url(const char *url) {
     if (!strcmp(full, "mtt:start")) build_doc(PAGE_START);
     else if (!strcmp(full, "mtt:about")) build_doc(PAGE_ABOUT);
     else if (!strcmp(full, "mtt:help")) build_doc(PAGE_HELP);
-    else if (!strcmp(full, "mtt:config")) build_docf(PAGE_CONFIG, wifi_up ? "CONNECTED" : "OFF", cfg_ssid.c_str(), cfg_home.c_str(), cfg_tz.c_str());
+    else if (!strcmp(full, "mtt:config")) build_docf(PAGE_CONFIG, wifi_up ? "CONNECTED" : "OFF", cfg_ssid.c_str(), cfg_pass.c_str(), cfg_home.c_str(), cfg_tz.c_str(), cfg_text_mode ? "ON" : "OFF");
+    else if (!strcmp(full, "mtt:textmode")) {
+      cfg_text_mode = !cfg_text_mode;
+      config_save();
+      Serial.printf("[cfg] text_mode=%d\n", cfg_text_mode ? 1 : 0);
+      build_docf(PAGE_CONFIG, wifi_up ? "CONNECTED" : "OFF", cfg_ssid.c_str(), cfg_pass.c_str(), cfg_home.c_str(), cfg_tz.c_str(), cfg_text_mode ? "ON" : "OFF");
+    }
     else if (!strcmp(full, "mtt:web")) build_doc(PAGE_WEB);
     else if (!strcmp(full, "mtt:sites")) build_doc(PAGE_SITES);
+    else if (!strcmp(full, "mtt:feeds")) build_doc(PAGE_FEEDS);
     else if (!strcmp(full, "mtt:fb")) build_doc(PAGE_FB);
     else if (!strcmp(full, "mtt:tools")) build_doc(PAGE_TOOLS);
     else if (!strcmp(full, "mtt:dl")) build_doc(PAGE_DL);
@@ -1590,7 +1826,7 @@ static void go_url(const char *url) {
     }
     else if (!strcmp(full, "mtt:history")) {
       char *buf = page_scratch();
-      if (!buf) { show_msg("Khong du bo nho RAM."); return; }
+      if (!buf) { show_msg("Not enough RAM."); return; }
       int o = snprintf(buf, 6000, "<wml><card title=\"History\"><p>");
       for (int i = 0; i < history_count() && o < 5000; i++)
         o += snprintf(buf + o, 6000 - o, "<a href=\"%s\">%s</a><br/>",
@@ -1601,13 +1837,13 @@ static void go_url(const char *url) {
       // menu la popup overlay — khong dung trang
     } else if (!strcmp(full, "mtt:menu#book")) {
       bookmark_add(menu_src_url, menu_src_title[0] ? menu_src_title : menu_src_url);
-      show_msg("Da luu Bookmark. OK de tiep.");   // show_msg da render
+      show_msg("Bookmark saved. OK to continue.");   // show_msg da render
       return;
     } else if (!strcmp(full, "mtt:menu#refresh")) {
       go_url(menu_src_url); return;
     } else if (!strcmp(full, "mtt:bookmark")) {
       char *buf = page_scratch();
-      if (!buf) { show_msg("Khong du bo nho RAM."); return; }
+      if (!buf) { show_msg("Not enough RAM."); return; }
       int o = snprintf(buf, 6000, "<wml><card title=\"Bookmark\"><p>");
       for (int i = 0; i < bookmark_count() && o < 5000; i++)
         o += snprintf(buf + o, 6000 - o, "<a href=\"%s\">%s</a><br/>",
@@ -1622,10 +1858,10 @@ static void go_url(const char *url) {
     render(); return;
   }
   if (strncmp(full, "http://", 7) && strncmp(full, "https://", 8)) {
-    show_msg("Protocol/link nay khong duoc ho tro.");
+    show_msg("This protocol/link is not supported.");
     return;
   }
-  if (!wifi_up) { show_msg("WiFi chua bat. Vao Settings > Ket noi WiFi."); return; }
+  if (!wifi_up) { show_msg("WiFi is off. Go to Settings > Connect WiFi."); return; }
   nav_record_new(full);
   strncpy(cur_url, full, sizeof cur_url - 1);
   cur_url[sizeof cur_url - 1] = 0;
@@ -1638,33 +1874,31 @@ static void go_url(const char *url) {
   load_paint_pct = -1; load_paint_kb[0] = 0; load_phase_recv = false;
   load_fmt_size(0, load_paint_kb, sizeof load_paint_kb);
   disp.fillScreen(UI_BG);
-  disp.fillRect(0, 0, SCR_W, UI_HDR_H, UI_TITLE);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-  disp.drawString("Connecting...", 18, (UI_HDR_H - 13) / 2);
-  disp.fillRect(0, UI_HDR_H - 3, SCR_W * load_pct / 100, 3, UI_WHITE);
-  disp.setTextColor(UI_FG); disp.drawString(full, 4, UI_HDR_H + 8);
+  g_pane_status = "Connecting...";
+  draw_status_pane();
+  set_text_font(0); disp.setTextColor(S60_FG);
+  s60_text(full, 8, UI_HDR_H + 8);
   load_paint_footer();                 // Menu | bar + 0.0K | Back (o cho dong gio)
   load_pct = 45; load_paint_pct = 45;
-  disp.fillRect(0, UI_HDR_H - 3, SCR_W * load_pct / 100, 3, UI_WHITE);
-  disp.fillRect(18, (UI_HDR_H - 13) / 2, 150, 14, UI_TITLE);
-  disp.setTextColor(UI_WHITE);
-  disp.drawString("Sending request...", 18, (UI_HDR_H - 13) / 2);
+  g_pane_status = "Sending request...";
+  draw_status_pane();
   disp.endWrite();
   HttpMeta meta; size_t len = 0;
   http_set_progress(on_http_progress);
   bool ok = http_get(full, net_buf, DOC_CAP, &len, &meta);
   http_set_progress(nullptr);
+  g_pane_status = nullptr;             // tra pane ve title cua trang
   if (!ok) {
     loading = false;
-    if (meta.status == -2) show_msg("Khong ket noi duoc may chu.");
-    else if (meta.status == -3) show_msg("Phan hoi HTTP khong hop le.");
-    else if (meta.status == -5) show_msg("Simulator khong co TLS; ESP32 ho tro HTTPS.");
-    else if (meta.status == -6) show_msg("Qua nhieu redirect.");
-    else show_msg("Ket noi that bai.");
+    if (meta.status == -2) show_msg("Cannot connect to server.");
+    else if (meta.status == -3) show_msg("Invalid HTTP response.");
+    else if (meta.status == -5) show_msg("Simulator has no TLS; ESP32 supports HTTPS.");
+    else if (meta.status == -6) show_msg("Too many redirects.");
+    else show_msg("Connection failed.");
     return;
   }
   // gzip: khong giai nen duoc tren thiet bi -> bao loi
-  if (meta.gzipped) { show_msg("Server bo qua identity va tra gzip/br."); return; }
+  if (meta.gzipped) { show_msg("Server sent gzip/br; cannot decode yet."); return; }
   if (meta.final_url[0] && strcmp(meta.final_url, cur_url)) {
     strncpy(cur_url, meta.final_url, sizeof cur_url - 1);
     cur_url[sizeof cur_url - 1] = 0;
@@ -1674,13 +1908,13 @@ static void go_url(const char *url) {
     last_host[sizeof last_host - 1] = 0;
   }
   if (len == 0) {
-    char em[96]; snprintf(em, sizeof em, "HTTP %d - server khong tra noi dung.", meta.status);
+    char em[96]; snprintf(em, sizeof em, "HTTP %d - empty response.", meta.status);
     show_msg(em); return;
   }
   if (meta.content_type[0] && strncmp(meta.content_type, "text/", 5) &&
       !strstr(meta.content_type, "html") && !strstr(meta.content_type, "xml") &&
       !strstr(meta.content_type, "wml")) {
-    char em[128]; snprintf(em, sizeof em, "Khong render duoc: %s", meta.content_type);
+    char em[128]; snprintf(em, sizeof em, "Cannot render: %s", meta.content_type);
     show_msg(em); return;
   }
   doc.buf = doc_buf; doc.cap = DOC_CAP;
@@ -1688,10 +1922,13 @@ static void go_url(const char *url) {
   body_scroll_reset(0);
   // Warm a few image thumbnails so Overview can show real page tiles immediately.
   // Memory tier is PSRAM; decoded RGB565 survives reboot through LittleFS tier.
-  thumb_prefetch_doc(3);
+  // Text mode (chi van ban): khong prefetch/decode anh.
+  if (!cfg_text_mode) thumb_prefetch_doc(3);
   history_add(cur_url, doc.title[0] ? doc.title : cur_url);
   loading = false; load_pct = 100;
   // Desktop/large-UI (khong viewport meta) -> tu hien chuot ao; mobile viewport -> tat chuot.
+  // Trang WML/mtt: LUON tat chuot ao, neu khong chuot bat tu trang desktop truoc do se
+  // giu nguyen va nuot phim D-Pad cua UI nho.
   if (!doc.is_wml) {
     if (html_looks_desktop(net_buf, len)) {
       mouse_on = true; mouse_x = SCR_W / 2; mouse_y = SCR_H / 2;
@@ -1699,6 +1936,8 @@ static void go_url(const char *url) {
     } else {
       mouse_on = false;
     }
+  } else {
+    mouse_on = false;
   }
   scr = SCR_BROWSE; top = 0;
   focus_first();
@@ -1741,7 +1980,16 @@ static int focus_block_end(int line) {
 static int render_line_h(int line) {
   if (line < 0 || line >= doc.nlines) return 18;
   int st = doc.lines[line].style;
-  return (st == 1) ? 24 : (st == 3) ? 22 : line_h(st);
+  if (st == 1) return 24;
+  // Dong trong nam GIUA hai hang danh sach (folder/dir): co lai con 2 px de danh
+  // sach S60 lien mach nhu menu Nokia, thay vi 16/22 px trang ngan cach. Phai
+  // kiem tra TRUOC nhanh "st == 3" vi parser giu style 3 cho ca dong trong.
+  if (doc.lines[line].n == 0 && line > 0 && line + 1 < doc.nlines &&
+      doc.lines[line - 1].style == 3 && doc.lines[line - 1].n != 0 &&
+      doc.lines[line + 1].style == 3 && doc.lines[line + 1].n != 0)
+    return 2;
+  if (st == 3) return 22;
+  return line_h(st);
 }
 
 static int doc_px_before_line(int line) {
@@ -1823,6 +2071,18 @@ static void body_scroll_kick(int dir) {
   body_scroll_active = true;
 }
 
+static void body_scroll_move_by_px(int delta) {
+  int max_px = body_scroll_max_px();
+  int px = (int)(body_scroll_visual_fp / BODY_FP) + delta;
+  if (px < 0) px = 0;
+  if (px > max_px) px = max_px;
+  body_scroll_visual_fp = body_scroll_target_fp = (int32_t)px * BODY_FP;
+  body_scroll_velocity_fp = 0;
+  body_scroll_last = millis();
+  body_scroll_active = false;
+  body_scroll_inertia = false;
+}
+
 static bool body_scroll_tick() {
   if (!body_scroll_active && !body_scroll_inertia && body_scroll_velocity_fp == 0) return false;
   uint32_t now = millis();
@@ -1898,92 +2158,245 @@ static void ensure_focus_visible() {
   body_scroll_target_line(top);
 }
 
-// icon nho ve bang fillRect (khong can GIF runtime)
-static void draw_icon_globe(int x, int y) {
-  disp.fillRect(x + 2, y + 0, 5, 1, UI_WHITE);
-  disp.fillRect(x + 1, y + 1, 7, 1, UI_WHITE);
-  disp.fillRect(x + 0, y + 2, 9, 5, UI_WHITE);
-  disp.fillRect(x + 1, y + 7, 7, 1, UI_WHITE);
-  disp.fillRect(x + 2, y + 8, 5, 1, UI_WHITE);
-  disp.drawFastHLine(x + 1, y + 4, 7, UI_TITLE);   // equator
-  disp.drawPixel(x + 4, y + 1, UI_TITLE);
-  disp.drawPixel(x + 4, y + 7, UI_TITLE);
+// =================== S60 icon set (hinh hoc co ban, khong can asset) ===================
+static void s60_icon_globe(int cx, int cy, int r, uint16_t c) {
+  disp.drawCircle(cx, cy, r, c);
+  disp.drawFastHLine(cx - r, cy, r * 2 + 1, c);            // xich dao
+  for (int dy = -r; dy <= r; dy++) {                       // kinh tuyen
+    int rem = r * r - dy * dy;
+    int s = 0; while ((s + 1) * (s + 1) <= rem) s++;
+    int dx = s / 2;
+    disp.drawPixel(cx + dx, cy + dy, c);
+    disp.drawPixel(cx - dx, cy + dy, c);
+  }
 }
-static void draw_icon_pencil(int x, int y) {
-  disp.fillRect(x + 1, y + 1, 2, 8, 0x6B4D);       // shaft
-  disp.fillRect(x + 3, y + 0, 2, 3, 0xC631);       // tip
-  disp.fillRect(x + 1, y + 0, 2, 1, 0x8C71);
+static void s60_icon_gear(int cx, int cy, int r, uint16_t c, uint16_t bg) {
+  static const int8_t DX[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+  static const int8_t DY[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+  for (int i = 0; i < 8; i++) disp.fillRect(cx + DX[i] * r - 1, cy + DY[i] * r - 1, 3, 3, c);
+  disp.fillCircle(cx, cy, r, c);
+  disp.fillCircle(cx, cy, r / 2, bg);                      // lo o giua
 }
-static void draw_icon_search(int x, int y) {
-  disp.fillRect(x + 1, y + 1, 5, 5, 0x8C71);
-  disp.fillRect(x + 2, y + 2, 3, 3, UI_BG);
-  disp.fillRect(x + 5, y + 5, 3, 2, 0x8C71);
+static void s60_icon_clock(int cx, int cy, int r, uint16_t c) {
+  disp.drawCircle(cx, cy, r, c);
+  disp.drawFastVLine(cx, cy - r + 2, r - 1, c);
+  disp.drawFastHLine(cx, cy, r - 2, c);
 }
-static void draw_icon_folder(int x, int y) {
-  disp.fillRect(x + 0, y + 2, 4, 2, 0x8C71);       // tab
-  disp.fillRect(x + 0, y + 3, 10, 7, 0x07E0);      // body (green)
-  disp.fillRect(x + 6, y + 5, 2, 2, UI_WHITE);     // check
+static void s60_icon_magnifier(int cx, int cy, int r, uint16_t c) {
+  disp.drawCircle(cx - 1, cy - 1, r, c);
+  disp.fillRect(cx + r - 2, cy + r - 2, 4, 2, c);
+  disp.fillRect(cx + r - 1, cy + r - 1, 2, 2, c);
 }
-static void draw_chevron(int x, int y, uint16_t c) {
-  for (int i = 0; i < 4; i++) {
-    disp.drawPixel(x + i, y + i, c);
-    disp.drawPixel(x + i, y + 8 - i, c);
-    disp.drawPixel(x + 5 + i, y + i, c);
-    disp.drawPixel(x + 5 + i, y + 8 - i, c);
+static void s60_icon_ribbon(int x, int y, int w, int h, uint16_t c, uint16_t bg) {
+  (void)bg;
+  disp.fillRect(x, y, w, h, c);                            // bookmark ribbon + khuyet V
+  int n = w / 2;
+  for (int i = 0; i < n; i++) {
+    disp.fillRect(x + i, y + h - n + i, 1, n - i, bg);
+    disp.fillRect(x + w - 1 - i, y + h - n + i, 1, n - i, bg);
+  }
+}
+// 3 cung song + cham tam, cao 11 px, be 2r+1 px, trai deu quanh (cx, cy).
+static void s60_icon_wifi_glyph(int cx, int cy, int r, uint16_t c) {
+  int t = cy - r;
+  int w0 = r * 2 + 1;
+  disp.fillRect(cx - r, t, w0, 2, c);
+  int w1 = w0 * 2 / 3; if (w1 < 5) w1 = 5;
+  disp.fillRect(cx - w1 / 2, t + 3, w1, 2, c);
+  int w2 = w0 / 3; if (w2 < 3) w2 = 3;
+  disp.fillRect(cx - w2 / 2, t + 6, w2, 2, c);
+  disp.fillRect(cx - 1, t + 9, 3, 2, c);
+}
+static void s60_icon_info(int cx, int cy, int r, uint16_t c) {
+  disp.drawCircle(cx, cy, r, c);
+  disp.fillRect(cx - 1, cy - 1, 2, r, c);
+  disp.fillRect(cx - 1, cy - r + 2, 2, 2, c);
+}
+
+// Icon tile S60: khoi vuong bo goc co gradient sang, glyph ben trong.
+enum S60IconKind { S60_IC_SITE, S60_IC_SETTINGS, S60_IC_BOOKMARK, S60_IC_HISTORY,
+                   S60_IC_SEARCH, S60_IC_WIFI, S60_IC_INFO, S60_IC_HELP };
+
+static S60IconKind s60_icon_kind(const char *label) {
+  const char *l = label ? label : "";
+  auto has = [l](const char *k) -> bool {
+    for (const char *p = l; *p; p++) {
+      int i = 0; for (; k[i]; i++) if (tolower((unsigned char)p[i]) != tolower((unsigned char)k[i])) break;
+      if (!k[i]) return true;
+    }
+    return false;
+  };
+  if (has("wifi") || has("connect") || has("network")) return S60_IC_WIFI;
+  if (has("setting") || has("config") || has("tool"))   return S60_IC_SETTINGS;
+  if (has("bookmark"))                                    return S60_IC_BOOKMARK;
+  if (has("history"))                                     return S60_IC_HISTORY;
+  if (has("search") || has("google"))                     return S60_IC_SEARCH;
+  if (has("about"))                                       return S60_IC_INFO;
+  if (has("help"))                                        return S60_IC_HELP;
+  return S60_IC_SITE;
+}
+
+// Icon cua mot dong danh sach S60 3rd Edition: chi co glyph 16x16, KHONG co o
+// nen — dung nhu menu Nokia (nen chi doi mau khi dong duoc chon).
+// bg = mau nen dang nam duoi icon (de khoe lo/cat khuyet).
+static void s60_list_icon(int x, int y, int s, S60IconKind k, uint16_t fg, uint16_t bg) {
+  int cx = x + s / 2, cy = y + s / 2, r = s / 2 - 1;
+  switch (k) {
+    case S60_IC_SETTINGS: s60_icon_gear(cx, cy, r, fg, bg); break;
+    case S60_IC_BOOKMARK: s60_icon_ribbon(cx - r + 2, y + 1, r * 2 - 3, s - 2, fg, bg); break;
+    case S60_IC_HISTORY:  s60_icon_clock(cx, cy, r, fg); break;
+    case S60_IC_SEARCH:   s60_icon_magnifier(cx, cy, r, fg); break;
+    case S60_IC_WIFI:     s60_icon_wifi_glyph(cx, cy + 1, r - 1, fg); break;
+    case S60_IC_INFO:     s60_icon_info(cx, cy, r, fg); break;
+    case S60_IC_HELP:     disp.drawCircle(cx, cy, r, fg);
+                          set_text_font(0); disp.setTextColor(fg);
+                          s60_text_center("?", cx, cy - 4); break;
+    default:              s60_icon_globe(cx, cy, r - 1, fg); break;
   }
 }
 
-// popup OPTION menu (giong anh: Bmrk/Optn/Navg/Tool/Sett/Help/Exit)
+// ---- P2: live WiFi bars in title bar (E524546: WiFi STA, no touch) ----
+static int     wifi_rssi_lvl = -1;     // -1=off, 0..4 bars
+static uint32_t wifi_rssi_ms = 0;
+
+static void wifi_rssi_poll() {
+#if defined(ARDUINO)
+  uint32_t now = millis();
+  if (now - wifi_rssi_ms < 1000) return;
+  wifi_rssi_ms = now;
+  if (!wifi_up || WiFi.status() != WL_CONNECTED) { wifi_rssi_lvl = -1; return; }
+  int r = WiFi.RSSI();                 // dBm, typically -30..-90
+  int lvl;
+  if (r >= -55) lvl = 4;
+  else if (r >= -66) lvl = 3;
+  else if (r >= -75) lvl = 2;
+  else if (r >= -85) lvl = 1;
+  else lvl = 0;
+  wifi_rssi_lvl = lvl;
+#else
+  wifi_rssi_lvl = wifi_up ? 3 : -1;    // sim: steady 3 bars when "connected"
+#endif
+}
+
+// ---- S60 application pane: vach song (trai), WiFi + pin (phai), title DAM ----
+// Chieu cao thanh duoi cua pane: 4 px cuoi dung cho progress/duong ke.
+#define S60_PANE_MAIN_H (S60_PANE_H - 4)
+#define S60_PANE_TEXT_Y 5
+
+static void draw_icon_signal(int x, int y) {
+  // 5 vach Nokia: be 3 px, cach 1 px, cao 3..11 px, moc day y+11.
+  int lvl = (wifi_rssi_lvl < 0) ? 0 : wifi_rssi_lvl + 1;
+  for (int i = 0; i < 5; i++) {
+    int h = 3 + i * 2;
+    uint16_t c = (i < lvl) ? S60_PANE_TEXT : 0x2965;   // slot chua co tin hieu
+    disp.fillRect(x + i * 4, y + 11 - h, 3, h, c);
+  }
+}
+
+// Pin: ESP32-S3 khong do duoc muc pin (khong co chan ADC trong pins.h) nen bieu
+// tuong hien "nguon dang cap" nhu dien thoai dang sac: khung + 3 o day.
+static void draw_icon_battery(int x, int y) {
+  const int w = 18, h = 10;
+  disp.drawRect(x, y, w, h, S60_PANE_TEXT);
+  disp.fillRect(x + w, y + 3, 2, 4, S60_PANE_TEXT);
+  for (int i = 0; i < 3; i++) disp.fillRect(x + 2 + i * 5, y + 2, 4, h - 4, S60_PANE_TEXT);
+}
+
+static void draw_icon_wifi(int x, int y) {
+  uint16_t c = (wifi_rssi_lvl >= 0) ? S60_PANE_TEXT : 0x2965;
+  s60_icon_wifi_glyph(x + 6, y + 5, 5, c);
+  if (wifi_rssi_lvl < 0)                                    // gach cheo = mat ket noi
+    for (int i = 0; i < 11; i++) disp.drawPixel(x + 1 + i, y + 10 - i, S60_RED);
+}
+
+// Status pane + title bar (mot dai gradient lien tuc theo kieu S60).
+static void draw_status_pane() {
+  wifi_rssi_poll();
+  s60_pane_fill(0, 0, SCR_W, S60_PANE_H);
+  draw_icon_signal(3, 3);
+  const int bat_x = SCR_W - 20;
+  draw_icon_battery(bat_x, 3);
+  draw_icon_wifi(bat_x - 16, 3);
+  const int tx = 25;
+  const char *t = g_pane_status ? g_pane_status : (doc.title[0] ? doc.title : "Qeafbrowser");
+  s60_pane_title(t, tx, (bat_x - 17) - tx - 2, S60_PANE_TEXT_Y);
+  if (loading) {
+    disp.fillRect(0, S60_PANE_H - 3, SCR_W, 3, S60_TRACK);
+    disp.fillRect(0, S60_PANE_H - 3, SCR_W * load_pct / 100, 3, S60_ACCENT);
+  } else {
+    disp.fillRect(0, S60_PANE_H - 1, SCR_W, 1, S60_PANE_LINE);
+  }
+}
+
+static void draw_title_bar(bool loading_bar) {
+  (void)loading_bar;
+  draw_status_pane();
+}
+static void draw_icon_pencil(int x, int y, uint16_t c) {
+  // but chi kieu S60 cho o nhap URL
+  disp.fillRect(x + 1, y + 1, 2, 8, c);
+  disp.fillRect(x + 3, y + 0, 2, 3, c);
+  disp.fillRect(x + 1, y + 0, 3, 1, c);
+}
+// Mui ten phai dac (dung cho muc menu co menu con).
+static void draw_chevron(int x, int y, uint16_t c) {
+  for (int i = 0; i < 5; i++) disp.fillRect(x + i, y + i, 2, 10 - 2 * i, c);
+}
+
+static void draw_virtual_mouse_cursor(int x, int y) {
+  static const uint8_t outer_x[18] = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,8,8
+  };
+  static const uint8_t outer_w[18] = {
+    1,2,3,4,5,6,7,8,9,10,12,7,8,9,10,4,3,1
+  };
+  static const uint8_t inner_x[14] = { 1,1,1,1,1,1,1,1,1,1,6,6,7,8 };
+  static const uint8_t inner_w[14] = { 2,4,5,6,8,9,10,6,7,2,3,2,2,1 };
+  for (int row = 0; row < 18; row++)
+    disp.fillRect(x + outer_x[row] + 1, y + row + 1, outer_w[row], 1, S60_SHADOW);
+  for (int row = 0; row < 18; row++)
+    disp.fillRect(x + outer_x[row], y + row, outer_w[row], 1, S60_FG);
+  for (int row = 0; row < 14; row++)
+    disp.fillRect(x + inner_x[row], y + row + 3, inner_w[row], 1, S60_WHITE);
+}
+
+// popup OPTION menu (Bmrk/Optn/Navg/Tool/Sett/Help/Exit) kieu S60 Options
 struct MenuTop { const char *label; const char *child; };
-static const MenuTop MENUS[7] = {
+static const MenuTop MENUS[8] = {
   { "Bmrk", "SvBmrk" },
   { "Optn", "SpDial" },   // Speed Dial home
   { "Navg", "Overview" }, // Opera Mini page overview
   { "Tool", "Mouse"    }, // Opera Mini virtual mouse
   { "Sett", "WiFi"   },
+  { "Text", "NoImg"  },   // toggle text mode (hide images)
   { "Help", "Help"   },
   { "Exit", ""       },
 };
 
-static void draw_chevron_btn(int x, int y) {
-  // nut mui ten xam nho (giong anh comparison)
-  disp.fillRect(x, y, 14, 14, UI_ARROW);
-  disp.fillRect(x, y, 14, 1, UI_BORDER);
-  disp.fillRect(x, y + 13, 14, 1, UI_BORDER);
-  disp.fillRect(x, y, 1, 14, UI_BORDER);
-  disp.fillRect(x + 13, y, 1, 14, UI_BORDER);
-  for (int i = 0; i < 4; i++) {
-    disp.drawPixel(x + 5 + i, y + 4 + i, UI_FG);
-    disp.drawPixel(x + 5 + i, y + 10 - i, UI_FG);
-  }
-}
-
+// S60 Options: panel tron co bong, muc DAM, thanh chon xanh, mui ten cho menu con.
 static void render_menu_popup() {
-  // panel dung + mo (khong lo trang duoi)
-  const int mx = 2, my = UI_HDR_H + 2;
-  const int lw = 78, rw = 90, mh = 7 * 18 + 6;
-  disp.fillRect(mx, my, lw + rw, mh, UI_BG);
-  disp.fillRect(mx, my, lw + rw, 1, UI_BORDER);
-  disp.fillRect(mx, my + mh - 1, lw + rw, 1, UI_BORDER);
-  disp.fillRect(mx, my, 1, mh, UI_BORDER);
-  disp.fillRect(mx + lw + rw - 1, my, 1, mh, UI_BORDER);
-  disp.fillRect(mx + lw, my, 1, mh, UI_BORDER);   // ke 2 cot
-  disp.setTextFont(2);
-  for (int i = 0; i < 7; i++) {
-    int y = my + 3 + 18 * i;
+  const int mx = 16, my = UI_HDR_H + 4;
+  const int mw = SCR_W - 2 * mx;
+  const int rowh = 20;
+  const int mh = 8 * rowh + 8;
+  s60_panel(mx, my, mw, mh, S60_FIELD, S60_FIELD_LINE);
+  set_text_font(0);
+  for (int i = 0; i < 8; i++) {
+    int y = my + 4 + rowh * i;
     bool sel = (i == menu_idx);
-    if (sel) disp.fillRect(mx + 1, y - 2, lw - 1, 17, UI_SEL);
-    disp.setTextColor(sel && !menu_in_sub ? UI_SELFG : UI_FG);
-    disp.drawString(MENUS[i].label, mx + 4, y + 1);
-    if (MENUS[i].child[0]) {
-      draw_chevron_btn(mx + lw - 18, y);
+    bool sub = sel && menu_in_sub;
+    if (sel) {
+      s60_sel_bar(mx + 2, y, mw - 4, rowh - 2);
+      draw_chevron(mx + 6, y + 4, S60_SEL_TEXT);        // con tro chon cua S60
     }
-    // child cot phai (SvBmrk / AddBmk)
+    disp.setTextColor((sel && !menu_in_sub) ? S60_SEL_TEXT : S60_FG);
+    s60_text(MENUS[i].label, mx + 14, y + 5);
     if (MENUS[i].child[0]) {
-      bool sub_sel = sel && menu_in_sub;
-      if (sub_sel) disp.fillRect(mx + lw + 1, y - 2, rw - 2, 17, UI_SEL);
-      disp.setTextColor(sub_sel ? UI_SELFG : (sel ? UI_SELFG : UI_FG));
-      disp.drawString(MENUS[i].child, mx + lw + 6, y + 1);
+      disp.setTextColor(sub ? S60_SEL_TEXT : (sel ? S60_SEL_TEXT : S60_DIM));
+      s60_text_right(MENUS[i].child, mx + mw - 12, y + 5);
+      draw_chevron(mx + mw - 11, y + 5, sub ? S60_SEL_TEXT : S60_DIM);
+    } else {
+      draw_chevron(mx + mw - 11, y + 5, sel ? S60_SEL_TEXT : S60_DIM);
     }
   }
 }
@@ -1991,25 +2404,25 @@ static void render_menu_popup() {
 static void render() {
 #if defined(ARDUINO)
   // Ve toan bo khung vao backbuffer PSRAM, sau do push mot len man hinh.
-  if (frame_ok) gfx_dst = &frame_buf;
+  // gui_draw_text (lc_font) ve qua launcher LCD() — can redirect target sang frame_buf.
+  if (frame_ok) {
+    gfx_dst = &frame_buf;
+    launcher_set_target(&frame_buf);
+  }
 #endif
   disp.startWrite();
   disp.fillScreen(UI_BG);
-  // title bar + globe (can giua doc)
-  disp.fillRect(0, 0, SCR_W, HDR_H, UI_TITLE);
-  draw_icon_globe(UI_PAD, (HDR_H - 9) / 2);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-  disp.drawString(doc.title[0] ? doc.title : "Qeafbrowser", UI_PAD + 14, (HDR_H - 8) / 2);
-  if (loading) disp.fillRect(0, HDR_H - 3, SCR_W * load_pct / 100, 3, UI_WHITE);
+  // title bar + globe + WiFi bars (P2)
+  draw_title_bar(loading);
 
   if (overview_on) {
     int n = doc.nlines > 0 ? doc.nlines : 1;
     int ox = 6, oy = HDR_H + 14, ow = SCR_W - 26, oh = SCR_H - HDR_H - FTR_H - 18;
-    disp.setTextFont(1);
-    disp.setTextColor(UI_DIM);
-    disp.drawString("Desktop overview", 8, HDR_H + 2);
+    set_text_font(5);
+    disp.setTextColor(S60_DIM);
+    s60_text("Desktop overview", 8, HDR_H + 2);
     char zbuf[16]; snprintf(zbuf, sizeof zbuf, "x%d", overview_zoom);
-    disp.drawString(zbuf, SCR_W - 20, HDR_H + 2);
+    s60_text_right(zbuf, SCR_W - 8, HDR_H + 2);
     draw_overview_mosaic(ox, oy, ow, oh);
     int32_t zfp = ov_zoom_fp < OV_FP ? OV_FP : ov_zoom_fp;
     int draw_start = (int)(ov_visual_fp / OV_FP);
@@ -2043,11 +2456,12 @@ static void render() {
       if (doc.lines[i].n) {
         const char *txt = doc.buf + doc.lines[i].off;
         bool sel = (i >= fs && i <= fe);   // Focus Block co the gom nhieu dong cua mot link
-        if (sel) {
+        if (sel && st != 1 && st != 3 && st != 7) {
+          // st 1/3/7 tu ve trang thai chon (o nhap / thanh xanh / vien anh), khong
+          // them khung focus de tranh chong len nhau.
           int bx = UI_PAD - 3;
           int bw;
-          if (st == 1 || st == 3 || st == 7) { bx = 2; bw = SCR_W - 4; }
-          else {
+          {
             int tw = gfx_textWidth(txt, st);
             bw = tw + 8;
             if (bw < 16) bw = 16;
@@ -2059,13 +2473,21 @@ static void render() {
           focus_y1 = y + lh - 1;
         }
         if (st == 7) {
+          // Text mode: hien alt thuong, khong goi thumb_find/decode.
+          if (cfg_text_mode) {
+            set_text_font(0); disp.setTextColor(UI_FG);
+            const char *alt_t = txt;
+            int ii_t = doc.lines[i].image;
+            if (ii_t >= 0 && ii_t < doc.nimages && doc.images[ii_t].alt[0])
+              alt_t = doc.images[ii_t].alt;
+            s60_text(alt_t, UI_PAD, y);
+            break;
+          }
           // Small Screen Rendering: JPEG/PNG thumbnail neu decode duoc, neu khong thi fallback placeholder.
           int bx = UI_PAD, bw = SCR_W - 2 * UI_PAD, bh = 74;
-          disp.fillRect(bx, y, bw, bh, 0xDEFB);
-          disp.fillRect(bx, y, bw, 1, UI_BORDER);
-          disp.fillRect(bx, y + bh - 1, bw, 1, UI_BORDER);
-          disp.fillRect(bx, y, 1, bh, UI_BORDER);
-          disp.fillRect(bx + bw - 1, y, 1, bh, UI_BORDER);
+          disp.fillRect(bx, y, bw, bh, S60_SCROLL_BG);
+          disp.drawRect(bx, y, bw, bh, sel ? S60_ACCENT : UI_BORDER);
+          if (sel) disp.drawRect(bx + 1, y + 1, bw - 2, bh - 2, S60_ACCENT);
           int ii = doc.lines[i].image;
           const char *alt = txt;
           ThumbCache *th = nullptr;
@@ -2089,50 +2511,59 @@ static void render() {
               }
             }
           }
-          disp.setTextFont(1); disp.setTextColor(UI_DIM);
-          disp.drawString("Image thumb 240px", bx + 72, y + 10);
-          disp.setTextFont(2); disp.setTextColor(UI_FG);
-          disp.drawString(alt, bx + 72, y + 28);
-          disp.setTextFont(1); disp.setTextColor(UI_DIM);
-          disp.drawString((th && th->ok) ? (th->persistent_hit ? "LittleFS -> PSRAM" : "PSRAM image cache") : "thumbnail fallback", bx + 72, y + 48);
+          set_text_font(5); disp.setTextColor(UI_DIM);
+          s60_text("Image thumb 240px", bx + 72, y + 10);
+          set_text_font(0); disp.setTextColor(UI_FG);
+          s60_text(alt, bx + 72, y + 28);
+          set_text_font(5); disp.setTextColor(UI_DIM);
+          s60_text((th && th->ok) ? (th->persistent_hit ? "LittleFS -> PSRAM" : "PSRAM image cache") : "thumbnail fallback", bx + 72, y + 48);
         } else if (st == 1) {
-          // field: box deu 2 ben
-          int bx = UI_PAD, bw = SCR_W - 2 * UI_PAD, bh = 22;
-          disp.fillRect(bx, y, bw, bh, UI_FIELD);
-          disp.fillRect(bx, y, bw, 1, UI_BORDER);
-          disp.fillRect(bx, y + bh - 1, bw, 1, UI_BORDER);
-          disp.fillRect(bx, y, 1, bh, UI_BORDER);
-          disp.fillRect(bx + bw - 1, y, 1, bh, UI_BORDER);
-          if (strstr(txt, "URL") || strstr(txt, "Address") || strstr(txt, "Enter"))
-            draw_icon_pencil(bx + 6, y + 6);
-          else draw_icon_search(bx + 6, y + 6);
-          disp.setTextFont(2);
-          disp.setTextColor(UI_DIM);
-          disp.drawString(txt, bx + 22, y + 7);
+          // O nhap kieu S60: nen sang + vien nhat; khi duoc chon thi TO NEN XANH
+          // va chu trang, dung nhu text box dang focus cua S60.
+          int bx = UI_PAD, bw = SCR_W - 2 * UI_PAD, bh = 24;   // khop render_line_h
+          if (sel) {
+            s60_sel_bar(bx, y, bw, bh);
+            disp.drawRoundRect(bx, y, bw, bh, 3, S60_SEL_LINE);
+          } else {
+            disp.fillRect(bx, y, bw, bh, S60_FIELD);
+            disp.drawRoundRect(bx, y, bw, bh, 3, S60_FIELD_LINE);
+          }
+          uint16_t ic = sel ? S60_SEL_TEXT : S60_TILE_GLYPH;
+          bool url_box = strstr(txt, "URL") || strstr(txt, "Address") || strstr(txt, "Enter");
+          if (url_box) draw_icon_pencil(bx + 7, y + 7, ic);
+          else s60_icon_magnifier(bx + 10, y + 12, 4, ic);
+          set_text_font(0);
+          disp.setTextColor(sel ? S60_SEL_TEXT : S60_DIM);
+          s60_text(txt, bx + 22, y + 8);
         } else if (st == 3) {
-          int rh = 22;
-          disp.fillRect(0, y, SCR_W, rh, UI_ROW);
-          draw_icon_folder(UI_PAD, y + 5);
-          disp.setTextFont(2);
-          disp.setTextColor(UI_FG);
-          disp.drawString(txt, UI_PAD + 18, y + 7);
-          draw_chevron_btn(SCR_W - UI_PAD - 16, y + 3);
+          // Dong danh sach S60: thanh chon xanh + icon glyph + nhan DAM + mui ten.
+          const int rh = S60_ROW_H;
+          if (sel) s60_sel_bar(0, y, SCR_W, rh - 1);
+          s60_list_icon(3, y + 3, S60_TILE, s60_icon_kind(txt),
+                        sel ? S60_SEL_TEXT : S60_TILE_GLYPH,
+                        sel ? S60_SEL_TOP : S60_BG);
+          int label_x = 3 + S60_TILE + 5;
+          set_text_font(0);
+          disp.setTextColor(sel ? S60_SEL_TEXT : S60_FG);
+          char clip[64];
+          s60_fit(txt, clip, (int)sizeof clip, SCR_W - label_x - 14);
+          s60_text(clip, label_x, y + (rh - 8) / 2);
+          draw_chevron(SCR_W - 12, y + (rh - 10) / 2, sel ? S60_SEL_TEXT : S60_DIM);
+          if (!sel) disp.fillRect(0, y + rh - 1, SCR_W, 1, S60_RULE);
         } else {
-          // font + mau theo style (Opera Mini / bao HTML)
-          if (st == 2)      disp.setTextFont(4);          // h1/h2
-          else if (st == 5) disp.setTextFont(1);          // small/meta
-          else              disp.setTextFont(2);
-          uint16_t fg = UI_FG;
-          if (doc.lines[i].link >= 0) fg = UI_LINK;
-          else if (st == 2) fg = UI_LINK;                 // tieu de bai bao
-          else if (st == 5) fg = UI_DIM;                  // byline / timestamp
-          else if (st == 6) fg = UI_FG;                   // bold
-          disp.setTextColor(fg);
-          disp.drawString(txt, UI_PAD, y);
+          // Van ban noi dung: lc_font Tahoma VN — tieng Viet co dau + ASCII nhu cu.
+          uint16_t fg = S60_FG;
+          if (doc.lines[i].link >= 0) fg = S60_LINK;
+          else if (st == 2) fg = S60_LINK;                // tieu de bai bao
+          else if (st == 5) fg = S60_DIM;                 // byline / timestamp
+          int fs = (st == 2) ? 2 : 1;
+          gui_draw_text_bold(UI_PAD, y, fg, S60_BG, txt, fs);
           if (doc.lines[i].link >= 0) {
             int tw = gfx_textWidth(txt, st);
-            disp.drawFastHLine(UI_PAD, y + (st == 2 ? 24 : st == 5 ? 11 : 13), tw, UI_LINK);
+            int uy = y + (st == 2 ? 24 : st == 5 ? 11 : 13);
+            disp.drawFastHLine(UI_PAD, uy, tw, S60_LINK);
           }
+          if (st == 2) disp.fillRect(UI_PAD, y + 26, SCR_W - 2 * UI_PAD, 1, S60_RULE);
         }
       }
       y += lh;
@@ -2155,44 +2586,30 @@ static void render() {
         disp.fillRect(focus_x0 + fw - 2, focus_y0, 2, fh, fc);
       }
     }
-    if (mouse_on) {
-      // con tro chuot ao (Opera Mini desktop mode)
-      disp.fillRect(mouse_x, mouse_y, 3, 12, UI_FG);
-      disp.fillRect(mouse_x + 1, mouse_y + 2, 2, 10, UI_FG);
-      disp.fillRect(mouse_x + 2, mouse_y + 4, 2, 8, UI_FG);
-      disp.fillRect(mouse_x + 3, mouse_y + 6, 2, 6, UI_FG);
-      disp.fillRect(mouse_x, mouse_y, 1, 12, UI_WHITE);
-    }
+    if (mouse_on) draw_virtual_mouse_cursor(mouse_x, mouse_y);
   }
 
   // Repaint header after pixel scrolling so partially clipped content cannot bleed into title bar.
-  disp.fillRect(0, 0, SCR_W, HDR_H, UI_TITLE);
-  draw_icon_globe(UI_PAD, (HDR_H - 9) / 2);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
-  disp.drawString(doc.title[0] ? doc.title : "Qeafbrowser", UI_PAD + 14, (HDR_H - 8) / 2);
-  if (loading) disp.fillRect(0, HDR_H - 3, SCR_W * load_pct / 100, 3, UI_WHITE);
+  draw_title_bar(loading);
 
-  // softkey bar — Menu | time | Back (giong Opera Mini / K750)
-  disp.fillRect(0, SCR_H - FTR_H, SCR_W, FTR_H, UI_SOFT);
-  disp.setTextFont(2); disp.setTextColor(UI_WHITE);
+  // softkey bar S60 — nhan trai | dong ho | nhan phai, chu DAM
   const char *l = "Menu", *r = "Back";
   if (vkey_open) { l = "OK"; r = "Cancel"; }
   else if (menu_open) { l = "Select"; r = "Cancel"; }
-  int sy = SCR_H - FTR_H + (FTR_H - 8) / 2;
-  disp.drawString(l, UI_PAD, sy);
+  s60_softkey_bar(l, r);
+  int sy = SCR_H - S60_SOFT_H + (S60_SOFT_H - 8) / 2;
   // Real-time clock. NTP syncs when Internet is available; the system RTC keeps running afterwards.
   // Khi dang load: o giua la progress bar + KB (da ve boi load_paint_footer / on_http_progress).
-  if (loading) {
-    // chi ve lai label neu can; progress da o day tu callback
-  } else {
+  if (!loading) {
     clock_update_cache();
-    disp.drawString(clock_cache, (SCR_W - disp.textWidth(clock_cache)) / 2, sy);
+    disp.setTextColor(S60_SOFT_TEXT);
+    s60_text_center(clock_cache, SCR_W / 2, sy);
   }
-  disp.drawString(r, SCR_W - disp.textWidth(r) - UI_PAD, sy);
   disp.endWrite();          // dong giao dich cua frame_buf (neu dang ve frame)
 #if defined(ARDUINO)
   if (frame_ok) {
-    gfx_dst = &disp;        // day len man hinh THAT mot lan — khong nhap nhay
+    gfx_dst = g_panel;      // day len man hinh THAT mot lan — khong nhap nhay
+    launcher_set_target(nullptr);
     frame_buf.pushSprite(0, 0);
   }
 #endif
@@ -2204,30 +2621,36 @@ static void urlin_show() {
   snprintf(buf, sizeof buf,
     "<wml><card title=\"%s\"><p>%s</p></card></wml>",
     is_search_box ? "Search" : "Input URL",
-    is_search_box ? "Tu khoa:" : "URL:");
+    is_search_box ? "Keyword:" : "URL:");
   build_doc(buf);
   scr = SCR_INPUT; top = 0; cursor_link = 0;
   vkey_bind(url_in, &url_in_n, (int)sizeof url_in, false, is_search_box);
 }
 
+// Man khoi dong kieu S60: application pane o tren, logo Nokia-style, progress bar.
 static void draw_splash() {
-  disp.fillScreen(TFT_BLACK);
-  const int lw = 46, lh = 46;
-  int x0 = (SCR_W - lw) / 2, y0 = (SCR_H - lh) / 2 - 24;
+  disp.fillScreen(S60_BG);
   disp.startWrite();
-  // Native Qeafbrowser mark: compact red feature-phone browser tile with a white Q.
-  disp.fillRect(x0, y0, lw, lh, UI_TITLE);
-  disp.fillRect(x0 + 7, y0 + 7, 30, 5, UI_WHITE);
-  disp.fillRect(x0 + 7, y0 + 29, 30, 5, UI_WHITE);
-  disp.fillRect(x0 + 7, y0 + 7, 5, 27, UI_WHITE);
-  disp.fillRect(x0 + 32, y0 + 7, 5, 27, UI_WHITE);
-  disp.fillRect(x0 + 27, y0 + 26, 5, 5, UI_WHITE);
-  disp.fillRect(x0 + 32, y0 + 31, 5, 5, UI_WHITE);
-  disp.fillRect(x0 + 37, y0 + 36, 4, 4, UI_WHITE);
-  disp.setTextColor(TFT_WHITE); disp.setTextFont(4);
-  disp.drawString("Qeafbrowser", (SCR_W - disp.textWidth("Qeafbrowser")) / 2, y0 + lh + 8);
-  disp.setTextFont(2); disp.setTextColor(TFT_LIGHTGREY);
-  disp.drawString("Default: qeafivels.com", (SCR_W - disp.textWidth("Default: qeafivels.com")) / 2, y0 + lh + 40);
+  s60_pane_fill(0, 0, SCR_W, S60_PANE_H);
+  disp.fillRect(0, S60_PANE_H - 1, SCR_W, 1, S60_PANE_LINE);
+  set_text_font(0); disp.setTextColor(S60_PANE_TEXT);
+  s60_text("Symbian S60 interface", 6, S60_PANE_TEXT_Y);
+  const int lw = 56, lh = 56;
+  const int x0 = (SCR_W - lw) / 2, y0 = 84;
+  s60_panel(x0, y0, lw, lh, S60_PANE_MID, S60_PANE_LINE);
+  disp.drawCircle(x0 + lw / 2, y0 + lh / 2 - 2, 15, S60_WHITE);   // chu Q
+  disp.drawCircle(x0 + lw / 2, y0 + lh / 2 - 2, 14, S60_WHITE);
+  disp.fillRect(x0 + lw / 2 + 9, y0 + lh / 2 + 8, 8, 3, S60_WHITE);
+  disp.fillRect(x0 + lw / 2 + 15, y0 + lh / 2 + 11, 3, 3, S60_WHITE);
+  set_text_font(2); disp.setTextColor(S60_PANE_MID);
+  s60_text_center("Qeafbrowser", SCR_W / 2, y0 + lh + 12);
+  set_text_font(0); disp.setTextColor(S60_DIM);
+  s60_text_center("Default: qeafivels.com", SCR_W / 2, y0 + lh + 38);
+  s60_text_center("240x320  keypad browser", SCR_W / 2, y0 + lh + 52);
+  const int bx = 30, by = SCR_H - 64, bw = SCR_W - 60;
+  disp.fillRect(bx, by, bw, 6, S60_SCROLL_BG);
+  disp.drawRect(bx, by, bw, 6, S60_FIELD_LINE);
+  disp.fillRect(bx + 1, by + 1, bw / 2, 4, S60_ACCENT);
   disp.endWrite();
 }
 
@@ -2285,7 +2708,12 @@ static void jump_link(int dir) {
                 focus_i, focus_block_end(focus_i), cursor_link, top, dir);
 }
 static void on_key(const char *k) {
-  if (scr == SCR_SPLASH) return;
+  // ---- launcher dieu khien man hinh: moi phim di vao launcher truoc ----
+  if (launcher_active()) {
+    launcher_key(k);
+    return;
+  }
+  // (Man splash khong con nam phim — launcher tu mo ngay sau setup.)
 
   // ---- Opera Mini: page overview ----
   if (overview_on) {
@@ -2331,20 +2759,25 @@ static void on_key(const char *k) {
        !strcmp(k, "left") || !strcmp(k, "right") || !strcmp(k, "ok"))) {
     if (!strcmp(k, "back")) { mouse_on = false; render(); return; }
     // up/down: cuộn trang (giup doc dai) + van di chuyen con tro chuot
-    if (!strcmp(k, "up"))    { body_scroll_kick(-1); mouse_y -= 12; if (mouse_y < HDR_H) mouse_y = HDR_H; render(); return; }
-    if (!strcmp(k, "down"))  { body_scroll_kick(1);  mouse_y += 12; if (mouse_y > SCR_H - FTR_H) mouse_y = SCR_H - FTR_H; render(); return; }
+    if (!strcmp(k, "up"))    { body_scroll_move_by_px(-12); mouse_y -= 12; if (mouse_y < HDR_H) mouse_y = HDR_H; render(); return; }
+    if (!strcmp(k, "down"))  { body_scroll_move_by_px(12);  mouse_y += 12; if (mouse_y > SCR_H - FTR_H - MOUSE_CURSOR_VIS_H) mouse_y = SCR_H - FTR_H - MOUSE_CURSOR_VIS_H; render(); return; }
     if (!strcmp(k, "left"))  { mouse_x -= 12; if (mouse_x < 2) mouse_x = 2; render(); return; }
-    if (!strcmp(k, "right")) { mouse_x += 12; if (mouse_x > SCR_W - 3) mouse_x = SCR_W - 3; render(); return; }
+    if (!strcmp(k, "right")) { mouse_x += 12; if (mouse_x > SCR_W - MOUSE_CURSOR_VIS_W) mouse_x = SCR_W - MOUSE_CURSOR_VIS_W; render(); return; }
     if (!strcmp(k, "ok")) {
       // click: chon link gan con tro nhat
       int best = -1, best_d = 10000;
-      int vis = (SCR_H - HDR_H - FTR_H) / 16;
-      for (int li = 0; li < doc.nlinks; li++) {
-        int l0 = doc.links[li].line0;
-        if (l0 < top || l0 >= top + vis) continue;
-        int ly = HDR_H + 4 + (l0 - top) * 18 + 8;
-        int d = abs(ly - mouse_y) + abs(mouse_x - SCR_W / 2);
-        if (d < best_d) { best_d = d; best = li; }
+      int scroll_px = (int)(body_scroll_visual_fp / BODY_FP);
+      int first_top_px = 0;
+      int first_line = doc_line_at_px(scroll_px, &first_top_px);
+      int y = UI_ROWS_Y - (scroll_px - first_top_px);
+      for (int line = first_line; line < doc.nlines && y < SCR_H - FTR_H - 4; line++) {
+        int h = render_line_h(line);
+        int li = doc.lines[line].link;
+        if (li >= 0 && li < doc.nlinks && mouse_y >= y && mouse_y < y + h) {
+          int d = abs(mouse_x - SCR_W / 2);
+          if (d < best_d) { best_d = d; best = li; }
+        }
+        y += h;
       }
       if (best >= 0) { mouse_on = false; go_url(doc.links[best].url); }
       return;
@@ -2363,18 +2796,22 @@ static void on_key(const char *k) {
     }
     if (!strcmp(k, "menu"))  { vkey_submit(); return; }   // MENU = xong
     if (!strcmp(k, "delete")) { vkey_back(); render(); return; }
-    if (!strcmp(k, "up"))    { if (vkey_row > 0) { vkey_row--; if (vkey_row < 4) { int n = (int)strlen(rows[vkey_row]); if (vkey_col >= n) vkey_col = n - 1; } } render(); return; }
+    if (!strcmp(k, "up"))    { if (vkey_row > 0) { vkey_row--; if (vkey_row < 4) { int n = (int)strlen(rows[vkey_row]); if (vkey_col >= n) vkey_col = n - 1; } else if (vkey_col >= VK_SP_N) vkey_col = VK_SP_N - 1; } render(); return; }
     if (!strcmp(k, "down"))  {
-      if (vkey_row < 4) {
+      if (vkey_row < vkey_max_row()) {
         vkey_row++;
         if (vkey_row < 4) { int n = (int)strlen(rows[vkey_row]); if (vkey_col >= n) vkey_col = n - 1; }
+        else if (vkey_row == VK_TLD_ROW) { if (vkey_col >= VK_TLD_N) vkey_col = 0; }
         else vkey_col = 0;
       }
       render(); return;
     }
     if (!strcmp(k, "left"))  { if (vkey_col > 0) vkey_col--; render(); return; }
     if (!strcmp(k, "right")) {
-      int n = (vkey_row < 4) ? (int)strlen(rows[vkey_row]) : VK_SP_N;
+      int n;
+      if (vkey_row < 4) n = (int)strlen(rows[vkey_row]);
+      else if (vkey_row == VK_TLD_ROW) n = VK_TLD_N;
+      else n = VK_SP_N;
       if (vkey_col < n - 1) vkey_col++;
       render(); return;
     }
@@ -2384,6 +2821,11 @@ static void on_key(const char *k) {
       if (vkey_row < 4) {
         vkey_put(rows[vkey_row][vkey_col]);
         if (vkey_shift) vkey_shift = false;   // 1 chu HOA roi thuong
+      } else if (vkey_row == VK_TLD_ROW) {
+        if (vkey_col >= 0 && vkey_col < VK_TLD_N) {
+          const char *tld = VK_TLD[vkey_col];
+          for (const char *p = tld; *p; p++) vkey_put(*p);
+        }
       } else {
         if (vkey_col == VK_SHF) vkey_shift = !vkey_shift;
         else if (vkey_col == VK_SYM_K) vkey_sym = !vkey_sym;
@@ -2406,7 +2848,7 @@ static void on_key(const char *k) {
     }
     if (!strcmp(k, "down")) {
       if (menu_in_sub) { /* giu submenu don */
-      } else if (menu_idx < 6) menu_idx++;
+      }       else if (menu_idx < 7) menu_idx++;
       menu_sub = 0; render(); return;
     }
     if (!strcmp(k, "right")) {
@@ -2420,7 +2862,7 @@ static void on_key(const char *k) {
       if (menu_idx == 0) {          // Bmrk > SvBmrk
         bookmark_add(menu_src_url[0] ? menu_src_url : cur_url,
                      menu_src_title[0] ? menu_src_title : doc.title);
-        show_msg("SvBmrk: da luu Bookmark. OK de tiep.");   // show_msg da render
+        show_msg("SvBmrk: Bookmark saved. OK to continue.");   // show_msg da render
         return;
       } else if (menu_idx == 1) {   // Optn > SpDial
         go_url("mtt:start"); return;
@@ -2433,10 +2875,20 @@ static void on_key(const char *k) {
         render(); return;
       } else if (menu_idx == 4) {   // Sett > WiFi
         go_url("mtt:config"); return;
-      } else if (menu_idx == 5) {   // Help
+      } else if (menu_idx == 5) {   // Text > NoImg
+        cfg_text_mode = !cfg_text_mode;
+        config_save();
+        Serial.printf("[cfg] text_mode=%d (menu)\n", cfg_text_mode ? 1 : 0);
+        char msg[48];
+        snprintf(msg, sizeof msg, "Text mode: %s", cfg_text_mode ? "ON" : "OFF");
+        show_msg(msg);
+        return;
+      } else if (menu_idx == 6) {   // Help
         go_url("mtt:help"); return;
-      } else {                      // Exit
-        go_url("mtt:start"); return;
+      } else {                      // Exit -> ve launcher (Retro-Go style)
+        launcher_set_active(true);
+        launcher_redraw();
+        return;
       }
       render(); return;
     }
@@ -2444,9 +2896,12 @@ static void on_key(const char *k) {
   }
 
   if (!strcmp(k, "menu")) { menu_open = false; go_url("mtt:start"); return; }
-  if (scr == SCR_MSG) {                  // trang loi: OK = thu tai lai
-    if (!strcmp(k, "ok")) go_url(cur_url);
-    return;
+  if (scr == SCR_MSG) {
+    // Trang loi (PAGE_ERROR): OK = thu tai lai; cac phim khac van diu huong
+    // binh thuong (back/menu/option/d-pad) — khong duoc "nuot" phim.
+    if (!strcmp(k, "ok")) { go_url(cur_url); return; }
+    if (!strcmp(k, "back")) { if (!nav_back()) go_url("mtt:start"); return; }
+    // option/movement: rot xuong xu ly SCR_BROWSE o duoi
   }
   if (scr == SCR_WIFI_LIST) {
     // D-Pad di chuyen Focus Block (len/xuong/trai/phai) — giong trang chinh, khong rebuild doc.
@@ -2473,7 +2928,7 @@ static void on_key(const char *k) {
     }
     if (!strcmp(k, "ok")) {
       mt_commit();
-      Serial.printf("[wifi] thu ket noi '%s' pass='%s'\n", nets[net_cursor].ssid, pass_in);
+      Serial.printf("[wifi] try connect '%s' pass='%s'\n", nets[net_cursor].ssid, pass_in);
       wifi_result(wifi_try_connect(nets[net_cursor].ssid, nets[net_cursor].open ? "" : pass_in));
       render(); return;
     }
@@ -2510,7 +2965,9 @@ static void on_key(const char *k) {
           open_search_query(url_in);
         } else go_url("mtt:start");
       } else {
-        if (url_in_n) open_user_url(url_in); else go_url("mtt:start");
+        if (url_in_n && strcmp(url_in, "https://") && strcmp(url_in, "http://"))
+          open_user_url(url_in);
+        else go_url("mtt:start");
       }
       return;                         // cac nhanh tren da go_url -> da render
     } else if (!strcmp(k, "back")) {
@@ -2578,8 +3035,34 @@ static void on_key(const char *k) {
 
 // host test: mo URL truc tiep (khong di menu)
 extern "C" void sim_go_url(const char *url) { go_url(url); }
+// launcher -> browser: dong launcher va ve trang chu ngay (go_url tu render)
+extern "C" void sim_key_launch_go_home(void) {
+  launcher_set_active(false);
+  go_url("mtt:start");
+}
+// host test: ve lai man khoi dong de regression chup duoc theme S60
+// (setup() da ve splash roi di tiep qua WiFi/home nen harness khong kip chup).
+extern "C" void sim_draw_splash() { draw_splash(); }
+// host test: xuat layout da parse ra stdout (khong can ban phim serial)
+extern "C" void sim_doc_dump() { cli_doc(); }
+extern "C" int sim_doc_nlinks() { return doc.nlinks; }
+extern "C" const char *sim_doc_link(int i) {
+  return (i >= 0 && i < doc.nlinks) ? doc.links[i].url : "";
+}
+extern "C" int sim_doc_nimages() { return doc.nimages; }
+extern "C" const char *sim_doc_image_url(int i) {
+  return (i >= 0 && i < doc.nimages) ? doc.images[i].url : "";
+}
+extern "C" const char *sim_doc_title() { return doc.title; }
+extern "C" int sim_doc_nlines() { return doc.nlines; }
+extern "C" const char *sim_doc_line(int i) {
+  if (i < 0 || i >= doc.nlines) return "";
+  return doc.buf + doc.lines[i].off;
+}
 extern "C" int sim_body_scroll_px() { return (int)(body_scroll_visual_fp / BODY_FP); }
 extern "C" int sim_body_scroll_target_px() { return (int)(body_scroll_target_fp / BODY_FP); }
+extern "C" int sim_body_scroll_max_px() { return body_scroll_max_px(); }
+extern "C" int sim_mouse_on() { return mouse_on ? 1 : 0; }
 extern "C" int sim_body_scroll_active() { return body_scroll_active ? 1 : 0; }
 extern "C" int sim_body_scroll_velocity_fp() { return (int)body_scroll_velocity_fp; }
 extern "C" int sim_body_scroll_inertia() { return body_scroll_inertia ? 1 : 0; }
@@ -2604,7 +3087,9 @@ extern "C" void url_input_char(char c) {
         is_search_box = false;
         open_search_query(url_in);
       } else go_url("mtt:start");
-    } else if (url_in_n) open_user_url(url_in);
+    } else if (url_in_n && strcmp(url_in, "https://") && strcmp(url_in, "http://"))
+      open_user_url(url_in);
+    else go_url("mtt:start");
     return;
   }
   if (c == 8 || c == 127) {
@@ -2621,13 +3106,85 @@ extern "C" void url_input_char(char c) {
 }
 
 // ---------------- serial CLI (dieu khien firmware tu PC) ----------------
-// lenh: go <url> | key <name> | scan | status | wifi <ssid> <pass>
+// lenh: go <url> | key <name> | scan | status | wifi <ssid> <pass> | fonttest
 static char cli_in[160]; static int cli_n = 0;
+
+static void cli_fonttest() {
+  static const char *samples[] = {
+    "Settings", "Timezone: ICT-7", "Qeafbrowser",
+    "ghijklmnop 0123456789", "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  };
+  const int styles[] = { 0, 2, 5 };
+  for (int si = 0; si < 3; si++) {
+    int st = styles[si];
+    set_text_font(st);
+    Serial.printf("[font] style=%d lh=%d\n", st, line_h(st));
+    for (int i = 0; i < 5; i++) {
+      int tw = disp.textWidth(samples[i]);
+      Serial.printf("  w=%3d \"%s\"\n", tw, samples[i]);
+    }
+  }
+  Serial.println("[font] fonttest done");
+}
+
+// Xuat layout da parse (dong / style / chieu cao / vi tri y) — dung de kiem tra
+// theme S60: dong style 3 la mot hang danh sach co o icon.
+static void cli_doc() {
+  Serial.printf("[doc] title=\"%s\" lines=%d links=%d images=%d wml=%d\n",
+                doc.title, doc.nlines, doc.nlinks, doc.nimages, doc.is_wml ? 1 : 0);
+  int y = UI_ROWS_Y;
+  for (int i = 0; i < doc.nlines; i++) {
+    char t[44];
+    int n = doc.lines[i].n; if (n > 43) n = 43;
+    if (n) memcpy(t, doc.buf + doc.lines[i].off, (size_t)n);
+    t[n] = 0;
+    int h = render_line_h(i);
+    Serial.printf("  %3d y=%3d h=%2d st=%d link=%2d blk=%u \"%s\"\n",
+                  i, y, h, doc.lines[i].style, doc.lines[i].link,
+                  (unsigned)doc.lines[i].block, t);
+    y += h;
+  }
+}
+
+// Xuat framebuffer 240x320 RGB565 qua serial (protocol bin):
+//   "SHOT2 <len>\n" + raw BE bytes + "\nEND\n
+// Launcher ve truc tiep panel nen khi launcher dang mo phai ve lai vao frame_buf.
+static void cli_shot() {
+#if defined(ARDUINO)
+  if (!frame_ok) { Serial.println("[shot] no frame buffer"); return; }
+  if (launcher_active()) {
+    launcher_set_target(&frame_buf);
+    launcher_redraw();
+    launcher_set_target(nullptr);
+    // day len man hinh THAT de UI launcher van hien dung sau khi redirect
+    gfx_dst = g_panel;
+    frame_buf.pushSprite(0, 0);
+  }
+  const size_t n = (size_t)SCR_W * SCR_H * 2;
+  Serial.printf("SHOT2 %u\n", (unsigned)n);
+  Serial.flush();
+  const uint8_t *p = (const uint8_t *)frame_buf.getBuffer();
+  // Gui theo block 512B de khong tran UART FIFO
+  size_t off = 0;
+  while (off < n) {
+    size_t chunk = n - off; if (chunk > 512) chunk = 512;
+    Serial.write(p + off, chunk);
+    off += chunk;
+  }
+  Serial.println("\nEND");
+  Serial.flush();
+#else
+  Serial.println("[shot] sim only");
+#endif
+}
 
 static void cli_exec(const char *line) {
   if (!strncmp(line, "go ", 3)) { go_url(line + 3); return; }
   if (!strncmp(line, "key ", 4)) { on_key(line + 4); return; }
   if (!strcmp(line, "scan")) { wifi_scan(); wifi_list_show(); render(); return; }
+  if (!strcmp(line, "doc")) { cli_doc(); return; }
+  if (!strcmp(line, "fonttest")) { cli_fonttest(); return; }
+  if (!strcmp(line, "shot")) { cli_shot(); return; }
   if (!strncmp(line, "wifi ", 5)) {
     char ssid[33] = {0}, pass[65] = {0};
     const char *p = line + 5;
@@ -2685,28 +3242,39 @@ void setup() {
   delay(100);
   Serial.println("[boot] 1 serial");
   Serial.flush();
+  Serial.println("[boot] 1b pre-panel");
+  Serial.flush();
+  Serial.println("[boot] 1c panel.init enter");
+  Serial.flush();
   g_panel->init();          // disp.init() khong duoc (macro disp = LovyanGFX*)
   Serial.println("[boot] 2 display");
   Serial.flush();
   g_panel->setRotation(0);                 // doc 240x320 theo E524546-OS
+  Serial.println("[boot] 2b rot");
+  Serial.flush();
   g_panel->setBrightness(200);
+  Serial.println("[boot] 2bb bright");
+  Serial.flush();
   g_panel->fillScreen(TFT_BLACK);
+  Serial.println("[boot] 2c fill");
+  Serial.flush();
 
   doc_buf = (char *)heap_caps_malloc(DOC_CAP, MALLOC_CAP_SPIRAM);
   net_buf = (char *)heap_caps_malloc(DOC_CAP, MALLOC_CAP_SPIRAM);
-  if (!doc_buf || !net_buf) { doc_buf = (char*)malloc(DOC_CAP); net_buf = (char*)malloc(DOC_CAP); }
+  if (!doc_buf) doc_buf = (char*)malloc(DOC_CAP);
+  if (!net_buf) net_buf = (char*)malloc(DOC_CAP);
   // Doc struct (~32KB) cung chuyen sang PSRAM de WiFi/TLS du RAM noi bo.
   g_doc = (Doc *)heap_caps_malloc(sizeof(Doc), MALLOC_CAP_SPIRAM);
   if (!g_doc) g_doc = (Doc *)malloc(sizeof(Doc));
   if (g_doc) memset(g_doc, 0, sizeof(Doc));
   if (!g_doc || !doc_buf || !net_buf)
-    Serial.println("[mem] NGUY HIEM: khong cap duoc PSRAM/heap cho doc buffers");
+    Serial.println("[mem] CRITICAL: cannot alloc PSRAM/heap for doc buffers");
   doc.buf = doc_buf; doc.cap = DOC_CAP;
 #if defined(ARDUINO)
   // Backbuffer 240x320 RGB565 (153600 byte) trong PSRAM — chong nhap nhay man hinh.
   frame_buf.setPsram(true);
   if (frame_buf.createSprite(SCR_W, SCR_H)) frame_ok = true;
-  Serial.printf("[gfx] frame buffer PSRAM 240x320: %s\n", frame_ok ? "OK" : "MISSING -> ve truc tiep");
+  Serial.printf("[gfx] frame buffer PSRAM 240x320: %s\n", frame_ok ? "OK" : "MISSING -> draw direct");
 #endif
 #if defined(ARDUINO)
   Serial.printf("[mem] boot: heap=%u maxblk=%u psram=%u psram_free=%u\n",
@@ -2714,11 +3282,20 @@ void setup() {
                 (unsigned)ESP.getPsramSize(), (unsigned)ESP.getFreePsram());
 #endif
   store_init();
+  Serial.println("[boot] 3 store");
+  Serial.flush();
+  launcher_begin(false);      // nap theme + mount SD + khoi tao art task
   keys_init();
   key_cb = on_key;
+  Serial.println("[boot] 4 keys");
+  Serial.flush();
 
   draw_splash();
   delay(1200);
+  Serial.println("[boot] 5 splash");
+  Serial.flush();
+  // Mo dau vao launcher (Retro-Go style) — phim bat ky de vao browser.
+  launcher_set_active(true);
 
   WiFi.persistent(true);                 // luu tai WiFi vao flash (bo nho tam)
   WiFi.mode(WIFI_STA);
@@ -2734,20 +3311,31 @@ void setup() {
                   wifi_up ? WiFi.localIP().toString().c_str() : "-");
   }
 #if defined(ARDUINO)
-  Serial.printf("[mem] sau wifi: heap=%u maxblk=%u\n",
+  Serial.printf("[mem] after wifi: heap=%u maxblk=%u\n",
                 (unsigned)ESP.getFreeHeap(), (unsigned)ESP.getMaxAllocHeap());
 #endif
   if (wifi_up) clock_start_ntp();
-  else Serial.println("[wifi] Vao Settings > Ket noi WiFi de quet + nhap thu cong");
-  if (wifi_up) go_url(cfg_home.length() ? cfg_home.c_str() : "https://qeafivels.com/");
-  else go_url("mtt:start");   // offline: Speed Dial, khong dung man "Connection Timeout"
-  Serial.println("[boot] setup xong. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass>");
+  else Serial.println("[wifi] Go to Settings > Connect WiFi to scan + enter manually");
+  if (launcher_active()) {
+    // Launcher dang mo (boot): KHONG cho browser go_url de ve lai man — launcher
+    // tu chup lai man hinh; browser chi build page khi nguoi mo muc Browser.
+    Serial.println("[boot] launcher active -> browser page load da hoan on start");
+  } else if (wifi_up) {
+    go_url(cfg_home.length() ? cfg_home.c_str() : "https://qeafivels.com/");
+  } else {
+    go_url("mtt:start");   // offline: Speed Dial, khong dung man "Connection Timeout"
+  }
+  Serial.println("[boot] setup done. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass> | shot | doc");
   Serial.flush();
 }
 
 void loop() {
+  static bool once = false;
+  if (!once) { once = true; Serial.println("[boot] loop enter"); Serial.flush(); }
   keys_poll();
   serial_poll();
+  // Launcher: ve phan art moi ve (task decode xong) — chi khi launcher dang mo.
+  if (launcher_active()) launcher_tick();
   // multi-tap: qua 900ms khong phim -> tu khoa ky tu dang cho (nhan dien Nokia)
   if (scr == SCR_WIFI_PASS && mt_slot >= 0 && millis() - mt_last > 900) {
     mt_commit();
@@ -2783,6 +3371,9 @@ void loop() {
   if (millis() - clock_ui_tick >= 1000) {
     clock_ui_tick = millis();
     clock_draw_footer_only();
+    // launcher statusbar dung chung gio + wifi (khong ve lai, chi cache)
+    launcher_set_clock(clock_cache);
+    launcher_set_net(wifi_up);
   }
   static uint32_t hb = 0;
   if (millis() - hb > 15000) { hb = millis(); }   // (no-op giu cho struct tinh)

@@ -115,6 +115,8 @@ bool url_normalize_input(const char *input, char *out, size_t cap) {
 
   if (!strncasecmp(tmp, "mtt:", 4) || !strncasecmp(tmp, "http://", 7) ||
       !strncasecmp(tmp, "https://", 8)) {
+    // chi con scheme (prefill https:// ma user GO rong) -> xem nhu rong
+    if (!strcmp(tmp, "http://") || !strcmp(tmp, "https://")) { out[0] = 0; return false; }
     strncpy(out, tmp, cap - 1); out[cap - 1] = 0; return true;
   }
   if (!strncmp(tmp, "//", 2)) {
@@ -331,10 +333,10 @@ static bool perform_request(TClient &client, const char *url, const char *scheme
 
   client.print("GET "); client.print(path); client.print(" HTTP/1.1\r\n");
   client.print("Host: "); client.print(host_hdr); client.print("\r\n");
-  client.print("User-Agent: Opera/9.80 (J2ME/MIDP; Opera Mini/4.5.33867/191.323; U; vi) Presto/2.12.423 Version/12.16 Qeafbrowser-ESP/1.3\r\n");
+  client.print("User-Agent: Opera/9.80 (J2ME/MIDP; Opera Mini/4.5.33867/191.323; U; en) Presto/2.12.423 Version/12.16 Qeafbrowser-ESP/1.3\r\n");
   client.print("Accept: text/html, application/xhtml+xml, application/vnd.wap.xhtml+xml, text/vnd.wap.wml, application/xml;q=0.9, text/plain;q=0.8, */*;q=0.2\r\n");
   client.print("Accept-Encoding: identity\r\n");
-  client.print("Accept-Language: vi,en;q=0.8\r\n");
+  client.print("Accept-Language: en-US,en;q=0.9\r\n");
   client.print("Accept-Charset: utf-8,*;q=0.7\r\n");
   client.print("Cache-Control: no-cache\r\n");
   static char ck[256]; cookie_get(host, ck, sizeof ck);

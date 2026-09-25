@@ -1,0 +1,57 @@
+Symbian S3 OS v0.9 TEST REPORT
+Generated: 2026-09-24
+
+== Regression suites ==
+-- tools/test_grid_nav.py
+PASS: S60 3x3 launcher navigation and edge wrapping
+-- tools/test_v04.py
+PASS: 7/7 v0.4 regression gates
+-- tools/test_v05.py
+PASS: 9/9 v0.5 regression gates
+-- tools/test_v051.py
+PASS: 6/6 v0.5.1 linker regression gates
+-- tools/test_v06.py
+PASS: 53/53 v0.6 regression gates
+-- tools/test_v061.py
+PASS: 62/62 v0.6.1 gates
+-- tools/test_v07.py
+PASS: 82/82 v0.7 gates
+-- tools/test_v08.py
+PASS: 79/79 v0.8 gates
+-- tools/test_v09.py
+PASS: 62/62 v0.9 gates
+
+== GNU++11 host syntax ==
+PASS src/apps/Apps.cpp
+PASS src/core/InputManager.cpp
+PASS src/core/SymbianUI.cpp
+PASS src/core/TextKeyboard.cpp
+PASS src/main.cpp
+PASS src/services/BrowserService.cpp
+PASS src/services/ImageViewerService.cpp
+PASS src/services/MusicService.cpp
+PASS src/services/NotificationService.cpp
+PASS src/services/SettingsStore.cpp
+PASS src/services/ShellService.cpp
+PASS src/services/StorageService.cpp
+PASS src/services/SystemService.cpp
+PASS src/services/WiFiProfileStore.cpp
+PASS 14/14 translation units
+
+== Full host link with TFT macro collision set ==
+PASS (symbian_v09_host linked successfully)
+
+== Shell runtime smoke ==
+PASS shell_smoke_v09 exit 0
+1  cp test/a.txt test/b.txt
+2  mv test/b.txt test/c.txt
+3  hexdump test/a.txt
+4  nslookup example.com
+5  ping example.com 2
+6  netmon
+7  top
+8  history
+
+== Target limitation ==
+PlatformIO ESP32-S3 toolchain is not installed in this execution environment.
+Run pio run -t clean && pio run on the target development PC for final Arduino-ESP32 link/size verification.

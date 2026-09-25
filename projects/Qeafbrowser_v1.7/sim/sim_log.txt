@@ -1,43 +1,66 @@
 [boot] 1 serial
+[boot] 1b pre-panel
 [boot] 2 display
+[boot] 2b rot
+[boot] 2c fill
 [store] FS=LittleFS
-[store] fs=LFS hist=7 book=0 ssid= home=https://qeafivels.com/
-[wifi] Vao Settings > Ket noi WiFi de quet + nhap thu cong
-[nav] mtt:start
-[boot] setup xong. CLI: go <url> | key <name> | scan | status
+[store] fs=LFS hist=9 book=12 ssid=VNPT-Home home=https://qeafivels.com/
+[boot] 3 store
+[lc] theme loaded: retrogo_dark
+[b[boot] 5 spla[boot] 5 splash
+[wifi] OK ip=192.168.1.77
+[clock] simulator realtime UTC+7
+[boot] launcher active -> browser page load da hoan on start
+[boot] setup done. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass>
+[boot][nav] mtt:sta[nav] mtt:start
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+images=0 wml=1
+    0 y= 28 h[nav] /downloads.html
+[mouse] desktop UI detected -> virtual mouse on
+[focus] line=8..10 link=-1 top=0 dir=1
+[focus] line=11..11 link=1 top=0 dir=1
+[focus] line=13..13 link=2 top=0 dir=1
+[focus] line=15..16 link=-1 top=2 dir=1
+nk= 2 blk=5 "Bookmarks"
+    6 y=156 h=16 st=0 link=-1 blk=5 "|"
+    7 y=172 h=16 st=0 link= 3 blk=5 "History"
+    8 y=188 h=16 st=0 link=-1 blk=5 "|"
+    9 y=204 h=16 st=0 link= 4 blk=5 "Settings"
+   10 y=220 h=16 st=0 link=-1 blk=5 "|"
+   11 y=236 h=16 st=0 link= 5 blk=5 "About"
+   12 y=252 h=16 st=0 link=-1 blk=5 "|"
+   13 y=268 h=16 st=0 link= 6 blk=5 "Help"
+   14 y=284 h=16 st=0 link=-1 blk=5 ""
+   15 y=300 h=22 st=3 link= 7 blk=7 "Qeafivels"
+   16 y=322 h= 2 st=3 link=-1 blk=7 ""
+   17 y=324 h=22 st=3 link= 8 blk=9 "Google"
+   18 y=346 h= 2 st=3 link=-1 blk=9 ""
+   19 y=348 h=22 st=3 link= 9 blk=11 "Facebook"
+   20 y=370 h= 2 st=3 link=-1 blk=11 ""
+   21 y=372 h=22 st=3 link=10 blk=13 "Wikipedia"
+   22 y=394 h= 2 st=3 link=-1 blk=13 ""
+   23 y=396 h=22 st=3 link=11 blk=15 "YouTube"
+   24 y=418 h= 2 st=3 link=-1 blk=15 ""
+   25 y=420 h=22 st=3 link=12 blk=17 "Qeafivels Home"
+   26 y=442 h= 2 st=3 link=-1 blk=17 ""
+   27 y=444 h=22 st=3 link=13 blk=19 "Weather"
+   28 y=466 h= 2 st=3 link=-1 blk=19 ""
+   29 y=468 h=22 st=3 link=14 blk=21 "Tubidy"
+   30 y=490 h= 2 st=3 link=-1 blk=21 ""
+   31 y=492 h=22 st=3 link=15 blk=23 "More Sites"
 [focus] line=3..3 link=1 top=0 dir=1
 [focus] line=5..5 link=2 top=0 dir=1
 [focus] line=7..7 link=3 top=0 dir=1
 [focus] line=9..9 link=4 top=0 dir=1
-[nav] mtt:config
-[nav] mtt:wifi
-[wifi] quet mang THAT (WiFi.scanNetworks)...
-[wifi] thay 4 mang THAT
-[nav] mtt:wifisel#0
-[wifi] thu ket noi 'VNPT-Home' pass='abc'
-[store] config.ini da luu (ssid=VNPT-Home)
-[clock] simulator realtime UTC+7
-[boot] 1 serial
-[boot] 2 display
-[store] FS=LittleFS
-[store] fs=LFS hist=7 book=0 ssid=VNPT-Home home=https://qeafivels.com/
-[wifi] OK ip=192.168.1.77
-[clock] simulator realtime UTC+7
-[nav] https://qeafivels.com/
-[thumb] prefetch=0/2 image(s)
+[focus] line=11..11 link=5 top=0 dir=1
+[focus] line=13..13 link=6 top=0 dir=1
+[focus] line=15..15 link=7 top=2 dir=1
+[focus] line=17..17 link=8 top=3 dir=1
+[focus] line=19..19 link=9 top=4 dir=1
+[nav] https://keypad.test/
 [mouse] desktop UI detected -> virtual mouse on
-[thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
-[boot] setup xong. CLI: go <url> | key <name> | scan | status
-[nav] https://qeafivels.com/
-[thumb] PSRAM hit slot=0 hits=3 https://www.qeafivels.com/hero-banner.jpg
-[thumb] PSRAM hit slot=1 hits=2 https://www.qeafivels.com/products-audio.png
-[thumb] prefetch=0/2 image(s)
-[mouse] desktop UI detected -> virtual mouse on
-[thumb] PSRAM hit slot=0 hits=4 https://www.qeafivels.com/hero-banner.jpg
 [menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
-[thumb] PSRAM hit slot=0 hits=5 https://www.qeafivels.com/hero-banner.jpg
-[thumb] PSRAM hit slot=0 hits=6 https://www.qeafivels.com/hero-banner.jpg
 [nav] mtt:start
 [nav] #
-[nav] https://example.com/
-[nav] mtt:about
+[nav] mtt:start
+[nav] https://www.google.com/

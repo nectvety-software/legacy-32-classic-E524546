@@ -8,16 +8,16 @@ extern void setup();
 extern void loop();
 extern "C" void sim_go_url(const char *url);
 extern "C" int sim_thumb_request(const char *url);
-static const char *OUT="sim/qeafivels_out";
+static const char *OUTDIR="sim/qeafivels_out";
 static void pump(unsigned ms){ unsigned long t0=millis(); do{ loop(); Sleep(2);}while(millis()-t0<ms); }
 static int slot_of(const char *name){ static const char *N[]={"menu","up","back","left","ok","right","option","down","delete","mode"}; for(int i=0;i<10;i++) if(!strcmp(name,N[i])) return i; return -1; }
 static void press(const char *name){ int s=slot_of(name); if(s<0)return; SIM_KEYS[s]=1; pump(70); SIM_KEYS[s]=0; pump(180); }
-static void shot(const char *name){ char p[256]; snprintf(p,sizeof p,"%s/%s.bmp",OUT,name); if(LGFX::inst) LGFX::inst->dumpBmp(p); printf("[shot] %s\n",p); }
+static void shot(const char *name){ char p[256]; snprintf(p,sizeof p,"%s/%s.bmp",OUTDIR,name); if(LGFX::inst) LGFX::inst->dumpBmp(p); printf("[shot] %s\n",p); }
 int main(){
 #ifdef _WIN32
-  ::mkdir("sim"); ::mkdir(OUT); ::mkdir("sim_lfs"); ::mkdir("sim_lfs/Qeafbrowser");
+  ::mkdir("sim"); ::mkdir(OUTDIR); ::mkdir("sim_lfs"); ::mkdir("sim_lfs/Qeafbrowser");
 #else
-  ::mkdir("sim",0755); ::mkdir(OUT,0755); ::mkdir("sim_lfs",0755); ::mkdir("sim_lfs/Qeafbrowser",0755);
+  ::mkdir("sim",0755); ::mkdir(OUTDIR,0755); ::mkdir("sim_lfs",0755); ::mkdir("sim_lfs/Qeafbrowser",0755);
 #endif
   FILE *f=fopen("sim_lfs/Qeafbrowser/config.ini","wb");
   if(f){ fputs("wifi_ssid=VNPT-Home\nwifi_pass=abc\nhome_url=https://qeafivels.com/\n",f); fclose(f); }

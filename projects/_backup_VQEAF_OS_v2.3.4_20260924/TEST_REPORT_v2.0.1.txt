@@ -1,0 +1,33 @@
+Symbian S3 OS v2.0.1 — board verification kit
+Date: 2026-09-24
+Target: E524546 ESP32-S3 N16R8, ST7789 240x320 portrait, SD_MMC 1-bit
+
+TESTED HERE (HOST ONLY):
+PASS: Original v2.0.0 production TLS trust bundle fingerprint verification (7 public roots).
+PASS: OpenSSL can validate the seven embedded root certificates and rejects a distinct self-signed root.
+PASS: Production TrustedTls adapter compiled and clock gate exercised using host mocks.
+PASS: Production StorageService staged writes with synthetic corruption, rollback, removal and reinsertion.
+PASS: v2.0.1 production BoardDiagnostics.cpp host-compiled tests: 4096-byte readback, scratch-name collision preservation, SD offline and non-network TLS INCONCLUSIVE behavior.
+PASS: Changed main.cpp, ShellService.cpp, BoardDiagnostics.cpp: GNU++11 syntax with Arduino mock API and known TFT macro defines.
+PASS: Full v2.0 regression including 22/22 host C++11 production translation units / synthetic link.
+PASS: Python board serial capture tool syntax.
+
+NOT TESTED HERE:
+PENDING: `pio run` real Xtensa target compilation; no PlatformIO/toolchain in this environment.
+PENDING: Real live Internet certificate handshake from the ESP32-S3; no connected board.
+PENDING: Physical microSD remove/reinsert cycles; no connected board or serial device.
+PENDING: Gallery, Themes and signed Applications after real remount.
+PENDING: 30-60 min live TLS/heap/SD monitoring and HTTP redirect behavior on the board.
+Attempted host openssl public TLS probe; DNS resolution failed in this sandbox.
+
+ON-BOARD EVIDENCE TOOLING:
+- Serial: diag help, diag tls valid/expired/wrong/self/host <domain>, diag sd status/rw.
+- Shell: tlsdiag [valid|expired|wrong|self|host <domain>], sddiag status|rw.
+- Serial SD transitions: [S3DIAG][SD] event=REMOVED/MOUNTED.
+- TLS: success positive = PASS; negative only PASS if mbedTLS -0x2700 certificate verify failure; network failures = INCONCLUSIVE.
+- SD: scratch read/write/CRC32 in /System/Temp only, 4096 bytes, 256-byte buffers; never format or overwrite user files.
+- Collector: python tools/board_test_capture.py --port COM7 --mode tls
+             python tools/board_test_capture.py --port COM7 --mode sd --cycles 10
+See docs/BOARD_TEST_V201.md for safety constraints and acceptance criteria.
+
+IMPORTANT: This report is NOT proof of physical-board success. Upload real UART evidence to conclude target TLS and hotplug correctness.

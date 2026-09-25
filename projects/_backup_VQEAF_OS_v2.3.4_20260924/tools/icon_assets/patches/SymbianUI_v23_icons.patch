@@ -1,0 +1,54 @@
+--- a/src/core/SymbianUI.cpp
++++ b/src/core/SymbianUI.cpp
+@@ -5,6 +5,7 @@
+ #include "UiVietnameseFont.h"
+ #include "UiTypography.h"
+ #include "UiIconCatalog.h"
++#include "VqeafIconRenderer.h"
+ 
+ // C++11 out-of-class definitions for S60 geometry constants.
+ constexpr int SymbianUI::TITLEBAR_H;
+@@ -356,6 +357,12 @@
+ 
+ void SymbianUI::drawS60MenuIcon(int x, int y, const String &requestedKind, uint16_t bg) {
+   const String kind = UiIconCatalog::canonical(requestedKind.c_str());
++  const VqeafIcons::Id standardized = VqeafIcons::fromLegacy(kind.c_str());
++  if (standardized != VqeafIcons::Id::Count) {
++    VqeafIcons::draw(tft, standardized, x, y, 36, bg, VqeafIcons::Palette::standard());
++    return;
++  }
++  // Preserve v2.3 procedural drawings for non-core icons.
+   // 36x36 vector/pixel icons inspired by S60 3rd Edition. No image buffers or
+   // decoded assets are retained in RAM; every icon is drawn directly to ST7789.
+   tft.fillRect(x, y, ICON_BOX, ICON_BOX, bg);
+@@ -517,7 +524,12 @@
+     tft.drawFastVLine(3, y + 1, LIST_ROW_H - 3, colors.chrome);
+   }
+ 
+-  drawIcon(7, y + 6, icon, bg);
++  // All twelve core glyphs use the hand-rastered 24x24 variant in lists;
++  // extra v2.3 glyphs keep their existing, source-compatible 36px fallback.
++  const VqeafIcons::Id standardId=VqeafIcons::fromLegacy(UiIconCatalog::canonical(icon.c_str()));
++  if (standardId != VqeafIcons::Id::Count)
++    VqeafIcons::draw(tft, standardId, 12, y + 9, 24, bg, VqeafIcons::Palette::standard());
++  else drawIcon(7, y + 3, icon, bg);
+ 
+   const uint16_t labelInk = selected ? selectedInk : colors.text;
+   tft.setTextColor(labelInk, bg);
+@@ -558,14 +570,12 @@
+     tft.drawFastHLine(x, y, w, 0xAEE9);
+   if (selected) {
+     if (themeId == ThemeId::S60Green) {
+-      tft.drawRect(x+1,y+1,w-2,h-2,TFT_WHITE);
+-      tft.drawRect(x+2,y+2,w-4,h-4,0xB6EE);
++      VqeafIcons::focusFrame(tft,x+1,y+1,w-2,h-2,TFT_WHITE,0xB6EE);
+       // Original reference frame: discrete white glints at the top corners.
+       tft.fillRect(x+3,y+3,17,2,0xF7FC);
+       tft.fillRect(x+w-20,y+3,17,2,0xF7FC);
+     } else if (themeId == ThemeId::AmoledRed || themeId == ThemeId::External) {
+-      tft.drawRect(x+1,y+1,w-2,h-2,colors.accent);
+-      tft.drawRect(x+2,y+2,w-4,h-4,colors.border);
++      VqeafIcons::focusFrame(tft,x+1,y+1,w-2,h-2,colors.accent,colors.border);
+       tft.fillRect(x+3,y+3,w-6,2,colors.accent);
+     } else {
+       tft.drawRect(x, y, w, h, colors.border);

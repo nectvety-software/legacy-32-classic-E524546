@@ -1,0 +1,57 @@
+Symbian S3 OS v1.4.0 - QEAPP/1 App Installer
+===========================================
+Target: ESP32-S3 WROOM N16R8 / ST7789 portrait 240x320
+Date: 2026-09-24
+
+WHAT WAS BUILT
+--------------
+- Binary QEAPP/1 format: length-checked bounded manifest (<=2048 B),
+  optional RGB565 32x32 icon (2048 B), optional payload (<=256 KiB).
+- SHA-256 validation of all sections before install and again while copying.
+- Atomic-style staging directory -> installed directory rename.
+- App installer Inbox/Installed UI: name/version/type, verified icon detail,
+  Install/Uninstall with confirmation and error feedback.
+- Installed apps registered in Applications with icons, opening animation;
+  `web` apps launch Qeafbrowser, `text` apps launch the existing Text Viewer.
+- File Manager and browser download handoff for .qeapp packages.
+- On-boot installed catalog scan capped at 12 entries; catalog full check.
+- No native executable loading. See docs/QEAPP_V14.md.
+
+TESTS EXECUTED
+--------------
+1. tools/test_v14_installer.py           PASS
+   * The actual C++11 parser/installer was linked against a POSIX SD shim.
+   * Valid text and web packages, manifest/icon/payload SHA checks.
+   * Corrupt payload, corrupt lengths, malformed/missing/duplicate/unsafe
+     manifest fields, invalid URL/version and unknown files during uninstall.
+   * Copy-to-staging/install/visible registry/uninstall behavior.
+   * 12-app limit and freeing a slot for the 13th package.
+   * Cross-checked sample package header SHA-256 against Python hashlib.
+2. tools/test_v14_wiring.py              PASS (20/20 assertions)
+   * Main/application/file manager/browser/SD/screen routing and theme kept.
+3. tools/test_v14_build.py               PASS
+   * 17/17 firmware .cpp translation units passed mock GNU++11 compilation.
+   * Full host link passed, including previously conflicting TFT macros.
+4. tools/test_v12.py                     PASS (legacy theme integration gate)
+5. ZIP integrity                          PASS (archive CRC read of all files)
+
+LIMITS AND IMPORTANT WARNINGS
+-----------------------------
+- Host Arduino/ESP32 API mocks are not the real Espressif toolchain.
+- PlatformIO target ESP32-S3 build and physical display/SD testing were NOT
+  performed in this environment, because `pio` is not installed here.
+- No hardware screenshot is claimed. The included image is a geometry mock.
+- SHA-256 proves package bytes match the header, but does not authenticate
+  the creator. There is no trusted publisher signature system yet.
+- .qeapp v1 contains declarative HTTPS launcher or text only. It does NOT
+  install/execute VXP, ZIP, ELF, JavaScript or third-party native binaries.
+- SD write interruption can leave .stage-<id> directories; inspect and clean
+  manually before retry. Runtime SD failure needs board testing.
+
+BUILD/FLASH ON THE BOARD
+------------------------
+cd SymbianS3_OS
+pio run -t clean
+pio run
+pio run -t upload
+pio device monitor -b 115200

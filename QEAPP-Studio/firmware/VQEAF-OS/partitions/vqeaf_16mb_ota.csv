@@ -1,0 +1,10 @@
+# VQEAF OS N16R8: 16MiB flash, two 6.25MiB OTA app slots,
+# 3.375MiB SPIFFS-compatible partition for optional LittleFS and 64KiB coredump.
+# Exact layout of Arduino-ESP32 2.0.17 default_16MB.csv (vendored to prevent ambiguity).
+# Name,   Type, SubType, Offset,   Size,      Flags
+nvs,      data, nvs,     0x9000,   0x5000,
+otadata,  data, ota,     0xe000,   0x2000,
+app0,     app,  ota_0,   0x10000,  0x640000,
+app1,     app,  ota_1,   0x650000, 0x640000,
+spiffs,   data, spiffs,  0xc90000, 0x360000,
+coredump, data, coredump,0xFF0000, 0x10000,

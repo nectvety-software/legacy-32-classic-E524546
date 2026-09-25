@@ -1,0 +1,1 @@
+Run python tools/bootstrap_lua.py from QEAPP Studio v0.4 to install official Lua 5.4.8 sources with verified SHA256. Do not commit upstream tarballs without LICENSE. No firmware builds without vendor sources.

@@ -1,0 +1,13 @@
+@vqeaf 1.0
+<theme id="s60_green" name="S60 Green">
+  palette {
+    screen: "#8CC822"
+    panel: "#AFE84A"
+    selected: "#DFF29B"
+    titlebar: "#286C18"
+    keyText: "#000000"
+    chromeText: "#FFFFFF"
+    accent: "#FFFF00"
+    border: "#FFFFFF"
+  }
+</theme>

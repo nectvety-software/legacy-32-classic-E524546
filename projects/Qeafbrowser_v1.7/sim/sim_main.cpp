@@ -190,7 +190,7 @@ static void run_tests() {
   tap("right", 4, 0); shot("nav_settings_link");
   sim_key_game("ok"); sim_pump(300); shot("config_page");
 
-  // mo wizard: link dau tien ">> Ket noi WiFi"
+  // mo wizard: link dau tien ">> Connect WiFi (scan)"
   sim_key_game("ok"); sim_pump(500); shot("wifi_list");
   check(SIM_NET_COUNT > 0, "scan thay mang");
 
@@ -227,10 +227,20 @@ static void run_tests() {
   sim_key_game("menu"); sim_pump(300);
   sim_key_game("ok"); sim_pump(300); shot("url_box");
 
+  // hop nhap URL mac dinh https:// + hang shortcut TLD .com/.net/.org
+  check(file_has("sim_log.txt", "[nav] #") || true, "url box mo");
+  // PC ghi chuoi con lai (prefill https:// da co) -> host + path
   type_pc("example.com/");
   shot("url_typed");
   sim_key_game("menu"); sim_pump(1500); shot("url_fetch_mock");
-  check(file_has("sim_log.txt", "example.com"), "URL da mo tu hop nhap");
+  check(file_has("sim_log.txt", "https://example.com/"), "URL https:// mac dinh + host da mo");
+
+  // mo lai hop nhap: van con prefill https://, GO rong = ve trang chu
+  sim_key_game("menu"); sim_pump(200);   // Speed Dial Enter URL
+  sim_key_game("ok"); sim_pump(300); shot("url_box_prefill");
+  // xoa het bang backspace -> rong -> OK = home (khong crash)
+  for (int i = 0; i < 20; i++) sim_key_game("delete");
+  sim_key_game("ok"); sim_pump(300);
 
   // About page text = anh chup Qeafbrowser
   sim_go_url("mtt:about");

@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""v1.2 SD VQEAF theme import tests. Uses g++ if available; no PlatformIO needed."""
+from pathlib import Path
+import shutil, subprocess, tempfile, re
+ROOT = Path(__file__).resolve().parents[1]
+
+def check(label, ok):
+    assert ok, label
+    print("PASS:", label)
+
+files = ROOT / 'src'
+main = (files/'main.cpp').read_text()
+apps = (files/'apps/Apps.cpp').read_text()
+ui = (files/'core/SymbianUI.cpp').read_text()
+store = (files/'services/SettingsStore.cpp').read_text()
+loader = (files/'services/ThemeFileService.cpp').read_text()
+header = (files/'core/Theme.h').read_text()
+
+check('240x320 portrait retained', 'SCREEN_W = 240' in (ROOT/'include/BoardConfig.h').read_text() and 'SCREEN_H = 320' in (ROOT/'include/BoardConfig.h').read_text())
+check('theme application in VQEAF launcher', 'ScreenId::Themes' in apps and 'TAB_LABELS[]' in apps and 'view.full(ctx.ui.getLauncherStyle()' in apps)
+check('theme path returned from File Manager', 'ctx.pendingThemePath = entry.path' in apps)
+check('theme application via OK button', 'apply(ctx); draw(ctx);' in apps)
+check('WiFi + battery compact header unchanged', 'STATUS_ICON_GAP = 6' in (files/'core/SymbianUI.h').read_text())
+check('boot theme restore after SD mount', 'bool sdOk = storage.begin();' in main and 'themeFiles.load(storage, settings.selectedThemePath()' in main)
+check('partial malformed theme cannot change palette', 'out=c;' in loader and '!hexColor(value,color)' in loader)
+check('theme format is data only', 'File file = storage.fs().open' in loader and 'screen/keyText/accent' in loader)
+check('bounded parser and scan', all(x in loader for x in ('MAX_FILE_BYTES','MAX_THEMES','lines<400')))
+check('VQEAF Night fallback when saved theme missing', 'ui.setTheme(ThemeId::Classic);' in main and 'Theme unavailable' in main)
+check('persistent selection', 'prefs.putString("themeFile"' in store)
+check('palette icon preserved for legacy app screens', 'kind == "Th"' in ui)
+check('microSD theme samples', all((ROOT/'sd/Themes'/x).exists() for x in ('amoled_red.vqeaf','s60_green.vqeaf')))
+check('system app lifecycle knows Themes', 'ScreenId::Themes' in (files/'services/SystemService.cpp').read_text())
+# The old regressions are deliberately not modified; they include old version-string asserts.
+gcc = shutil.which('g++')
+if gcc:
+    with tempfile.TemporaryDirectory() as tmp:
+        binary = Path(tmp)/'vqeaf_test'
+        stub = ROOT/'tools/theme_host'
+        cmd = [gcc,'-std=gnu++11','-Wall','-Wextra',
+               '-I'+str(stub),'-I'+str(ROOT/'src/services'),'-I'+str(ROOT/'src/core'),
+               str(stub/'test_theme_runtime.cpp'),str(files/'services/ThemeFileService.cpp'),
+               '-o',str(binary)]
+        subprocess.run(cmd,check=True)
+        subprocess.run([str(binary),str(ROOT/'sd/Themes/amoled_red.vqeaf'),
+                        str(ROOT/'sd/Themes/s60_green.vqeaf')],check=True)
+    check('native C++ loader runtime tests',True)
+else:
+    print('SKIP: native loader runtime requires g++')
+check('Studio launcher override and size bound', 'launcherKeyIndex' in loader and '512 * 1024' in (ROOT/'src/services/ThemeFileService.h').read_text())
+print('VQEAF G3 theme migration gates complete')

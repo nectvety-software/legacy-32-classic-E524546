@@ -1,0 +1,35 @@
+{
+  "app_real_cpp_install": true,
+  "installed": [
+    {
+      "id": "welcome",
+      "receipt": true
+    },
+    {
+      "id": "help_site",
+      "receipt": true
+    }
+  ],
+  "theme_real_cpp_validated": true,
+  "theme_persistence_after_restart": true,
+  "theme": [
+    36420,
+    44873,
+    57235,
+    0,
+    0,
+    11107,
+    65535,
+    65504,
+    63488,
+    44873,
+    0,
+    57235,
+    65535
+  ],
+  "browser_real_cpp_html_parsed_mock_http": true,
+  "frames_from_production_cpp_renderer": 5,
+  "physical_esp32": false,
+  "real_micro_sd": false,
+  "live_internet_tls": false
+}

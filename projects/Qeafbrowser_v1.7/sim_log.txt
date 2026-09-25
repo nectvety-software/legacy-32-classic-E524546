@@ -1,45 +1,55 @@
 [boot] 1 serial
+[boot] 1b pre-panel
+[boot] 1c panel.init enter
 [boot] 2 display
+[boot] 2b rot
+[boot] 2bb bright
+[boot] 2c fill
 [store] FS=LittleFS
-[store] fs=LFS hist=7 book=0 ssid= home=https://qeafivels.com/
-[wifi] Vao Settings > Ket noi WiFi de quet + nhap thu cong
-[nav] mtt:start
-[boot] setup xong. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass>
-[focus] line=3..3 link=1 top=0 dir=1
-[focus] line=5..5 link=2 top=0 dir=1
-[focus] line=7..7 link=3 top=0 dir=1
-[focus] line=9..9 link=4 top=0 dir=1
-[nav] mtt:config
-[nav] mtt:wifi
-[wifi] quet mang THAT (WiFi.scanNetworks)...
-[wifi] thay 4 mang THAT
-[nav] mtt:wifisel#0
-[wifi] thu ket noi 'VNPT-Home' pass='abc'
-[store] config.ini da luu (ssid=VNPT-Home)
-[clock] simulator realtime UTC+7
-[boot] 1 serial
-[boot] 2 display
-[store] FS=LittleFS
-[store] fs=LFS hist=7 book=0 ssid=VNPT-Home home=https://qeafivels.com/
+[store] fs=LFS hist=14 book=24 ssid=VNPT-Home home=mtt:start
+[boot] 3 store
+[lc] theme vqeaf: retrogo_dark (Retro-Go Dark)
+[boot] 4 keys
+[boot] 5 splash
 [wifi] OK ip=192.168.1.77
 [clock] simulator realtime UTC+7
-[nav] https://qeafivels.com/
-[thumb] LFS CRC mismatch /Qeafbrowser/thumbcache/97856203.qbt got=7bfe7660 expected=6cf11f52
-[thumb] LFS CRC mismatch /Qeafbrowser/thumbcache/2f60e9f3.qbt got=a8be4627 expected=b709f249
+[boot] launcher active -> browser page load da hoan on start
+[boot] setup done. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass> | shot | doc
+[boot] loop enter
+[nav] mtt:start
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+=32 links=16 images=0 wml=1
+    0 y= 28 h=16 st=0 link=-1 blk=0 ""
+    1 y= 44 h=24 st=1 link= 0 blk=2 "Enter URL"
+    2 y= 68 h=24 st=1 link=-1 blk=2 ""
+    3 y= 92 h=24 st=1 link= 1 blk=4 "Google Search"
+    4 y=116 h=24 st=1 link=[nav] https://qeafivels.com/
 [thumb] prefetch=0/2 image(s)
 [mouse] desktop UI detected -> virtual mouse on
 [thumb] PSRAM hit slot=0 hits=2 https://www.qeafivels.com/hero-banner.jpg
-[boot] setup xong. CLI: go <url> | key <name> | scan | status | wifi <ssid> <pass>
-[nav] https://qeafivels.com/
-[thumb] PSRAM hit slot=0 hits=3 https://www.qeafivels.com/hero-banner.jpg
-[thumb] PSRAM hit slot=1 hits=2 https://www.qeafivels.com/products-audio.png
-[thumb] prefetch=0/2 image(s)
-[mouse] desktop UI detected -> virtual mouse on
-[thumb] PSRAM hit slot=0 hits=4 https://www.qeafivels.com/hero-banner.jpg
 [menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
+[thumb] PSRAM hit slot=0 hits=3 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=4 https://www.qeafivels.com/hero-banner.jpg
 [thumb] PSRAM hit slot=0 hits=5 https://www.qeafivels.com/hero-banner.jpg
 [thumb] PSRAM hit slot=0 hits=6 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=7 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=8 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=9 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=10 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=11 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=0 hits=12 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=2 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=13 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=3 https://www.qeafivels.com/products-audio.png
+[thumb] PSRAM hit slot=0 hits=14 https://www.qeafivels.com/hero-banner.jpg
+[thumb] PSRAM hit slot=1 hits=4 https:[focus] line=9..9 link=4 top=0 dir=1
+[focus] line=11..11 link=5 top=0 dir=1
+[focus] line=13..13 link=6 top=0 dir=1
+[focus] line=15..15 link=7 top=2 dir=1
+[nav] https://keypad.test/
+[mouse] desktop UI detected -> virtual mouse on
+[menu] open Bmrk/Optn/Navg/Tool/Sett/Help/Exit
 [nav] mtt:start
 [nav] #
-[nav] https://example.com/
-[nav] mtt:about
+[nav] mtt:start
+[nav] https://www.google.com/

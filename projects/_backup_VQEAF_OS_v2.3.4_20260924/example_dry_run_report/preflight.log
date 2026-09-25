@@ -1,0 +1,4 @@
+[DRY-RUN] VQEAF OS: simulation only — not a firmware build
+[DRY-RUN] Runs local Python board consistency validation; never runs pio or Xtensa compiler.
+[DRY-RUN] Read-only cache snapshot complete. Cache absence does not block simulation.
+[DRY-RUN] Observed: PlatformIO CLI not detected; REAL offline build would require it.

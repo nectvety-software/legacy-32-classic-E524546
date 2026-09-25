@@ -1,0 +1,11 @@
+# UTC 2026-09-24T12:24:41+00:00
+# Command: /opt/pyvenv/bin/python3 tools/check_board_config.py
+# cwd: /mnt/data/VQEAF_OS_v233_dryrun_work/VQEAF-OS
+
+PASS board: project-local ESP32-S3 N16R8 QIO flash + OPI PSRAM
+PASS pins: LCD (SPI2), all 10 buttons, SDMMC 1-bit; portrait 240x320
+PASS platform: pinned espressif32 6.10.0 and four pinned libraries
+PASS partitions: NVS, OTA data, 2x 6.25MiB app slots, flash FS, coredump; no overlaps
+PASS build guards: C++11 pin asserts and serial memory diagnostics installed
+
+# exit_code=0

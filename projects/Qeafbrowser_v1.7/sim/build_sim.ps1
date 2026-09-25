@@ -10,7 +10,7 @@ Set-Location $PSScriptRoot
 & $gpp -O2 -std=gnu++17 -static -D_POSIX_THREAD_SAFE_FUNCTIONS=1 -I shims -I "$root\include" `
   -o qeafbrowser_sim.exe `
   sim_main.cpp sim_arduino.cpp `
-  "$root\src\main.cpp" "$root\src\wml.cpp" "$root\src\http.cpp" "$root\src\store.cpp" `
+  "$root\src\main.cpp" "$root\src\wml.cpp" "$root\src\http.cpp" "$root\src\store.cpp" "$root\src\launcher.cpp" `
   -lws2_32 -lgdi32 -lcomdlg32 -lcomdlg32
 
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

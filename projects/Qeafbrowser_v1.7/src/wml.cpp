@@ -41,11 +41,95 @@ static inline bool starts_focus_block(const char *t) {
   return false;
 }
 
+static void attr_decode(char *s) {
+  if (!s) return;
+  char *w = s;
+  const char *r = s;
+  while (*r) {
+    if (!strncmp(r, "&amp;", 5)) { *w++ = '&'; r += 5; continue; }
+    if (!strncmp(r, "&quot;", 6)) { *w++ = '"'; r += 6; continue; }
+    if (!strncmp(r, "&#39;", 5) || !strncmp(r, "&apos;", 6)) { *w++ = '\''; r += (*r == '&' && r[2] == '#') ? 5 : 6; continue; }
+    *w++ = *r++;
+  }
+  *w = 0;
+}
+
+static bool prefix_ci(const char *s, const char *prefix) {
+  while (*prefix) {
+    if (!*s || tolower((unsigned char)*s) != tolower((unsigned char)*prefix)) return false;
+    s++; prefix++;
+  }
+  return true;
+}
+
+static bool suffix_ci(const char *s, size_t n, const char *suffix) {
+  size_t z = strlen(suffix);
+  return n >= z && !strncasecmp(s + n - z, suffix, z);
+}
+
+static bool image_url_candidate(const char *u) {
+  if (!u || !u[0] || isspace((unsigned char)u[0]) ||
+      prefix_ci(u, "data:") || prefix_ci(u, "blob:") ||
+      prefix_ci(u, "javascript:") || prefix_ci(u, "about:")) return false;
+  size_t n = strlen(u);
+  for (size_t i = 0; i < n; i++) {
+    if (u[i] == '?' || u[i] == '#') { n = i; break; }
+  }
+  if (suffix_ci(u, n, ".gif") || suffix_ci(u, n, ".webp") ||
+      suffix_ci(u, n, ".svg") || suffix_ci(u, n, ".avif")) return false;
+  return true;
+}
+
+static void image_srcset_pick(const char *set, char *out, int cap) {
+  out[0] = 0;
+  if (!set || !set[0] || prefix_ci(set, "data:")) return;
+  const char *p = set;
+  while (*p) {
+    while (*p == ',' || isspace((unsigned char)*p)) p++;
+    const char *start = p;
+    while (*p && *p != ',') p++;
+    const char *end = p;
+    while (end > start && isspace((unsigned char)end[-1])) end--;
+    const char *ue = start;
+    while (ue < end && !isspace((unsigned char)*ue)) ue++;
+    size_t n = (size_t)(ue - start);
+    if (n > 0 && n < (size_t)cap) {
+      char candidate[192];
+      size_t copy = n < sizeof candidate - 1 ? n : sizeof candidate - 1;
+      memcpy(candidate, start, copy);
+      candidate[copy] = 0;
+      if (image_url_candidate(candidate)) {
+        strncpy(out, candidate, (size_t)cap - 1);
+        out[cap - 1] = 0;
+        return;
+      }
+    }
+    if (*p == ',') p++;
+  }
+}
+
+static void image_source_pick(const char *lazy, const char *set, const char *src,
+                             char *out, int cap) {
+  out[0] = 0;
+  if (image_url_candidate(lazy)) {
+    strncpy(out, lazy, (size_t)cap - 1);
+    out[cap - 1] = 0;
+  } else {
+    image_srcset_pick(set, out, cap);
+    if (!out[0] && image_url_candidate(src)) {
+      strncpy(out, src, (size_t)cap - 1);
+      out[cap - 1] = 0;
+    }
+  }
+  attr_decode(out);
+}
+
 // tach ten the + thuoc tinh href/title. Tra ve 1=the mo, -1=the dong/comment, 0=khong phai the
 static int tag_scan(const char *s, size_t n, size_t *i, char *name, int ncap,
                     char *href, int hcap, char *title, int tcap,
-                    char *alt, int acap, char *src, int scap) {
-  name[0] = href[0] = title[0] = alt[0] = src[0] = 0;
+                    char *alt, int acap, char *src, int scap,
+                    char *lazy, int lcap, char *srcset, int setcap) {
+  name[0] = href[0] = title[0] = alt[0] = src[0] = lazy[0] = srcset[0] = 0;
   if (*i >= n || s[*i] != '<') return 0;
   size_t p = *i + 1;
   bool closing = false;
@@ -97,6 +181,14 @@ static int tag_scan(const char *s, size_t n, size_t *i, char *name, int ncap,
       } else if (!strcmp(key, "src") && src && ve > vs) {
         size_t l = ve - vs; if (l >= (size_t)scap) l = scap - 1;
         memcpy(src, s + vs, l); src[l] = 0;
+      } else if ((!strcmp(key, "data-src") || !strcmp(key, "data-original") ||
+                  !strcmp(key, "data-lazy-src")) && lazy && ve > vs) {
+        size_t l = ve - vs; if (l >= (size_t)lcap) l = lcap - 1;
+        memcpy(lazy, s + vs, l); lazy[l] = 0;
+      } else if ((!strcmp(key, "srcset") || !strcmp(key, "data-srcset")) &&
+                 srcset && ve > vs) {
+        size_t l = ve - vs; if (l >= (size_t)setcap) l = setcap - 1;
+        memcpy(srcset, s + vs, l); srcset[l] = 0;
       }
     }
   }
@@ -120,10 +212,88 @@ static bool title_space;
 static char skip_name[16];
 static int  skip_depth;
 
+// ---- Feed (RSS 2.0 / Atom) detection + state ----
+static bool feed_mode;
+static bool feed_in_item;          // inside <item> or <entry>
+static bool feed_in_title;         // capturing <title> text
+static bool feed_in_link_text;     // capturing <link>URL</link> (RSS)
+static bool feed_in_desc;          // capturing description/summary (plain text)
+static bool feed_have_title, feed_have_link;
+static char feed_title[160];
+static char feed_link[192];
+static char feed_desc[720];       // BBC: description truoc link — defer den sau emit
+static int  feed_tlen, feed_llen, feed_dlen;
+
+// ASCII whitespace only — UTF-8 continuation bytes (0x80-0xBF) must never match.
+static inline bool ascii_space(char c) {
+  return (unsigned char)c < 128 && isspace((unsigned char)c);
+}
+
+// Decode &#NNN; / &#xHH; at src[i] into UTF-8 out[4].
+// Returns bytes written (0 = not a valid entity). *end = pos after ';'.
+static int entity_utf8(const char *src, size_t n, size_t i, char out[4], size_t *end) {
+  if (i + 2 >= n || src[i] != '&' || src[i + 1] != '#') return 0;
+  size_t k = i + 2;
+  int base = 10;
+  if (k < n && (src[k] == 'x' || src[k] == 'X')) { base = 16; k++; }
+  char tmp[8]; int tl = 0;
+  while (k < n && tl < 7 && src[k] != ';') tmp[tl++] = src[k++];
+  if (tl == 0 || k >= n || src[k] != ';') return 0;
+  tmp[tl] = 0;
+  char *ep = nullptr;
+  long v = strtol(tmp, &ep, base);
+  if (ep == tmp || v < 1 || v > 0x10FFFF) return 0;
+  if (v >= 0xD800 && v <= 0xDFFF) return 0;
+  *end = k + 1;
+  if (v < 0x80) { out[0] = (char)v; return 1; }
+  if (v < 0x800) {
+    out[0] = (char)(0xC0 | (v >> 6));
+    out[1] = (char)(0x80 | (v & 0x3F));
+    return 2;
+  }
+  if (v < 0x10000) {
+    out[0] = (char)(0xE0 | (v >> 12));
+    out[1] = (char)(0x80 | ((v >> 6) & 0x3F));
+    out[2] = (char)(0x80 | (v & 0x3F));
+    return 3;
+  }
+  out[0] = (char)(0xF0 | (v >> 18));
+  out[1] = (char)(0x80 | ((v >> 12) & 0x3F));
+  out[2] = (char)(0x80 | ((v >> 6) & 0x3F));
+  out[3] = (char)(0x80 | (v & 0x3F));
+  return 4;
+}
+
+static bool looks_like_feed(const char *s, size_t n) {
+  size_t lim = n < 4096 ? n : 4096;
+  for (size_t i = 0; i + 5 < lim; i++) {
+    if (s[i] != '<') continue;
+    if ((s[i+1]=='r'||s[i+1]=='R') && (s[i+2]=='s'||s[i+2]=='S') &&
+        (s[i+3]=='s'||s[i+3]=='S') && (s[i+4]=='>'||isspace((unsigned char)s[i+4])))
+      return true;
+    if ((s[i+1]=='f'||s[i+1]=='F') && (s[i+2]=='e'||s[i+2]=='E') &&
+        (s[i+3]=='e'||s[i+3]=='E') && (s[i+4]=='d'||s[i+4]=='D'))
+      return true;
+    if ((s[i+1]=='a'||s[i+1]=='A') && (s[i+2]=='t'||s[i+2]=='T') &&
+        (s[i+3]=='o'||s[i+3]=='O') && (s[i+4]=='m'||s[i+4]=='M'))
+      return true;
+    if ((s[i+1]=='r'||s[i+1]=='R') && (s[i+2]=='d'||s[i+2]=='D') &&
+        (s[i+3]=='f'||s[i+3]=='F') && (s[i+4]==':'))
+      return true;
+  }
+  return false;
+}
+
+static void feed_reset_item() {
+  feed_have_title = feed_have_link = false;
+  feed_tlen = feed_llen = feed_dlen = 0;
+  feed_title[0] = 0; feed_link[0] = 0; feed_desc[0] = 0;
+}
+
 static void title_char(char c) {
   size_t n = strlen(D->title);
   if (n + 1 >= MAX_TITLE) return;
-  if (isspace((unsigned char)c)) { title_space = n > 0; return; }
+  if (ascii_space(c)) { title_space = n > 0; return; }
   if (title_space && n && n + 1 < MAX_TITLE) D->title[n++] = ' ';
   D->title[n++] = c; D->title[n] = 0; title_space = false;
 }
@@ -191,6 +361,7 @@ static void flush_line() {
 
 static void put_char(char c) {
   if (D->len + 2 >= D->cap) return;
+  // put_char chi dung cho entity/ky tu le (ASCII). UTF-8 nhieu byte di qua put_word.
   char t[2] = { c, 0 };
   int w = gfx_textWidth(t, cur_style);
   if (cur_px + w > SCR_W - 6 && cur_chars > 0) {
@@ -211,6 +382,60 @@ static void put_word(const char *nul_term, int n) {
   cur_chars += n;
   cur_px += w;
   pending_space = false;
+}
+
+// Feed: Đóng 1 mục — title thành link clickable nếu có URL, không thì text thường.
+static void feed_emit_item() {
+  if (feed_have_title || feed_have_link) {
+    if (cur_chars > 0) flush_line();
+    if (feed_have_link && D->nlinks < MAX_LINKS) {
+      int li = D->nlinks++;
+      strncpy(D->links[li].url, feed_link, sizeof D->links[li].url - 1);
+      D->links[li].url[sizeof D->links[li].url - 1] = 0;
+      D->links[li].line0 = D->nlines;
+      D->links[li].line1 = D->nlines;
+      open_link = li;
+      const char *lab = feed_have_title ? feed_title : feed_link;
+      put_word(lab, (int)strlen(lab));
+      if (cur_chars > 0) flush_line();
+      link_close_to(D->nlines > 0 ? D->nlines - 1 : 0);
+      open_link = -1;
+    } else if (feed_have_title) {
+      put_word(feed_title, feed_tlen);
+      flush_line();
+    }
+    pending_space = false;
+    // Description defer (BBC radio: title, description, link)
+    if (feed_dlen > 0) {
+      flush_line();
+      int save_style = cur_style;
+      cur_style = 5;
+      cur_block = next_block++;
+      put_word(feed_desc, feed_dlen);
+      flush_line();
+      cur_style = save_style;
+      pending_space = false;
+    }
+  }
+  feed_reset_item();
+}
+
+static void feed_put_char(char c) {
+  if (feed_in_title) {
+    if (feed_tlen + 1 < (int)sizeof feed_title) {
+      if (ascii_space(c)) {
+        if (feed_tlen > 0 && feed_title[feed_tlen-1] != ' ') feed_title[feed_tlen++] = ' ';
+      } else feed_title[feed_tlen++] = c;
+      feed_title[feed_tlen] = 0;
+      feed_have_title = feed_tlen > 0;
+    }
+  } else if (feed_in_link_text) {
+    if (feed_llen + 1 < (int)sizeof feed_link) {
+      feed_link[feed_llen++] = c;
+      feed_link[feed_llen] = 0;
+      feed_have_link = feed_llen > 0;
+    }
+  }
 }
 
 bool doc_line_is_separator(Doc *d, int i) {
@@ -236,18 +461,58 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
   cur_block = 0; next_block = 1;
   pending_space = false; in_title = false; title_space = false;
   skip_name[0] = 0; skip_depth = 0;
+  feed_mode = looks_like_feed(src, n);
+  feed_in_item = feed_in_title = feed_in_link_text = feed_in_desc = false;
+  feed_reset_item();
+  if (feed_mode) Serial.println("[feed] RSS/Atom detected");
 
   size_t i = 0;
   static char name[24], href[192], title[64], alt[96], src_url[192];
+  static char lazy_url[192], srcset_url[512], image_url[192];
   static char word[256]; int wi = 0;
 
   while (i < n) {
     char c = src[i];
+    // <![CDATA[ ... ]]> — RSS/Atom gap 2.0 (BBC, CNN…). tag_scan se huy no nhu comment.
+    if (c == '<' && i + 9 <= n && !memcmp(src + i, "<![CDATA[", 9)) {
+      if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
+      size_t cs = i + 9;
+      size_t ce = cs;
+      while (ce + 2 < n && !(src[ce]==']' && src[ce+1]==']' && src[ce+2]=='>')) ce++;
+      size_t clen = (ce > cs) ? ce - cs : 0;
+      if (feed_mode && (feed_in_title || feed_in_link_text)) {
+        for (size_t k = 0; k < clen; k++) feed_put_char(src[cs + k]);
+      } else if (in_title) {
+        for (size_t k = 0; k < clen; k++) title_char(src[cs + k]);
+      } else       if (feed_mode && feed_in_desc) {
+        for (size_t k = 0; k < clen; k++) {
+          char ch = src[cs + k];
+          if (feed_dlen + 1 < (int)sizeof feed_desc) {
+            if (ascii_space(ch)) {
+              if (feed_dlen > 0 && feed_desc[feed_dlen-1] != ' ') feed_desc[feed_dlen++] = ' ';
+            } else feed_desc[feed_dlen++] = ch;
+            feed_desc[feed_dlen] = 0;
+          }
+        }
+      } else if (!feed_mode) {
+        for (size_t k = 0; k < clen; k++) {
+          char ch = src[cs + k];
+          if (ascii_space(ch)) {
+            if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
+            if (cur_chars > 0) pending_space = true;
+          } else if (wi < (int)sizeof word - 1) word[wi++] = ch;
+        }
+      }
+      // feed nhung text KHONG nam trong capture -> bo qua (guid/pubDate/channel meta)
+      i = (ce + 2 < n) ? ce + 3 : n;
+      continue;
+    }
     if (c == '<') {
       if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
       size_t j = i;
       int r = tag_scan(src, n, &j, name, sizeof name, href, sizeof href, title, sizeof title,
-                       alt, sizeof alt, src_url, sizeof src_url);
+                       alt, sizeof alt, src_url, sizeof src_url,
+                       lazy_url, sizeof lazy_url, srcset_url, sizeof srcset_url);
       if (r == 0) { i++; continue; }
       i = j;
       if (skip_depth > 0) {
@@ -255,6 +520,114 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
         else if (r == -2 && !strcmp(name, skip_name) && --skip_depth == 0) skip_name[0] = 0;
         continue;
       }
+      // ---- Feed mode branch ----
+      if (feed_mode) {
+        bool is_item = !strcmp(name, "item") || !strcmp(name, "entry");
+        bool is_title = !strcmp(name, "title");
+        bool is_link = !strcmp(name, "link") || !strcmp(name, "atom:link");
+        bool is_desc = !strcmp(name, "description") || !strcmp(name, "summary") ||
+                       !strcmp(name, "content") || !strcmp(name, "encoded") ||
+                       !strcmp(name, "media:description");
+        bool is_skip = !strcmp(name, "guid") || !strcmp(name, "pubdate") ||
+                       !strcmp(name, "published") || !strcmp(name, "updated") ||
+                       !strcmp(name, "author") || !strcmp(name, "creator") ||
+                       !strcmp(name, "category") || !strcmp(name, "comment") ||
+                       !strcmp(name, "enclosure") || !strcmp(name, "thumbnail") ||
+                       !strcmp(name, "media:content") || !strcmp(name, "media:thumbnail");
+
+        if (r == -2) { // closing
+          if (is_title) {
+            if (feed_in_title) {
+              feed_in_title = false;
+            } else {
+              in_title = false; title_space = false; // channel/page title done
+            }
+            continue;
+          }
+          if (is_link && feed_in_link_text) {
+            feed_in_link_text = false;
+            // emit se xay ra o </item> / </entry> de description luon nam sau title
+            continue;
+          }
+          if (is_desc && feed_in_desc) {
+            feed_in_desc = false;
+            continue;
+          }
+          if (is_item && feed_in_item) {
+            feed_in_item = false;
+            feed_emit_item();
+            cur_block = next_block++;
+            continue;
+          }
+          continue;
+        }
+        if (r == -1) continue;
+        if (is_skip) {
+          // Leaf meta (guid/pubDate/…): bo qua tag — text rac se bi bo o feed text path.
+          // KHONG dung skip_depth: media:thumbnail self-closing se lam skip_depth treo.
+          continue;
+        }
+        if (is_item) {
+          if (feed_in_item) feed_emit_item();
+          feed_in_item = true;
+          feed_reset_item();
+          flush_line();
+          cur_block = next_block++;
+          cur_style = 0;
+          continue;
+        }
+        if (is_title) {
+          if (feed_in_item) {
+            feed_in_title = true;
+            feed_tlen = 0; feed_title[0] = 0; feed_have_title = false;
+          } else if (!d->title[0]) {
+            in_title = true; title_space = false; // channel/page title only once
+          }
+          continue;
+        }
+        if (is_link) {
+          if (href[0]) { // Atom: <link href="..."/>
+            if (feed_in_item) {
+              strncpy(feed_link, href, sizeof feed_link - 1);
+              feed_link[sizeof feed_link - 1] = 0;
+              feed_have_link = feed_link[0] != 0;
+              feed_llen = (int)strlen(feed_link);
+              // emit o </entry> — giu description co thu tu dung
+            }
+            continue;
+          }
+          if (feed_in_item) {
+            feed_in_link_text = true;
+            feed_llen = 0; feed_link[0] = 0; feed_have_link = false;
+          }
+          continue;
+        }
+        if (is_desc) {
+          // defer: khong in ngay — BBC co description TRUOC link
+          if (feed_in_item) {
+            feed_in_desc = true;
+            feed_dlen = 0; feed_desc[0] = 0;
+          }
+          continue;
+        }
+        // Inside item, title/link known: if RSS order title then link, emit after link text closes.
+        // Fall through for other tags (channel, rss, etc.)
+        if (isblock(name)) {
+          if (feed_in_item || strcmp(name, "channel") == 0 || strcmp(name, "rss") == 0 ||
+              strcmp(name, "feed") == 0 || strcmp(name, "rdf") == 0) {
+            // don't break lines aggressively inside item except at emit
+            if (!feed_in_item) {
+              flush_line();
+              if (starts_focus_block(name)) cur_block = next_block++;
+              cur_style = heading_style(name);
+            }
+          }
+          continue;
+        }
+        // unknown/open tags in feed: ignore name, keep going
+        continue;
+      }
+      // ---- End feed mode branch ----
       if (r == -2) {                       // the dong: dong link neu la a/anchor
         if (!strcmp(name, "title")) { in_title = false; title_space = false; continue; }
         if (!strcmp(name, "a") || !strcmp(name, "anchor") || !strcmp(name, "option")) {
@@ -268,6 +641,13 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
         continue;
       }
       if (r == -1) continue;               // comment/doctype
+      attr_decode(href);
+      attr_decode(title);
+      attr_decode(alt);
+      attr_decode(src_url);
+      attr_decode(lazy_url);
+      attr_decode(srcset_url);
+      image_source_pick(lazy_url, srcset_url, src_url, image_url, sizeof image_url);
       if (!strcmp(name, "script") || !strcmp(name, "style") || !strcmp(name, "noscript") ||
           !strcmp(name, "svg") || !strcmp(name, "canvas") || !strcmp(name, "template") ||
           !strcmp(name, "iframe") || !strcmp(name, "object")) {
@@ -293,30 +673,40 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
         d->links[li].line1 = d->nlines;
         open_link = li;
       }
-      if (!strcmp(name, "img") && (alt[0] || src_url[0])) {
-        if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
-        flush_line();
-        cur_style = 7;
-        cur_block = next_block++;
-        current_image = -1;
-        if (d->nimages < MAX_IMAGES) {
-          int ii = d->nimages++;
-          strncpy(d->images[ii].url, src_url, sizeof d->images[ii].url - 1);
-          d->images[ii].url[sizeof d->images[ii].url - 1] = 0;
-          const char *label = alt[0] ? alt : src_url;
-          strncpy(d->images[ii].alt, label, sizeof d->images[ii].alt - 1);
-          d->images[ii].alt[sizeof d->images[ii].alt - 1] = 0;
-          d->images[ii].line0 = d->nlines;
-          d->images[ii].line1 = d->nlines;
-          current_image = ii;
+      if (!strcmp(name, "img")) {
+        if (image_url[0]) {
+          if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
+          flush_line();
+          cur_style = 7;
+          cur_block = next_block++;
+          current_image = -1;
+          if (d->nimages < MAX_IMAGES) {
+            int ii = d->nimages++;
+            strncpy(d->images[ii].url, image_url, sizeof d->images[ii].url - 1);
+            d->images[ii].url[sizeof d->images[ii].url - 1] = 0;
+            const char *label = alt[0] ? alt : image_url;
+            strncpy(d->images[ii].alt, label, sizeof d->images[ii].alt - 1);
+            d->images[ii].alt[sizeof d->images[ii].alt - 1] = 0;
+            d->images[ii].line0 = d->nlines;
+            d->images[ii].line1 = d->nlines;
+            current_image = ii;
+          }
+          const char *label = alt[0] ? alt : image_url;
+          put_word(label, (int)strlen(label));
+          flush_line();
+          if (current_image >= 0) d->images[current_image].line1 = d->nlines - 1;
+          cur_style = 0;
+          current_image = -1;
+          pending_space = false;
+        } else if (alt[0]) {
+          if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
+          flush_line();
+          cur_block = next_block++;
+          put_word(alt, (int)strlen(alt));
+          flush_line();
+          cur_style = 0;
+          pending_space = false;
         }
-        const char *label = alt[0] ? alt : src_url;
-        put_word(label, (int)strlen(label));
-        flush_line();
-        if (current_image >= 0) d->images[current_image].line1 = d->nlines - 1;
-        cur_style = 0;
-        current_image = -1;
-        pending_space = false;
       }
       if (!strcmp(name, "hr")) {
         flush_line(); cur_style = 5;
@@ -330,6 +720,67 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
       continue;
     }
     if (skip_depth > 0) { i++; continue; }
+    // Feed text capture (title / link text / description body)
+    if (feed_mode && (feed_in_title || feed_in_link_text)) {
+      char compat = 0;
+      size_t ni = i;
+      if (utf8_compat_punct(src, n, &ni, &compat)) { feed_put_char(compat); i = ni; continue; }
+      if (c == '&') {
+        static const struct { const char *k; char v; } TE[] = {
+          {"&amp;",'&'},{"&lt;",'<'},{"&gt;",'>'},{"&nbsp;",' '},{"&quot;",'"'},{"&apos;",'\''},{0,0}};
+        bool done = false;
+        for (int k = 0; TE[k].k; k++) {
+          size_t el = strlen(TE[k].k);
+          if (i + el <= n && !memcmp(src + i, TE[k].k, el)) {
+            feed_put_char(TE[k].v); i += el; done = true; break;
+          }
+        }
+        if (done) continue;
+        char u[4]; size_t uend;
+        int ul = entity_utf8(src, n, i, u, &uend);
+        if (ul) {
+          for (int b = 0; b < ul; b++) feed_put_char(u[b]);
+          i = uend; continue;
+        }
+      }
+      if (!ascii_space(c) || feed_in_title) feed_put_char(c);
+      else if (feed_in_link_text && !ascii_space(c)) feed_put_char(c);
+      i++; continue;
+    }
+    if (feed_mode && feed_in_desc) {
+      // description -> buffer defer (in sau title link)
+      if (c == '&') {
+        char u[4]; size_t uend;
+        int ul = entity_utf8(src, n, i, u, &uend);
+        if (ul) {
+          for (int b = 0; b < ul; b++) {
+            char ch = u[b];
+            if (feed_dlen + 1 < (int)sizeof feed_desc) {
+              if (ascii_space(ch)) {
+                if (feed_dlen > 0 && feed_desc[feed_dlen-1] != ' ') feed_desc[feed_dlen++] = ' ';
+              } else feed_desc[feed_dlen++] = ch;
+              feed_desc[feed_dlen] = 0;
+            }
+          }
+          i = uend; continue;
+        }
+      }
+      if (ascii_space(c)) {
+        if (feed_dlen > 0 && feed_desc[feed_dlen-1] != ' ' && feed_dlen + 1 < (int)sizeof feed_desc)
+          feed_desc[feed_dlen++] = ' ';
+        i++; continue;
+      }
+      if (feed_dlen + 1 < (int)sizeof feed_desc) {
+        feed_desc[feed_dlen++] = c;
+        feed_desc[feed_dlen] = 0;
+      }
+      i++; continue;
+    }
+    // Feed text rac ngoai title/link/desc (guid, pubDate, channel link…) -> bo qua
+    if (feed_mode && !feed_in_title && !feed_in_link_text && !feed_in_desc && !in_title) {
+      if (c == '&' || isspace((unsigned char)c)) { i++; continue; }
+      i++; continue;
+    }
     if (in_title) {
       char compat = 0;
       size_t ni = i;
@@ -345,6 +796,12 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
           }
         }
         if (done) continue;
+        char u[4]; size_t uend;
+        int ul = entity_utf8(src, n, i, u, &uend);
+        if (ul) {
+          for (int b = 0; b < ul; b++) title_char(u[b]);
+          i = uend; continue;
+        }
       }
       title_char(c); i++; continue;
     }
@@ -371,24 +828,23 @@ bool doc_parse(Doc *d, const char *src, size_t n) {
         }
       }
       if (done) continue;
-      // numeric entity
-      if (i + 2 < n && src[i + 1] == '#') {
-        int base = (i + 2 < n && (src[i + 2] == 'x' || src[i + 2] == 'X')) ? 16 : 10;
-        char tmp[8]; int tl = 0;
-        size_t k = i + (base == 16 ? 3 : 2);
-        while (k < n && tl < 6 && src[k] != ';') tmp[tl++] = src[k++];
-        tmp[tl] = 0;
-        long v = strtol(tmp, 0, base);
-        if (tl > 0 && v > 31 && v < 127) {
+      // numeric entity -> UTF-8 (Vietnamese: &#7871; ế, &#225; á, ...)
+      char u[4]; size_t uend;
+      int ul = entity_utf8(src, n, i, u, &uend);
+      if (ul) {
+        if (ul == 1 && ascii_space(u[0])) {
           if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
-          put_char((char)v);
-          i = k; if (i < n && src[i] == ';') i++;
-          continue;
+          if (cur_chars > 0) pending_space = true;
+        } else {
+          for (int b = 0; b < ul; b++)
+            if (wi < (int)sizeof word - 1) word[wi++] = u[b];
         }
+        i = uend;
+        continue;
       }
       // & thuong -> giu nguyen
     }
-    if (isspace((unsigned char)c)) {
+    if (ascii_space(c)) {
       if (wi) { word[wi]=0; put_word(word, wi); wi = 0; }
       if (cur_chars > 0) pending_space = true;
       i++;

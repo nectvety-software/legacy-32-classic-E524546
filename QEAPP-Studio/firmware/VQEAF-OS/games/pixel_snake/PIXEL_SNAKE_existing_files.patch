@@ -1,0 +1,154 @@
+diff --git a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -24,6 +24,7 @@
+ #include "services/AppInstallerService.h"
+ #include "services/QeappDataService.h"
+ #include "apps/Apps.h"
++#include "apps/PixelSnakeApp.h"
+ 
+ static TFT_eSPI tft;
+ static VqeafUI ui(tft); // compatibility adapter over the existing UI implementation
+@@ -66,6 +67,7 @@
+ static TaskSwitcherApp taskSwitcherApp;
+ static NotificationCenterApp notificationApp;
+ static NotesApp notesApp;
++static PixelSnakeApp pixelSnakeApp;
+ 
+ static ScreenId screen = ScreenId::Splash;
+ static ScreenId detailReturn = ScreenId::Applications;
+@@ -187,7 +189,12 @@
+     } else {
+       packageOpeningName = meta.name;
+       appCtx.pendingPackageLaunch = true;
+-      if (!strcmp(meta.type, "web")) {
++      if (!strcmp(meta.id, "snake_pixel") && !strcmp(meta.type, "text")) {
++        if (pixelSnakeApp.enter(appCtx)) s = ScreenId::Snake;
++        else { notifications.push("Pixel Snake", "Invalid signed game settings"); s = ScreenId::Applications; }
++        // Browser and Text Viewer normally consume this flag. Snake does not.
++        appCtx.pendingPackageLaunch = false;
++      } else if (!strcmp(meta.type, "web")) {
+         appCtx.pendingBrowserUrl = meta.entry;
+         s = ScreenId::Browser;
+       } else {
+@@ -247,6 +254,8 @@
+       if (!resume) textViewerApp.enter(appCtx); textViewerApp.draw(appCtx); break;
+     case ScreenId::Browser:
+       if (!resume) browserApp.enter(appCtx); browserApp.draw(appCtx); break;
++    case ScreenId::Snake:
++      pixelSnakeApp.draw(appCtx); break;
+     case ScreenId::Shell:
+       if (!resume) shellApp.enter(appCtx); shellApp.draw(appCtx); break;
+     case ScreenId::Settings:
+@@ -526,7 +535,7 @@
+     if (screen == ScreenId::Explorer) explorer.draw(appCtx);
+     if (screen == ScreenId::Files || screen == ScreenId::Gallery ||
+         screen == ScreenId::Themes || screen == ScreenId::TextViewer ||
+-        screen == ScreenId::AppInstaller) enterScreen(ScreenId::Idle, false);
++        screen == ScreenId::AppInstaller || screen == ScreenId::Snake) enterScreen(ScreenId::Idle, false);
+   } else if (cardEvent == StorageService::CardEvent::Mounted) {
+     Serial.printf("[S3DIAG][SD] event=MOUNTED errors=%u uptime_ms=%lu\n", storage.ioErrors(), (unsigned long)millis());
+     notifications.push("microSD mounted", "Filesystem ready again");
+@@ -540,6 +549,7 @@
+     if (screen == ScreenId::Explorer) explorer.draw(appCtx);
+   }
+   stopwatchApp.tick(appCtx, screen == ScreenId::Stopwatch);
++  if (screen == ScreenId::Snake) pixelSnakeApp.tick(appCtx);
+   galleryApp.tick(appCtx, screen == ScreenId::Gallery);
+   wifiApp.tick(appCtx, screen == ScreenId::WiFi);
+   systemService.update(notifications);
+@@ -689,6 +699,8 @@
+       next = textViewerApp.handle(appCtx,e); break;
+     case ScreenId::Browser:
+       next = browserApp.handle(appCtx,e); break;
++    case ScreenId::Snake:
++      next = pixelSnakeApp.handle(appCtx,e); break;
+     case ScreenId::Shell:
+       next = shellApp.handle(appCtx,e); break;
+     case ScreenId::Settings:
+diff --git a/src/core/Types.h b/src/core/Types.h
+--- a/src/core/Types.h
++++ b/src/core/Types.h
+@@ -30,7 +30,8 @@
+   SystemInfo,
+   About,
+   Calculator,
+-  Stopwatch
++  Stopwatch,
++  Snake // optional trusted built-in game, activated by signed snake_pixel text package
+ };
+ 
+ enum class Key : uint8_t {
+diff --git a/src/services/SystemService.cpp b/src/services/SystemService.cpp
+--- a/src/services/SystemService.cpp
++++ b/src/services/SystemService.cpp
+@@ -108,6 +108,7 @@
+     case ScreenId::About:
+     case ScreenId::Calculator:
+     case ScreenId::Stopwatch:
++    case ScreenId::Snake:
+       return true;
+     default:
+       return false;
+@@ -198,6 +199,7 @@
+     case ScreenId::About: return "About";
+     case ScreenId::Calculator: return "Calculator";
+     case ScreenId::Stopwatch: return "Stopwatch";
++    case ScreenId::Snake: return "Pixel Snake";
+     default: return "Menu";
+   }
+ }
+@@ -225,6 +227,7 @@
+     case ScreenId::About: return "i";
+     case ScreenId::Calculator: return "Calc";
+     case ScreenId::Stopwatch: return "Clk";
++    case ScreenId::Snake: return "Game";
+     default: return "App";
+   }
+ }
+diff --git a/src/services/QeappSignature.cpp b/src/services/QeappSignature.cpp
+--- a/src/services/QeappSignature.cpp
++++ b/src/services/QeappSignature.cpp
+@@ -1,6 +1,8 @@
+ #include "QeappSignature.h"
+ #include <string.h>
+-#ifdef QEAPP_TRUST_KEY_HEADER
++#if defined(VQEAF_SNAKE_DEMO_KEY)
++#include "SnakeDemoTrustKey.h"
++#elif defined(QEAPP_TRUST_KEY_HEADER)
+ #include QEAPP_TRUST_KEY_HEADER
+ #else
+ #include "QeappTrustKey.h"
+diff --git a/platformio.ini b/platformio.ini
+--- a/platformio.ini
++++ b/platformio.ini
+@@ -72,3 +72,12 @@
+ build_flags =
+   ${env:vqeaf_os.build_flags}
+   -D VQEAF_ICON_SELFTEST=1
++
++; Demonstration-only trust anchor for bundled Pixel Snake signed sample.
++; Do NOT flash this profile over your production QEAPP trust configuration.
++; Existing welcome/help_site demo packages will not verify under this key.
++[env:vqeaf_snake_demo]
++extends = env:vqeaf_os
++build_flags =
++  ${env:vqeaf_os.build_flags}
++  -D VQEAF_SNAKE_DEMO_KEY=1
+diff --git a/README.md b/README.md
+--- a/README.md
++++ b/README.md
+@@ -148,3 +148,13 @@
+ The last command **builds two full firmware variants**, recording actual
+ `firmware.bin` deltas. Without PlatformIO it reports UNAVAILABLE. The `vqeaf_os`
+ production environment remains optimized and contains no self-test payload.
++
++
++## Pixel Snake signed QEAPP template (opt-in firmware extension)
++
++A bounded native Pixel Snake game handler is included in v2.4.1. The demo
++`games/pixel_snake/dist/snake_pixel_demo.qeapp` requires the **separate**
++`vqeaf_snake_demo` firmware environment. Existing `vqeaf_os` publisher pin is
++untouched. The signed package contains only the game configuration and icon;
++**no general runtime for game scripts is implied.** See
++`games/pixel_snake/README_VN.md`.

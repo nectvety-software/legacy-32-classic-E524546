@@ -1,7 +1,14 @@
+https://www.google.com/	Mock Server
+mtt:start	Qeafbrowser
+https://keypad.test/	Keypad Web Test
+https://image.test/index.html	Image source test
+https://www.qeafivels.com/	Qeafivels Software - Audio Tools, AI Agents, Hugging Face & 2D Games
+https://vn.test/vn.html	Thế giới tiếng Việt
+https://feed.test/atom.xml	Atom Test
+https://feed.test/rss.xml	Qeaf Test Feed
+https://keypad.test/long.html	Long scroll test
+https://keypad.test/downloads.html	Keypad Web Test
 mtt:about	About
 https://example.com/	Mock Server
-mtt:start	Qeafbrowser
-https://www.qeafivels.com/	Qeafivels Software - Audio Tools, AI Agents, Hugging Face & 2D Games
 mtt:config	Settings
-https://keypad.test/	Keypad Web Test
 https://keypad.test/article.html	Article Opened

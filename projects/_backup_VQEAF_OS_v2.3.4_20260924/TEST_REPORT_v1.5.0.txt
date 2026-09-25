@@ -1,0 +1,23 @@
+Symbian S3 OS v1.5.0 — QEAPP/2 cryptographic signing TEST REPORT
+
+Target: ESP32-S3 N16R8; ST7789 portrait 240x320.
+Crypto: ECDSA P-256 + SHA-256, pinned publisher public key.
+
+PASS: test_v15_signature.py — native C++ OpenSSL integration: signed install,
+  catalog bounds, manifest/icon/payload integrity, forged section hashes,
+  invalid signature, unknown key ID, foreign signing key, unsigned QEAPP/1,
+  missing signature trailer, tampered installed payload and signed receipt.
+  Independent Python cryptography signature verification also PASSED.
+PASS: test_v14_build.py — 18/18 GNU++11 firmware translation units and
+  host link with Arduino/TFT mock APIs. Real cryptography is tested above;
+  the Arduino mock does not test real mbedTLS target implementation.
+PASS: test_v14_wiring.py — 20/20 installer integration checks.
+PASS: test_v12.py — previous VQEAF Themes host parser integration checks.
+PASS: ZIP integrity, trusted demo-signed QEAPP/2 examples, no private keys
+  packaged, preview 240x320.
+
+NOT VERIFIED: PlatformIO ESP32-S3 target binary or physical board.
+Source-era tests v05/v06/v07/v08/v09/v10/v101/v11/v13 have existing
+brittle failures on pristine v1.4.0 and were not counted as passing.
+Signed QEAPP apps remain declarative text/HTTPS launchers only; no
+native execution, no secure boot, and browser TLS CA validation is pending.

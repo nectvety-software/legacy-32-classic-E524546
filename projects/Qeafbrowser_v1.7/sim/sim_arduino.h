@@ -210,12 +210,87 @@ public:
       for (int i = 0; i < w; i++) drawPixel(x + i, y + j, d[j * w + i]);
   }
   void drawFastHLine(int x, int y, int w, uint16_t c) { fillRect(x, y, w, 1, c); }
+  void drawFastVLine(int x, int y, int h, uint16_t c) { fillRect(x, y, 1, h, c); }
+  void drawRect(int x, int y, int w, int h, uint16_t c) {
+    if (w <= 0 || h <= 0) return;
+    fillRect(x, y, w, 1, c); fillRect(x, y + h - 1, w, 1, c);
+    fillRect(x, y, 1, h, c); fillRect(x + w - 1, y, 1, h, c);
+  }
+  void fillCircle(int cx, int cy, int r, uint16_t c) {
+    for (int dy = -r; dy <= r; dy++) {
+      int rem = r * r - dy * dy;
+      int dx = 0; while ((dx + 1) * (dx + 1) <= rem) dx++;
+      fillRect(cx - dx, cy + dy, dx * 2 + 1, 1, c);
+    }
+  }
+  void drawCircle(int cx, int cy, int r, uint16_t c) {
+    for (int dy = -r; dy <= r; dy++) {
+      int rem = r * r - dy * dy;
+      int dx = 0; while ((dx + 1) * (dx + 1) <= rem) dx++;
+      drawPixel(cx + dx, cy + dy, c);
+      drawPixel(cx - dx, cy + dy, c);
+    }
+  }
+  // Khoang cat ngang tai dong j trong goc bo tron ban kinh r (0 khi o giua).
+  static int round_cut(int j, int h, int r) {
+    if (r <= 0 || (j >= r && j < h - r)) return 0;
+    int d = (j < r) ? (r - 1 - j) : (j - (h - r));
+    int dx = 0, rem = r * r - d * d;
+    while ((dx + 1) * (dx + 1) <= rem) dx++;
+    int cut = r - dx;
+    return cut > 0 ? cut : 0;
+  }
+  void fillRoundRect(int x, int y, int w, int h, int r, uint16_t c) {
+    if (w <= 0 || h <= 0) return;
+    if (r > w / 2) r = w / 2;
+    if (r > h / 2) r = h / 2;
+    for (int j = 0; j < h; j++) {
+      int cut = round_cut(j, h, r);
+      fillRect(x + cut, y + j, w - 2 * cut, 1, c);
+    }
+  }
+  void drawRoundRect(int x, int y, int w, int h, int r, uint16_t c) {
+    if (w <= 0 || h <= 0) return;
+    if (r > w / 2) r = w / 2;
+    if (r > h / 2) r = h / 2;
+    fillRect(x + r, y, w - 2 * r, 1, c);
+    fillRect(x + r, y + h - 1, w - 2 * r, 1, c);
+    fillRect(x, y + r, 1, h - 2 * r, c);
+    fillRect(x + w - 1, y + r, 1, h - 2 * r, c);
+    for (int j = 0; j < r; j++) {
+      int cut = round_cut(j, h, r);
+      if (cut <= 0) continue;
+      drawPixel(x + cut, y + j, c);
+      drawPixel(x + w - 1 - cut, y + j, c);
+      drawPixel(x + cut, y + h - 1 - j, c);
+      drawPixel(x + w - 1 - cut, y + h - 1 - j, c);
+    }
+  }
   void setTextFont(int f) { font = f; }
   void setTextColor(uint16_t c) { fg = c; }
+  // setFont(const void*) — unused after default-font switch; keep as no-op stub.
+  void setFont(const void *) {}
   int charW() { return font >= 4 ? 12 : (font == 2 ? 6 : 5); }
   int charH() { return font >= 4 ? 16 : (font == 2 ? 8 : 7); }
-  int textWidth(const char *s) { return (int)strlen(s) * charW(); }
-  int textWidth(const char *s, int n) { return n * charW(); }
+  // Do rong theo codepoint UTF-8 (khong tinh byte tiep tuc 0x80-0xBF).
+  static int utf8_chars(const char *s) {
+    int n = 0;
+    for (const unsigned char *p = (const unsigned char *)s; *p; p++)
+      if ((*p & 0xC0) != 0x80) n++;
+    return n;
+  }
+  int textWidth(const char *s) { return utf8_chars(s) * charW(); }
+  int textWidth(const char *s, int n) {
+    int w = 0, i = 0;
+    while (i < n && s[i]) {
+      unsigned char c = (unsigned char)s[i];
+      if ((c & 0xC0) == 0x80) { i++; continue; }
+      int len = (c < 0x80) ? 1 : (c < 0xE0) ? 2 : (c < 0xF0) ? 3 : 4;
+      w += charW();
+      i += len;
+    }
+    return w;
+  }
   int textcolor() { return fg; }
   uint16_t color565(uint8_t r, uint8_t g, uint8_t b) { return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3); }
   void drawString(const char *s, int x, int y);

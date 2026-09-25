@@ -1,0 +1,15 @@
+@vqeaf 1.0
+<theme id="retrogo_dark" name="Retro-Go Dark">
+  palette {
+    screen: "#001028"
+    key: "#182838"
+    keyPressed: "#C8A000"
+    keyBorder: "#6B4D00"
+    keyText: "#FFFFFF"
+    subText: "#C0C0C0"
+    shellTop: "#001028"
+    shellBottom: "#001028"
+    accent: "#FFD700"
+    glow: "#FF4040"
+  }
+</theme>

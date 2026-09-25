@@ -6,11 +6,11 @@
 
 #define SCR_W 240
 #define SCR_H 320
-#define DOC_CAP 49152          // body toi da (PSRAM)
+#define DOC_CAP (96 * 1024)    // body toi da (PSRAM)
 #define MAX_LINES 400
 #define MAX_LINKS 96
 #define MAX_TITLE 96
-#define MAX_IMAGES 24
+#define MAX_IMAGES 48
 
 // ---------------- Document (WML subset + HTML subset -> dong van ban + link)
 struct Link {
@@ -77,10 +77,21 @@ void cookie_get(const char *domain, char *out, size_t cap);
 // these helpers provide the persistent LittleFS/selected-FS tier.
 bool thumb_store_load(const char *url, uint16_t *pix, size_t pixel_count);
 bool thumb_store_save(const char *url, const uint16_t *pix, size_t pixel_count);
-// config.ini: wifi_ssid, wifi_pass, home_url, timezone
+// config.ini: wifi_ssid, wifi_pass, home_url, timezone, text_mode
 void config_load();
 void config_save();            // ghi nguoc bo nho tam ra SD (wizard WiFi dung)
 extern String cfg_ssid, cfg_pass, cfg_home, cfg_tz;
+extern bool cfg_text_mode;     // true = chi van ban (khong tai thumbnail anh)
+
+// ---------------- Launcher FS helpers (store.cpp, dung chung fs_sel) --------
+// Launcher va theme/art deu di qua 3 ham nay de khong phai biet SD hay LittleFS.
+bool store_fs_read(const char *path, char *buf, size_t cap, size_t *len);
+bool store_fs_write(const char *path, const char *data, size_t n);
+bool store_fs_exists(const char *path);
+bool store_fs_mount_sd();      // mount SD_MMC 1-bit; false = khong co the (dung LFS)
+// Theme VQEAF: LUON doc tu LittleFS (fs_sel), khong dung SD.
+bool store_theme_read(const char *path, char *buf, size_t cap, size_t *len);
+int  store_theme_list(char names[][24], int maxn);  // liet ke /launcher/themes/*.vqeaf
 
 // ---------------- URL helpers
 bool url_split(const char *url, char *scheme, char *host, int *port, char *path);

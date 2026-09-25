@@ -1,0 +1,107 @@
+PASS: 16 screen targets, 162 checked regions, Grid/Home actual routes, GPIO unchanged, theme/QEAPP baselines present
+
+PASS: 16 screens, 162 target regions, all within 240x320. Grid 3x4 and 3 softkeys safe.
+
+PASS VQEAF: native Studio palette, extension, big base64 streaming, RGBA, fallback
+
+PASS input: SELECT hold toggle, deferred short press, T9 multitap, Home nav
+
+PASS launcher: 240x320 geometry, 6-tab, dirty row, RGB565 signed icon, dialog
+TEST: test_v14_build.py
+ASS: src/apps/LauncherGrid.cpp
+PASS: src/core/InputManager.cpp
+PASS: src/core/SymbianUI.cpp
+PASS: src/core/TextKeyboard.cpp
+PASS: src/core/UiScreenAtlas.cpp
+PASS: src/launcher/LauncherView.cpp
+PASS: src/main.cpp
+PASS: src/services/AppInstallerService.cpp
+PASS: src/services/BoardDiagnostics.cpp
+PASS: src/services/BrowserService.cpp
+PASS: src/services/CalculatorEngine.cpp
+PASS: src/services/ImageViewerService.cpp
+PASS: src/services/MusicService.cpp
+PASS: src/services/NotificationService.cpp
+PASS: src/services/QeappFormat.cpp
+PASS: src/services/QeappSignature.cpp
+PASS: src/services/SettingsStore.cpp
+PASS: src/services/ShellService.cpp
+PASS: src/services/StorageService.cpp
+PASS: src/services/SystemService.cpp
+PASS: src/services/ThemeFileService.cpp
+PASS: src/services/TrustedTls.cpp
+PASS: src/services/WiFiConnectionService.cpp
+PASS: src/services/WiFiProfileStore.cpp
+PASS: 25/25 host C++11 translation units + full host link
+NOTE: mock Arduino/ESP32 APIs; PlatformIO target build not verified
+TEST: test_v15_signature.py
+f3a10479e72486cb9ec6168aafa16bc30cfbc822633d03a59f
+Icon SHA256:     c8ad0b191bde65f2cfed9be434de32658941239464a1314afa6970be25d3fca5
+Payload SHA256:  01a633ca73839af851dac02831cdcb328e35478591c49083076b96c77bc197ff
+ECDSA P-256 signature present, publisher key ID: 0x31534351
+Firmware must pin the matching publisher public key.
+Package: /tmp/qeapp-signed-h0gvfq43/other_signed.qeapp  (2530 bytes)
+Manifest SHA256: 70c549616dca9cf3a10479e72486cb9ec6168aafa16bc30cfbc822633d03a59f
+Icon SHA256:     c8ad0b191bde65f2cfed9be434de32658941239464a1314afa6970be25d3fca5
+Payload SHA256:  01a633ca73839af851dac02831cdcb328e35478591c49083076b96c77bc197ff
+ECDSA P-256 signature present, publisher key ID: 0x31534351
+Firmware must pin the matching publisher public key.
+QEAPP/2 signature, tampering, unsigned and installed receipt gates: PASS
+QEAPP/2 secure publisher pin, SHA-256, ECDSA, installed receipt: PASS
+NOTE: host OpenSSL verifies signing semantics; ESP32 target still requires PlatformIO/hardware build
+TEST: test_v16_wifi.py
+ASS: bounded asynchronous scan timeout
+PASS: scan failure surfaces a clear message
+PASS: intentional disconnect suppresses immediate reconnect
+PASS: 12 simulated RF/saved-profile/timeout/security state-machine cases
+PASS: fixed board portrait 240x320
+PASS: radio service initialized on boot
+PASS: radio service polled each main loop
+PASS: browser still shares normal WiFi status
+PASS: saved profiles persist only after a successful join
+PASS: connect timeout is 12 seconds
+PASS: async scan never unconditionally drops active WLAN
+PASS: global shell/browser remains active during scans
+PASS: safe-mode reconnect preference propagated
+PASS: old password not accepted as verified for changed creds
+PASS: status has connect/rescan/disconnect/forget/saved/hidden
+PASS: two-row-only focus redraw
+PASS: no password printed in the new WiFi manager
+PASS: credentials never committed on failure
+PASS: no new full-screen framebuffer
+PASS: S60 top bar only wifi and battery
+PASS: 16/16 source integration checks
+TEST: test_v17_auto_wifi.py
+PASS: strongest of entire boot scan wins; no duplicate success result / NVS rewrite
+PASS: dropout triggers rescan after debounce and changes AP when stronger is absent
+PASS: failed strongest WPA association falls back; unsuccessful SSID not persisted
+PASS: equal signal tie prefers last known successful AP
+PASS: wrong auth variant is not auto-joined
+PASS: bounded retry/backoff; Settings off cancels scheduled scans
+PASS: view-only WiFi scan resumes on exit; explicit disconnect blocks retry
+PASS: existing browser WLAN survives boot auto manager startup
+PASS: Shell shared-radio override stops competing boot scan
+PASS: Safe Mode / disabled preference does not scan or auto-join
+PASS: 10 auto WiFi integration scenarios
+PASS: WiFi auto-selection host test suite (10 scenarios)
+TEST: test_v18_core.py
+PASS: calculator + stopwatch + bounded playlist repeat/shuffle
+PASS: portrait panel
+PASS: calculator screen routed
+PASS: stopwatch screen routed
+PASS: utility apps in Applications
+PASS: music auto-next in loop
+PASS: WAV end drains DMA
+PASS: bounded playlist no heap and nonrepeating shuffle
+PASS: music repeats Off/All/One
+PASS: gallery slideshow tick
+PASS: gallery outside library path
+PASS: BLE strongest results
+PASS: BLE details has return state
+PASS: safe mode audio guard unchanged
+PASS: TFT no full-screen sprite
+PASS: 14 v1.8 source integration checks
+TEST: test_v201_boarddiag.py
+PASS: real scratch readback, data collision, offline SD, TLS no-network honesty
+PASS v2.0.1 host diagnostics; physical card removal and live TLS are PENDING
+VQEAF 2.2 HOST TESTS PASS. ESP32 PlatformIO build and physical board PENDING.

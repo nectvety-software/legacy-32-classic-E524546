@@ -6,13 +6,14 @@
 extern void setup();
 extern void loop();
 extern "C" void sim_go_url(const char *url);
+extern "C" void sim_key_launch_go_home(void);
 extern "C" int sim_body_scroll_px();
 extern "C" int sim_body_scroll_target_px();
 extern "C" int sim_body_scroll_active();
 extern "C" int sim_body_scroll_velocity_fp();
 extern "C" int sim_body_scroll_inertia();
 
-static const char *OUT = "sim/inertia_scroll_out";
+static const char *OUTDIR = "sim/inertia_scroll_out";
 static void pump(unsigned ms) { unsigned long t0=millis(); do { loop(); Sleep(2); } while (millis()-t0 < ms); }
 static int slot_of(const char *name) {
   static const char *N[]={"menu","up","back","left","ok","right","option","down","delete","mode"};
@@ -24,7 +25,7 @@ static void tap(const char *name, unsigned post=70) {
   SIM_KEYS[s]=1; pump(55); SIM_KEYS[s]=0; pump(post);
 }
 static void shot(const char *name) {
-  char p[256]; snprintf(p,sizeof p,"%s/%s.bmp",OUT,name);
+  char p[256]; snprintf(p,sizeof p,"%s/%s.bmp",OUTDIR,name);
   if (LGFX::inst) LGFX::inst->dumpBmp(p);
   printf("[shot] %s pos=%d target=%d vel=%d inertia=%d active=%d\n",
          p, sim_body_scroll_px(), sim_body_scroll_target_px(),
@@ -33,15 +34,18 @@ static void shot(const char *name) {
 
 int main() {
 #ifdef _WIN32
-  ::mkdir("sim"); ::mkdir(OUT); ::mkdir("sim_lfs"); ::mkdir("sim_lfs/Qeafbrowser");
+  ::mkdir("sim"); ::mkdir(OUTDIR); ::mkdir("sim_lfs"); ::mkdir("sim_lfs/Qeafbrowser");
 #else
-  ::mkdir("sim",0755); ::mkdir(OUT,0755); ::mkdir("sim_lfs",0755); ::mkdir("sim_lfs/Qeafbrowser",0755);
+  ::mkdir("sim",0755); ::mkdir(OUTDIR,0755); ::mkdir("sim_lfs",0755); ::mkdir("sim_lfs/Qeafbrowser",0755);
 #endif
   FILE *f=fopen("sim_lfs/Qeafbrowser/config.ini","wb");
   if(f){ fputs("wifi_ssid=VNPT-Home\nwifi_pass=abc\nhome_url=https://qeafivels.com/\n",f); fclose(f); }
   sim_http_mock_set(true);
   setup(); pump(220);
-  sim_go_url("https://keypad.test/"); pump(180);
+  sim_key_launch_go_home(); pump(80);
+  // /long.html la fixture WML dai: khong bat chuot ao (khong co viewport meta) va
+  // du dai de cuon > mot man hinh, nen anim cuon con dang chay khi giu D-Pad.
+  sim_go_url("https://keypad.test/long.html"); pump(180);
 
   // Bring the focus near the bottom so the next DOWN requires visual pixel scrolling.
   for(int i=0;i<5;i++) tap("down",60);
@@ -66,7 +70,7 @@ int main() {
   pump(50);
   int late_pos=sim_body_scroll_px(), late_vel=sim_body_scroll_velocity_fp();
   shot("06_coast_late");
-  pump(500);
+  pump(2000);
   int end_pos=sim_body_scroll_px(), end_vel=sim_body_scroll_velocity_fp();
   int target=sim_body_scroll_target_px();
   shot("07_settled");

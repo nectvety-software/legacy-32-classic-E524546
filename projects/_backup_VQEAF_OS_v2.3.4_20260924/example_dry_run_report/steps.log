@@ -1,0 +1,10 @@
+PASS: board_preflight.log (exit 0)
+[DRY-RUN] dependency_cache: SIMULATED
+[DRY-RUN] platformio_version: SIMULATED
+[DRY-RUN] host_tests: SIMULATED
+[DRY-RUN] clean: SIMULATED
+[DRY-RUN] compile: SIMULATED_PASS
+[DRY-RUN] link: SIMULATED_PASS
+[DRY-RUN] target_build: SIMULATED_PASS
+[DRY-RUN] verify_artifact: SIMULATED
+[DRY-RUN] buildfs: SIMULATED_PASS

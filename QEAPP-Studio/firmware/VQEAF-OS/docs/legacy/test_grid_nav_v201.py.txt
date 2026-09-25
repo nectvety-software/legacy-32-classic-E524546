@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Host-side regression check for the current S60 3x4 launcher navigation."""
+
+COUNT = 12
+COLS = 3
+
+
+def move(index: int, key: str) -> int:
+    row = index // COLS
+    col = index % COLS
+    row_start = row * COLS
+    row_end = min(row_start + COLS - 1, COUNT - 1)
+
+    if key == "left":
+        return index - 1 if index > row_start else row_end
+    if key == "right":
+        return index + 1 if index < row_end else row_start
+    if key == "up":
+        if index - COLS >= 0:
+            return index - COLS
+        candidate = col
+        while candidate + COLS < COUNT:
+            candidate += COLS
+        return candidate
+    if key == "down":
+        if index + COLS < COUNT:
+            return index + COLS
+        return col if col < COUNT else 0
+    raise ValueError(key)
+
+
+EXPECTED = {
+    i: {k: move(i, k) for k in ("left", "right", "up", "down")}
+    for i in range(COUNT)
+}
+
+
+def main() -> None:
+    for index, expected in EXPECTED.items():
+        for key, target in expected.items():
+            actual = move(index, key)
+            assert actual == target, (index, key, actual, target)
+            assert 0 <= actual < COUNT
+    print("PASS: S60 3x4 launcher navigation and edge wrapping")
+
+
+if __name__ == "__main__":
+    main()

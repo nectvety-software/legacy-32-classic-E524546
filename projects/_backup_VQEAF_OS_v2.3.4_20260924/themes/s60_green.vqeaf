@@ -1,0 +1,30 @@
+@vqeaf 1.0
+
+<theme id="legacy_lime" name="Legacy Lime">
+    metadata {
+        author: "VQEAF OS"
+        version: "1.1.0"
+        description: "Legacy green palette for ESP32-S3 ST7789 240x320"
+    }
+    studio { orientation: "portrait" targetWidth: 240 targetHeight: 320 }
+    palette {
+        screen: "#8CC822"
+        panel: "#AFE84A"
+        selected: "#DFF29B"
+        titlebar: "#286C18"
+        keyText: "#000000"
+        chromeText: "#FFFFFF"
+        accent: "#FFFF00"
+        border: "#FFFFFF"
+    }
+    system {
+        titlebarHeight: 27px
+        softkeyHeight: 22px
+        menuColumns: 3
+        menuRows: 4
+        iconSize: 36px
+        statusIcons: [ "wifi", "battery" ]
+        statusGap: 6px
+        cellular: false
+    }
+</theme>

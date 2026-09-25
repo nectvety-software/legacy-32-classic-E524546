@@ -1,0 +1,21 @@
+VQEAF OS v2.3.1 / 12 system icon standardized kit v1.0
+Host validation performed 2026-09-24
+
+PASS: generated 12 transparent 36x36 PNG and 12 transparent 24x24 PNG.
+PASS: generated matching 24 SVG pixel layouts; generated 24 optional little-endian RGB565 color-key files.
+PASS: checked mandatory 4px (36x36) and 3px (24x24) transparent padding on ALL icons.
+PASS: compiled production C++11 VqeafIconRenderer.cpp with -Wall -Wextra -Werror using a host TFT shim.
+PASS: decoded 24 PNG/C++ raster pairs EXACTLY after RGB565 quantization.
+PASS: 12 icon identifiers, safe RLE decoding, invalid sizes, and focus boundaries.
+PASS: no allocation in icon renderer; static icon RLE payload size 3980 bytes of flash data.
+PASS: full v2.3 C++ GUI host regression and v2.2 suite; no full-screen redraw on D-pad cell updates.
+      Screenshot-grounded large-palette masks: Home 95.95%; Menu 95.62%.
+      These are RGB565 reference-color region scores; NOT 100% pixel-identical board output.
+PASS: existing `.vqeaf` theme loader and signed `.qeapp` regression suites from source test.
+
+PENDING: PlatformIO firmware build (pio not installed in this environment: pio: command not found).
+PENDING: upload to ESP32-S3 N16R8 and actual ST7789 240x320 visual validation.
+PENDING: test every `.vqeaf` third-party theme on hardware, including extreme dark/light focus contrast.
+
+Neither raw565 output nor 24/36 built-in icon RLE changes the existing signed QEAPP/2
+external app icon section (32x32 RGB565).

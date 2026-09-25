@@ -1,0 +1,27 @@
+VQEAF OS v2.3.0 — Source release / Home + Menu pixel reference + unified icons and Vietnamese UI font
+
+FILES TO START:
+  README.md                          - firmware context and warnings
+  docs/UI_HOME_MENU_PIXEL_V23.md     - physical pixel geometry and 1st-install theme
+  docs/FONT_ICONS_V23.md             - policy, glyph attribution, API examples
+  preview/v23_side_by_side_reference_vs_host.png  - user input crops vs production C++ host raster
+  preview/v23_unified_icon_catalog_host.png       - 12 icons from C++ host render
+  preview/v23_vietnamese_font_host_3x.png         - UTF-8 subset demo
+
+HOST REGRESSION:
+  python tools/test_ui_v23.py
+  Code compiles/links on PC (with simulated hardware) and reference palette area score:
+    Home 95.94%  |  Menu 96.69%
+  Diff behavior: changing Home shortcut or Menu focus touches only the 2 involved rectangles.
+
+TARGET BOARD (not executed here):
+  pio run -e vqeaf_os
+  pio run -e vqeaf_os -t upload
+  pio device monitor -b 115200
+
+No third-party Retro-Go code/artwork was imported; just independent drawing techniques.
+No unlicensed complete font files were included, only a fixed DejaVu-derived glyph subset
+with attribution text. Avoid declaring screen "hardware-perfect" before native capture.
+
+THEME: SD:/System/Themes/*.vqeaf; .qeapp is original secure QEAPP/2 package
+from the user's firmware. Do not bypass the ECDSA package verifier.

@@ -1,0 +1,3 @@
+$ g++ -std=c++17 -Wall -Wextra -Werror -Wno-deprecated-declarations -I/mnt/data/VQEAF_v242_acceptance_work/tests/persist_stubs -I/mnt/data/VQEAF_v242_acceptance_work/tests -I/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/host_stubs -Isrc -Iinclude /mnt/data/VQEAF_v242_acceptance_work/tests/persist_test.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/services/SettingsStore.cpp -o /mnt/data/VQEAF_v242_acceptance_work/actual_theme_persistence
+
+[exit] 0

@@ -1,0 +1,11 @@
+# VQEAF OS - DRY RUN EXECUTION PLAN (NO CROSS COMPILATION)
+Local Python board preflight was run; everything below was simulated.
+dependency_cache: SIMULATED: inspect espressif32@6.10.0 + preinstalled Xtensa/Arduino/esptool/SCons + 4 pinned libraries
+platformio_version: SIMULATED: pio --version
+host_tests: SIMULATED: /opt/pyvenv/bin/python3 tools/test_v14_build.py
+clean: SIMULATED: pio run -e vqeaf_os -t clean
+compile: SIMULATED_PASS: xtensa-esp32s3-elf-g++ [project translation units]
+link: SIMULATED_PASS: xtensa-esp32s3-elf-g++ [objects] -o firmware.elf
+target_build: SIMULATED_PASS: pio run -e vqeaf_os -v
+verify_artifact: SIMULATED: .pio/build/vqeaf_os/firmware.bin size + SHA-256 + freshness
+buildfs: SIMULATED_PASS: pio run -e vqeaf_os -t buildfs

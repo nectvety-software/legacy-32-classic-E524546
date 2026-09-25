@@ -1,0 +1,7 @@
+PASS: compile_game.log
+PASS: test_game.log
+PASS: compile_signed_installer.log
+PASS: test_signed_installer.log
+PASS: compile_default_pin.log
+PASS: test_default_pin_rejection.log
+Host integration tests: PASS. PlatformIO build not run.

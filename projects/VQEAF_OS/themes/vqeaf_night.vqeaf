@@ -1,0 +1,190 @@
+@vqeaf 1.0
+
+<theme id="vqeaf_night" name="VQEAF Night">
+    metadata {
+        author: "VQEAF OS"
+        version: "1.0.0"
+        description: "Portrait 240x320 default palette for VQEAF OS"
+    }
+
+    studio {
+        orientation: "portrait"
+        autoId: false
+        layerOrder: [ "frameBackground", "frameFx", "screen", "keypad", "decorations", "network", "badges" ]
+        frameFxOpacity: 0.12
+        frameFxBlend: "screen"
+    }
+
+    palette {
+        shellTop: "#162B49"
+        shellBottom: "#091321"
+        shellBorder: "#355277"
+        screen: "#080F1A"
+        key: "#1A2C46"
+        keyPressed: "#235481"
+        keyBorder: "#335778"
+        keyText: "#F0F7FF"
+        subText: "#A4BAD1"
+        accent: "#55D2C6"
+        glow: "#287EA5"
+    }
+
+    // Firmware-only extension: Theme Studio may omit this on re-export.
+    launcher {
+        background: "#080F1A"
+        foreground: "#F0F7FF"
+        headerBg: "#102540"
+        headerFg: "#F0F7FF"
+        tabAccent: "#55D2C6"
+        listBg: "#080F1A"
+        listFg: "#D5E6F7"
+        selectedBg: "#235481"
+        selectedFg: "#FFFFFF"
+        previewBg: "#152C44"
+        previewFg: "#FFFFFF"
+        scrollbar: "#55D2C6"
+        footerBg: "#102540"
+        footerFg: "#FFFFFF"
+        border: "#355277"
+    }
+
+    metrics {
+        shellRadius: 18dp
+        keyRadius: 6dp
+        keyBorder: 1dp
+    }
+
+    <component id="phoneShell" type="container">
+        shape {
+            type: rect
+            radius: $metrics.shellRadius
+            fill {
+                type: linear
+                angle: 180deg
+                colors: [ $palette.shellTop, $palette.shellBottom ]
+            }
+            stroke { width: 1.5dp color: $palette.shellBorder }
+        }
+        background {
+            source: null
+            opacity: 0.45
+            fit: "cover"
+            blend: "overlay"
+            scale: 1.00
+            offsetX: 0dp
+            offsetY: 0dp
+            blur: 0dp
+            brightness: 1.00
+            contrast: 1.00
+            saturation: 1.00
+            clipToFrameShape: true
+            raised: false
+            rotation: 0deg
+            scaleX: 1
+            scaleY: 1
+        }
+        effect {
+            frameFxOpacity: 0.12
+            frameFxBlend: "screen"
+            floating: false
+            floatAmplitude: 6dp
+            floatDuration: 3200ms
+            floatShadow: 30dp
+        }
+    </component>
+
+    <component id="screen" type="panel">
+        shape { radius: 4dp fill: $palette.screen }
+    </component>
+
+    <component id="key" type="button">
+        shape {
+            radius: $metrics.keyRadius
+            fill: $palette.key
+            stroke { width: $metrics.keyBorder color: $palette.keyBorder }
+        }
+        text { color: $palette.keyText weight: 700 align: center }
+        glow { color: $palette.glow radius: 8dp strength: 0.40 }
+        <state name="pressed">
+            shape { fill: $palette.keyPressed }
+            transform { scale: 0.98 }
+        </state>
+    </component>
+
+    <component id="keypad" type="container">
+        background {
+            source: null
+            opacity: 0.42
+            fit: "cover"
+            blend: "soft-light"
+            position: "below"
+            renderMode: "per-key-texture"
+            textureMode: "per-key"
+            brightness: 1.00
+            contrast: 1.08
+            saturation: 1.00
+            readabilityAssist: true
+            rotation: 0deg
+            scaleX: 1
+            scaleY: 1
+            scale: 1.00
+            offsetX: 0dp
+            offsetY: 0dp
+            blur: 0dp
+        }
+    </component>
+
+    <component id="networkLed" type="view">
+        shape { fill: $palette.accent radius: 99dp }
+    </component>
+
+    <component id="menuButton" type="badge">
+        appearance: "solid"
+        shape {
+            radius: 15dp
+            fill: "#1A2C46"
+            stroke { width: 1dp color: "#335778" }
+        }
+        text {
+            color: "#F0F7FF"
+            size: 11sp
+            weight: 800
+            letterSpacing: 0.04
+            uppercase: true
+        }
+        indicator {
+            color: "#55D2C6"
+            size: 6dp
+            glow: 8dp
+        }
+        glow { color: "#287EA5" radius: 8dp }
+        shadow { blur: 14dp }
+        opacity: 1.00
+        padding { horizontal: 11dp vertical: 9dp }
+    </component>
+
+    <component id="fpsBadge" type="badge">
+        appearance: "glass"
+        shape {
+            radius: 15dp
+            fill: "#091321"
+            stroke { width: 1dp color: "#355277" }
+        }
+        text {
+            color: "#A4BAD1"
+            size: 11sp
+            weight: 800
+            letterSpacing: 0.04
+            uppercase: true
+        }
+        indicator {
+            color: "#55D2C6"
+            size: 6dp
+            glow: 8dp
+        }
+        glow { color: "#287EA5" radius: 6dp }
+        shadow { blur: 14dp }
+        opacity: 1.00
+        padding { horizontal: 11dp vertical: 9dp }
+    </component>
+</theme>

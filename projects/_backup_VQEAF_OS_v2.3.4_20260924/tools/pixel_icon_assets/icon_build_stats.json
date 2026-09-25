@@ -1,0 +1,173 @@
+{
+  "total_flash_bytes": 8260,
+  "assets": {
+    "wifi_24": {
+      "bytes": 194,
+      "rle_bytes": 154,
+      "colors": 19,
+      "opaque": 111,
+      "size": 24
+    },
+    "bluetooth_24": {
+      "bytes": 244,
+      "rle_bytes": 216,
+      "colors": 13,
+      "opaque": 232,
+      "size": 24
+    },
+    "music_24": {
+      "bytes": 240,
+      "rle_bytes": 198,
+      "colors": 20,
+      "opaque": 180,
+      "size": 24
+    },
+    "files_24": {
+      "bytes": 207,
+      "rle_bytes": 175,
+      "colors": 15,
+      "opaque": 229,
+      "size": 24
+    },
+    "gallery_24": {
+      "bytes": 242,
+      "rle_bytes": 198,
+      "colors": 21,
+      "opaque": 298,
+      "size": 24
+    },
+    "internet_24": {
+      "bytes": 276,
+      "rle_bytes": 216,
+      "colors": 29,
+      "opaque": 233,
+      "size": 24
+    },
+    "shell_24": {
+      "bytes": 227,
+      "rle_bytes": 193,
+      "colors": 16,
+      "opaque": 269,
+      "size": 24
+    },
+    "recovery_24": {
+      "bytes": 261,
+      "rle_bytes": 215,
+      "colors": 22,
+      "opaque": 233,
+      "size": 24
+    },
+    "settings_24": {
+      "bytes": 294,
+      "rle_bytes": 246,
+      "colors": 23,
+      "opaque": 235,
+      "size": 24
+    },
+    "themes_24": {
+      "bytes": 229,
+      "rle_bytes": 189,
+      "colors": 19,
+      "opaque": 228,
+      "size": 24
+    },
+    "apps_24": {
+      "bytes": 221,
+      "rle_bytes": 179,
+      "colors": 20,
+      "opaque": 275,
+      "size": 24
+    },
+    "library_24": {
+      "bytes": 257,
+      "rle_bytes": 217,
+      "colors": 19,
+      "opaque": 285,
+      "size": 24
+    },
+    "wifi_36": {
+      "bytes": 356,
+      "rle_bytes": 318,
+      "colors": 18,
+      "opaque": 280,
+      "size": 36
+    },
+    "bluetooth_36": {
+      "bytes": 442,
+      "rle_bytes": 416,
+      "colors": 12,
+      "opaque": 554,
+      "size": 36
+    },
+    "music_36": {
+      "bytes": 448,
+      "rle_bytes": 404,
+      "colors": 21,
+      "opaque": 438,
+      "size": 36
+    },
+    "files_36": {
+      "bytes": 426,
+      "rle_bytes": 382,
+      "colors": 21,
+      "opaque": 539,
+      "size": 36
+    },
+    "gallery_36": {
+      "bytes": 395,
+      "rle_bytes": 351,
+      "colors": 21,
+      "opaque": 738,
+      "size": 36
+    },
+    "internet_36": {
+      "bytes": 505,
+      "rle_bytes": 443,
+      "colors": 30,
+      "opaque": 566,
+      "size": 36
+    },
+    "shell_36": {
+      "bytes": 445,
+      "rle_bytes": 409,
+      "colors": 17,
+      "opaque": 671,
+      "size": 36
+    },
+    "recovery_36": {
+      "bytes": 451,
+      "rle_bytes": 407,
+      "colors": 21,
+      "opaque": 565,
+      "size": 36
+    },
+    "settings_36": {
+      "bytes": 555,
+      "rle_bytes": 507,
+      "colors": 23,
+      "opaque": 591,
+      "size": 36
+    },
+    "themes_36": {
+      "bytes": 432,
+      "rle_bytes": 392,
+      "colors": 19,
+      "opaque": 568,
+      "size": 36
+    },
+    "apps_36": {
+      "bytes": 408,
+      "rle_bytes": 368,
+      "colors": 19,
+      "opaque": 665,
+      "size": 36
+    },
+    "library_36": {
+      "bytes": 505,
+      "rle_bytes": 457,
+      "colors": 23,
+      "opaque": 716,
+      "size": 36
+    }
+  }
+}

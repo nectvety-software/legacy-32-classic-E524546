@@ -1,0 +1,41 @@
+@vqeaf 1.0
+
+<theme id="symbian_s3_amoled_red" name="AMOLED Red">
+    metadata {
+        author: "DOXUANHOP"
+        website: "https://qeafivels.com/"
+        version: "1.1.0"
+        description: "AMOLED Red adapted for Symbian S3 OS / ESP32-S3 / ST7789 240x320"
+    }
+    studio {
+        orientation: "portrait"
+        autoId: false
+        targetWidth: 240
+        targetHeight: 320
+        frameFxOpacity: 0.12
+        frameFxBlend: "screen"
+    }
+    palette {
+        shellTop: "#141414"
+        shellBottom: "#050505"
+        shellBorder: "#54232B"
+        screen: "#000000"
+        key: "#171717"
+        keyPressed: "#38161B"
+        keyBorder: "#8A2E3B"
+        keyText: "#FFFFFF"
+        subText: "#B78E94"
+        accent: "#FF3D5B"
+        glow: "#FF2D4D"
+    }
+    system {
+        titlebarHeight: 27px
+        softkeyHeight: 22px
+        menuColumns: 3
+        menuRows: 4
+        iconSize: 36px
+        statusIcons: [ "wifi", "battery" ]
+        statusGap: 6px
+        cellular: false
+    }
+</theme>

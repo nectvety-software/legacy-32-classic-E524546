@@ -1,0 +1,37 @@
+Symbian S3 OS v1.6.0 — Qeafbrowser-style WiFi Wizard
+Test date: 2026-09-24
+Target: ESP32-S3 N16R8, ST7789 240x320 portrait, GNU++11/PlatformIO
+
+IMPLEMENTED:
+- Asynchronous WLAN scan including hidden SSIDs; no explicit disconnect during scanning.
+- Sort 16 strongest from all scan results using a fixed array; driver scan results released.
+- Keypad network picker and existing in-OS password keyboard.
+- Saved NVS network list, forget, status, hidden SSID, reconnect preferences.
+- Connection progress refreshed once per second; 12-second timeout; explicit errors.
+- Credentials saved only on verified successful join to the intended SSID.
+- Firmware forces WiFi.persistent(false) to avoid SDK-side failed-join flash credentials.
+- Rejoining current AP with known matching saved credentials does not drop browser connection.
+- Replacing current AP password must be validated by a real new join, never accepted based on existing association.
+- WiFi/Bluetooth/Menu/Shell/Qeafbrowser/Audio/Installer screens remain present.
+
+EXECUTED HOST TESTS:
+- tools/test_v16_wifi.py: 12/12 executable WiFi state-machine cases PASS
+- tools/test_v16_wifi.py: 16/16 in-system source integration checks PASS
+- tools/test_v14_build.py: 19/19 C++11 units PASS; full host mock link PASS
+- tools/test_v14_wiring.py: 20/20 static App Installer integration gates PASS
+- tools/test_v12.py: PASS (theme import checks)
+- tools/test_v051.py: PASS (6/6 old linker gates)
+- tools/test_v04.py: PASS (7/7 old UI gates)
+- Preview/reference PNGs: exactly 240x320 each (not hardware captures)
+
+LIMITATIONS:
+- This runtime uses simulated WiFi events. ESP-IDF/Arduino ESP32-S3 radio, real DHCP, RF contention, actual ST7789
+  behavior, PSRAM pressure, browser transfers under active scans and saved credentials after real reboot MUST be
+  validated using PlatformIO + the physical target. PlatformIO is not installed in the current environment.
+- Several very old version-specific source-text regressions do not accept the v1.5/v1.6 source layout or its README
+  version string; they are not counted as passing. This release uses the dedicated v1.6 runtime suite and the
+  compatible legacy smoke checks listed above. v1.5 heavy cryptographic tests were not rerun in this update;
+  AppInstaller signing source was not modified.
+- Firmware NVS is not encrypted by this project. Provision flash encryption for production confidentiality.
+- Live scanning need not disconnect existing connections, but the radio itself may briefly impact network throughput.
+- The Internet browser has limited HTML functionality and existing TLS restrictions from prior releases.

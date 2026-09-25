@@ -1,0 +1,15 @@
+test_dry_run_actual_static_board_failure_is_not_simulated (tools.test_offline_build.OfflineBuildTest.test_dry_run_actual_static_board_failure_is_not_simulated) ... ok
+test_dry_run_buildfs_and_host_tests_always_simulated (tools.test_offline_build.OfflineBuildTest.test_dry_run_buildfs_and_host_tests_always_simulated) ... ok
+test_dry_run_check_only_stops_before_build (tools.test_offline_build.OfflineBuildTest.test_dry_run_check_only_stops_before_build) ... ok
+test_dry_run_incremental_skips_clean_without_runtime (tools.test_offline_build.OfflineBuildTest.test_dry_run_incremental_skips_clean_without_runtime) ... ok
+test_dry_run_no_firmware_produces_specific_error (tools.test_offline_build.OfflineBuildTest.test_dry_run_no_firmware_produces_specific_error) ... ok
+test_dry_run_simulated_buildfs_error (tools.test_offline_build.OfflineBuildTest.test_dry_run_simulated_buildfs_error) ... ok
+test_dry_run_simulated_compiler_and_linker_failures (tools.test_offline_build.OfflineBuildTest.test_dry_run_simulated_compiler_and_linker_failures) ... ok
+test_dry_run_simulates_dependency_failure (tools.test_offline_build.OfflineBuildTest.test_dry_run_simulates_dependency_failure) ... ok
+test_dry_run_without_any_cache_or_toolchain (tools.test_offline_build.OfflineBuildTest.test_dry_run_without_any_cache_or_toolchain) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 13.628s
+
+OK
+dry_tests_count 9

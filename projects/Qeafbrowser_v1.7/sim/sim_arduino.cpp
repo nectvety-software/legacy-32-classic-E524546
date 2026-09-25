@@ -74,14 +74,114 @@ int WiFiClient::available() {
     if (rx.empty() && !g_req.empty()) {
       // Mock web that hon de test keypad focus / HTML / relative URL.
       const bool keypad = g_req.find("Host: keypad.test") != std::string::npos;
+      const bool keypad_long = keypad && g_req.find("GET /long.html ") != std::string::npos;
       const bool qf_root = g_req.find("Host: qeafivels.com") != std::string::npos;
       const bool qf_www = g_req.find("Host: www.qeafivels.com") != std::string::npos;
       const bool qf_hero = g_req.find("hero-banner.jpg") != std::string::npos;
       const bool qf_products = g_req.find("products-audio.png") != std::string::npos;
       const bool article = g_req.find("GET /article.html ") != std::string::npos;
+      const bool feed_rss = g_req.find("GET /rss.xml ") != std::string::npos;
+      const bool feed_atom = g_req.find("GET /atom.xml ") != std::string::npos;
+      const bool feed_host = g_req.find("Host: feed.test") != std::string::npos;
+      const bool vn_host = g_req.find("Host: vn.test") != std::string::npos;
+      const bool image_host = g_req.find("Host: image.test") != std::string::npos;
       const char *ctype = "text/vnd.wap.wml";
       const char *body = nullptr;
-      if (qf_root) {
+      if (image_host) {
+        ctype = "text/html; charset=utf-8";
+        body =
+          "<!doctype html><html><head><title>Image source test</title></head><body>"
+          "<img src=\"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==\" data-src=\"/real.jpg?x=1&amp;y=2\" alt=\"Lazy image\"/>"
+          "<img srcset=\"/small.webp 1x, /small.jpg 2x\" alt=\"Srcset image\"/>"
+          "<img src=\"/vector.svg\" alt=\"Vector fallback\"/>"
+          "</body></html>";
+      } else if (vn_host) {
+        ctype = "text/html; charset=utf-8";
+        // XHTML-MP tieng Viet: numeric entity (dung codepoint Unicode dung)
+        // ế=7871 ớ=7899 ệ=7879 ụ=7909 ộ=7897 ấ=7845 ả=7843 ạ=7841 ọ=7885 ơ=417 đ=273 á=225 ó=243 ữ=7919
+        body =
+          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+          "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.2//EN\" "
+          "\"http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd\">"
+          "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
+          "<head><title>Th&#7871; gi&#7899;i ti&#7871;ng Vi&#7879;t</title>"
+          "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />"
+          "</head><body>"
+          "<h1>Danh m&#7909;c</h1>"
+          "<p>Trang n&#224;y c&#243; ch&#7919; ti&#7871;ng Vi&#7879;t c&#243; d&#7845;u.</p>"
+          "<ul>"
+          "<li><a href=\"/vn/1.html\">M&#7909;c m&#7897;t</a></li>"
+          "<li><a href=\"/vn/2.html\">M&#7909;c hai</a></li>"
+          "<li><a href=\"/vn/3.html\">M&#7909;c b&#225;</a></li>"
+          "</ul>"
+          "<small>C&#7843;m &#417;n b&#7841;n &#273;&#7885;c!</small>"
+          "</body></html>";
+      } else if (feed_host && feed_rss) {
+        ctype = "application/rss+xml";
+        // Giong BBC: CDATA title/description + media:thumbnail self-closing
+        body =
+          "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+          "<rss version=\"2.0\" xmlns:media=\"http://search.yahoo.com/mrss/\">"
+          "<channel>"
+          "<title><![CDATA[Qeaf Test Feed]]></title>"
+          "<link>http://feed.test/</link>"
+          "<description><![CDATA[Text-only news]]></description>"
+          "<item>"
+          "<title><![CDATA[First Story Headline]]></title>"
+          "<description><![CDATA[Body of first story for readers.]]></description>"
+          "<link>http://feed.test/a1?x=1&amp;y=2</link>"
+          "<guid isPermaLink=\"false\">http://feed.test/a1#1</guid>"
+          "<pubDate>Thu, 24 Sep 2026 10:00:00 GMT</pubDate>"
+          "<media:thumbnail width=\"240\" height=\"135\" url=\"http://feed.test/t1.jpg\"/>"
+          "</item>"
+          "<item>"
+          "<title><![CDATA[Second Story Headline]]></title>"
+          "<link>http://feed.test/a2</link>"
+          "<description><![CDATA[Body of second story.]]></description>"
+          "<media:thumbnail width=\"240\" height=\"135\" url=\"http://feed.test/t2.jpg\"/>"
+          "</item>"
+          "<item>"
+          "<title><![CDATA[Third Story Headline]]></title>"
+          "<link>http://feed.test/a3</link>"
+          "</item>"
+          "</channel></rss>";
+      } else if (feed_host && feed_atom) {
+        ctype = "application/atom+xml";
+        body =
+          "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+          "<feed xmlns=\"http://www.w3.org/2005/Atom\">"
+          "<title>Atom Test</title>"
+          "<entry><title>Atom Entry One</title><link href=\"http://feed.test/e1\"/>"
+          "<summary>Summary one.</summary></entry>"
+          "<entry><title>Atom Entry Two</title><link href=\"http://feed.test/e2\"/>"
+          "<summary>Summary two.</summary></entry>"
+          "</feed>";
+      } else if (feed_host) {
+        const bool vn_page = g_req.find("GET /vn.html ") != std::string::npos;
+        if (vn_page) {
+          ctype = "text/html; charset=utf-8";
+          // XHTML-MP tieng Viet: numeric entity &#7871; ế, &#225; á, ...
+          body =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            "<!DOCTYPE html PUBLIC \"-//WAPFORUM//DTD XHTML Mobile 1.2//EN\" "
+            "\"http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd\">"
+            "<html xmlns=\"http://www.w3.org/1999/xhtml\">"
+            "<head><title>Th&#7871; gi&#7889;i ti&#7871;ng Vi&#7871;t</title>"
+            "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />"
+            "</head><body>"
+            "<h1>Danh m&#7909;ch</h1>"
+            "<p>Trang n&#225;y c&#243; ch&#7919; ti&#7871;ng Vi&#7871;t c&#243; d&#7845;u.</p>"
+            "<ul>"
+            "<li><a href=\"/vn/1.html\">M&#7909;c m&#7893;t</a></li>"
+            "<li><a href=\"/vn/2.html\">M&#7909;c hai</a></li>"
+            "<li><a href=\"/vn/3.html\">M&#7909;c b&#225;</a></li>"
+            "</ul>"
+            "<small>C&#7843;m &#373;&#7899;n b&#7841;n &#273;&#7885;c!</small>"
+            "</body></html>";
+        } else {
+          body = "<wml><card title=\"Mock\"><p>No vn page</p></card></wml>";
+        }
+      } else if (qf_root) {
         const char *redir = "HTTP/1.1 301 Moved Permanently\r\nLocation: https://www.qeafivels.com/\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
         rx.assign(redir);
         return (int)rx.size() - (int)rxp;
@@ -112,6 +212,21 @@ int WiFiClient::available() {
           "<p>This page proves the center key opened the focused link.</p>"
           "<p><a href=\"/\">Back to keypad test home</a></p>"
           "</body></html>";
+      } else if (keypad_long) {
+        // Fixture cho regression cuon pixel/inertia: WML nen firmware KHONG tu bat
+        // chuot ao (khong co <meta viewport>), va du dai de cuon > mot man hinh.
+        ctype = "text/vnd.wap.wml";
+        static std::string longpage;
+        if (longpage.empty()) {
+          longpage = "<wml><card title=\"Long scroll test\"><p>";
+          char line[96];
+          for (int i = 1; i <= 24; i++) {
+            snprintf(line, sizeof line, "<a href=\"#\">Content block number %d with a long label</a><br/>", i);
+            longpage += line;
+          }
+          longpage += "</p></card></wml>";
+        }
+        body = longpage.c_str();
       } else if (keypad) {
         ctype = "text/html; charset=utf-8";
         body =
@@ -221,11 +336,25 @@ void LGFX::drawString(const char *s, int x, int y) {
     {0,0,0x7F,0,0},{0,0x41,0x36,0x08,0},{0x08,0x04,0x08,0x10,0x08},
   };
   int sx = x;
-  for (int i = 0; s[i]; i++) {
+  for (int i = 0; s[i]; ) {
     unsigned char c = (unsigned char)s[i];
-    if (c == ' ') { sx += charW(); continue; }
-    if (c < 32 || c > 127) c = '?';
-    const unsigned char *g = F[c - 32];
+    // UTF-8 decode: 1 codepoint = 1 slot (hien '?' neu khong co glyph ASCII)
+    int len = 1;
+    unsigned int cp = c;
+    if (c >= 0xC0) {
+      if (c < 0xE0) { len = 2; cp = c & 0x1F; }
+      else if (c < 0xF0) { len = 3; cp = c & 0x0F; }
+      else { len = 4; cp = c & 0x07; }
+      for (int k = 1; k < len && s[i + k]; k++) {
+        unsigned char cc = (unsigned char)s[i + k];
+        if ((cc & 0xC0) != 0x80) { len = k; break; }
+        cp = (cp << 6) | (cc & 0x3F);
+      }
+    }
+    i += len;
+    if (cp == ' ') { sx += charW(); continue; }
+    unsigned char show = (cp >= 32 && cp <= 127) ? (unsigned char)cp : '?';
+    const unsigned char *g = F[show - 32];
     int scale = (font >= 4) ? 2 : 1;
     for (int col = 0; col < 5; col++) {
       unsigned char bits = g[col];

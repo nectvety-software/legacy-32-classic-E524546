@@ -1,0 +1,5 @@
+$ /mnt/data/VQEAF_v242_acceptance_work/actual_browser_parse /mnt/data/VQEAF_v242_acceptance_work/browser_page.json
+BROWSER_LOADED|200|VQEAF Browser Test|lines=3|links=1
+BROWSER_LINK_OPENED|https://example.org/apps
+
+[exit] 0

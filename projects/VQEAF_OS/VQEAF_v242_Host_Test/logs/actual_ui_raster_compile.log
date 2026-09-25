@@ -1,0 +1,3 @@
+$ g++ -std=c++17 -Wall -Wextra -Werror -Wno-deprecated-declarations -fpermissive -I/mnt/data/VQEAF_v242_acceptance_work/tests -I/mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/vqeaf_host/reference_stubs -Itools/host_stubs -Isrc -Iinclude /mnt/data/VQEAF_v242_acceptance_work/tests/ui_capture.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/core/SymbianUI.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/src/core/VqeafIconRenderer.cpp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/tools/host_stubs/host_globals.cpp -o /mnt/data/VQEAF_v242_acceptance_work/actual_ui_raster
+
+[exit] 0

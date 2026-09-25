@@ -1,0 +1,170 @@
+[
+  {
+    "name": "wifi",
+    "legacy": "Wi",
+    "size": 24,
+    "rleBytes": 77,
+    "opaque": 39
+  },
+  {
+    "name": "wifi",
+    "legacy": "Wi",
+    "size": 36,
+    "rleBytes": 145,
+    "opaque": 124
+  },
+  {
+    "name": "bluetooth",
+    "legacy": "BLE",
+    "size": 24,
+    "rleBytes": 146,
+    "opaque": 216
+  },
+  {
+    "name": "bluetooth",
+    "legacy": "BLE",
+    "size": 36,
+    "rleBytes": 226,
+    "opaque": 486
+  },
+  {
+    "name": "music",
+    "legacy": "Mus",
+    "size": 24,
+    "rleBytes": 101,
+    "opaque": 123
+  },
+  {
+    "name": "music",
+    "legacy": "Mus",
+    "size": 36,
+    "rleBytes": 196,
+    "opaque": 266
+  },
+  {
+    "name": "files",
+    "legacy": "Dir",
+    "size": 24,
+    "rleBytes": 93,
+    "opaque": 250
+  },
+  {
+    "name": "files",
+    "legacy": "Dir",
+    "size": 36,
+    "rleBytes": 167,
+    "opaque": 549
+  },
+  {
+    "name": "gallery",
+    "legacy": "Pic",
+    "size": 24,
+    "rleBytes": 165,
+    "opaque": 316
+  },
+  {
+    "name": "gallery",
+    "legacy": "Pic",
+    "size": 36,
+    "rleBytes": 273,
+    "opaque": 661
+  },
+  {
+    "name": "internet",
+    "legacy": "Web",
+    "size": 24,
+    "rleBytes": 125,
+    "opaque": 148
+  },
+  {
+    "name": "internet",
+    "legacy": "Web",
+    "size": 36,
+    "rleBytes": 222,
+    "opaque": 296
+  },
+  {
+    "name": "shell",
+    "legacy": "Term",
+    "size": 24,
+    "rleBytes": 134,
+    "opaque": 306
+  },
+  {
+    "name": "shell",
+    "legacy": "Term",
+    "size": 36,
+    "rleBytes": 225,
+    "opaque": 702
+  },
+  {
+    "name": "recovery",
+    "legacy": "Rec",
+    "size": 24,
+    "rleBytes": 120,
+    "opaque": 148
+  },
+  {
+    "name": "recovery",
+    "legacy": "Rec",
+    "size": 36,
+    "rleBytes": 200,
+    "opaque": 374
+  },
+  {
+    "name": "settings",
+    "legacy": "Set",
+    "size": 24,
+    "rleBytes": 131,
+    "opaque": 193
+  },
+  {
+    "name": "settings",
+    "legacy": "Set",
+    "size": 36,
+    "rleBytes": 213,
+    "opaque": 416
+  },
+  {
+    "name": "themes",
+    "legacy": "Th",
+    "size": 24,
+    "rleBytes": 130,
+    "opaque": 244
+  },
+  {
+    "name": "themes",
+    "legacy": "Th",
+    "size": 36,
+    "rleBytes": 215,
+    "opaque": 500
+  },
+  {
+    "name": "apps",
+    "legacy": "App",
+    "size": 24,
+    "rleBytes": 99,
+    "opaque": 252
+  },
+  {
+    "name": "apps",
+    "legacy": "App",
+    "size": 36,
+    "rleBytes": 169,
+    "opaque": 558
+  },
+  {
+    "name": "library",
+    "legacy": "Col",
+    "size": 24,
+    "rleBytes": 153,
+    "opaque": 259
+  },
+  {
+    "name": "library",
+    "legacy": "Col",
+    "size": 36,
+    "rleBytes": 255,
+    "opaque": 593
+  }
+]

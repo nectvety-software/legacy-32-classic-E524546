@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" shape-rendering="crispEdges">
+<title>VQEAF OS – gallery</title>
+<rect x="8" y="5" width="23" height="25" fill="#566675" stroke="#23313A" stroke-width="1"/>
+<rect x="5" y="9" width="23" height="22" fill="#D3E0E7" stroke="#FFFFFF" stroke-width="1"/>
+<rect x="8" y="12" width="17" height="15" fill="#69BDEB"/>
+<ellipse cx="20.0" cy="16.0" rx="2.0" ry="2.0" fill="#F5EB42"/>
+<polygon points="8,27 15,17 21,27" fill="#16CD60" stroke-linejoin="round"/>
+<polygon points="14,27 22,20 25,23 25,27" fill="#93ED8F" stroke-linejoin="round"/>
+</svg>

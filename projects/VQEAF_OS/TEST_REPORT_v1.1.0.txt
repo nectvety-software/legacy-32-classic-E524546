@@ -1,0 +1,565 @@
+Symbian S3 OS v1.1.0 Theme Engine - Regression Report
+Target: ESP32-S3 N16R8 / ST7789 portrait 240x320
+Source theme: VQEAF Theme Studio themes/amoled_red.vqeaf
+
+===== tools/test_grid_nav.py =====
+PASS: S60 3x4 launcher navigation and edge wrapping
+
+===== tools/test_v04.py =====
+PASS: check_portrait_layout
+PASS: check_pin_conflicts
+PASS: check_grid_navigation
+PASS: check_keyboard_fit
+PASS: check_features_present
+PASS: check_build_macro_safety
+PASS: check_cpp11_safe_initialization
+PASS: 7/7 v0.4 regression gates
+
+===== tools/test_v05.py =====
+PASS: check_new_screen_ids
+PASS: check_notification_service
+PASS: check_quick_panel_and_lock
+PASS: check_notes_persistence
+PASS: check_settings_scroll_and_timeout
+PASS: check_idle_shortcuts
+PASS: check_ble_duplicate_fixed
+PASS: check_version_docs
+PASS: check_cpp11_initializer_safety
+PASS: 9/9 v0.5 regression gates
+
+===== tools/test_v051.py =====
+PASS: legacy global AppContext ctx removed
+PASS: application context renamed and file-local
+PASS: main.cpp contains no standalone ctx identifier
+PASS: runtime objects use internal linkage
+PASS: README preserves v0.5.1 linker hotfix documentation
+PASS: CHANGELOG documents ctx collision fix
+PASS: 6/6 v0.5.1 linker regression gates
+
+===== tools/test_v06.py =====
+PASS: portrait 240x320 contract
+PASS: TaskSwitcher screen id exists
+PASS: long MENU opens task switcher
+PASS: enterScreen has resume parameter
+PASS: task switcher can request resume
+PASS: resume skips WiFi rescan enter
+PASS: MRU bounded to six tasks
+PASS: MRU de-duplicates existing screen
+PASS: health monitor runs at 5 second cadence
+PASS: low heap warning threshold 48 KB
+PASS: low heap warning rearm threshold 64 KB
+PASS: persistent boot counter
+PASS: WiFi profile store bounded to five
+PASS: WiFi profiles persist SSID/password/open state
+PASS: WiFi UI shows saved marker
+PASS: WiFi forget action exists
+PASS: boot reconnect uses last saved WiFi
+PASS: no standalone ctx identifier in main
+PASS: app context remains file-local appCtx
+PASS: new system services use internal linkage
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: MRU newest first
+PASS: MRU re-open moves existing to front without duplicate
+PASS: MRU seventh task drops oldest
+PASS: v0.6 docs present
+PASS: 53/53 v0.6 regression gates
+
+===== tools/test_v061.py =====
+PASS: portrait remains 240x320
+PASS: S60 titlebar/navbar geometry
+PASS: S60 icon cell retained/enlarged
+PASS: S60 titlebar keeps WiFi+battery status cluster
+PASS: chrome redraw cache exists
+PASS: softkey redraw cache exists
+PASS: content clear is separate from full-screen clear
+PASS: keyboard clears content only on first frame
+PASS: idle focus redraw is partial
+PASS: idle/clock timer no longer full redraws every second
+PASS: launcher dpad redraws only old/new grid cells
+PASS: applications list redraws only old/new rows
+PASS: WiFi list uses dirty old/new row repaint
+PASS: BLE list uses dirty old/new row repaint
+PASS: File Manager uses dirty old/new row repaint
+PASS: Music uses dirty old/new row repaint
+PASS: Settings uses dirty old/new row repaint
+PASS: Quick Panel selection repaint is local
+PASS: Notifications selection repaint is local
+PASS: Task switcher selection repaint is local
+PASS: transition no longer blanks whole LCD
+PASS: Font4 removed from firmware build
+PASS: WiFi results are fixed char buffers and capped at 16
+PASS: BLE results are fixed char buffers and capped at 16
+PASS: file manager entry cache reduced
+PASS: music entry cache reduced
+PASS: notification queue reduced
+PASS: collection counts media without 64-entry temp array
+PASS: audio work buffers reduced
+PASS: audio DMA pool reduced
+PASS: BLE host memory released after scan
+PASS: app context still file-local and not named ctx
+PASS: TFT macro collision fix preserved
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 62/62 v0.6.1 gates
+
+===== tools/test_v07.py =====
+PASS: portrait board remains 240x320
+PASS: titlebar status draws WiFi
+PASS: titlebar status draws battery
+PASS: titlebar status omits BLE and SD indicators
+PASS: idle status omits BLE and SD indicators
+PASS: lock status has WiFi and battery only
+PASS: recovery state bootPending
+PASS: recovery state crashStreak
+PASS: recovery state forceSafe
+PASS: watchdog panic brownout resets recognized
+PASS: automatic safe mode after repeated crashes
+PASS: stable boot clears crash-loop marker
+PASS: hardware A recovery chord
+PASS: safe mode disables risky apps
+PASS: safe mode skips audio runtime
+PASS: safe mode disables WiFi autoconnect
+PASS: recovery app screen exists
+PASS: recovery can clear flags and restart
+PASS: Gallery and TextViewer screens registered
+PASS: launcher exposes Gallery and Library
+PASS: file manager routes images to Gallery
+PASS: file manager routes text to TextViewer
+PASS: gallery scans BMP JPEG PNG
+PASS: gallery image decoder supports BMP
+PASS: gallery image decoder supports JPEG via Qeafbrowser decoder
+PASS: gallery image decoder supports PNG via Qeafbrowser decoder
+PASS: image buffers prefer PSRAM
+PASS: JPEG edge clipping preserves MCU source stride
+PASS: text viewer uses bounded page buffers
+PASS: text viewer streams from file offsets
+PASS: Browser screen/app registered
+PASS: launcher exposes Qeafbrowser
+PASS: browser uses fixed line/link pools
+PASS: browser response buffer is bounded to 32KB
+PASS: browser response buffer prefers PSRAM
+PASS: browser HTTP and HTTPS enabled
+PASS: browser TLS compatibility follows source
+PASS: browser explicit redirect loop
+PASS: browser resolves redirects relative to current URL
+PASS: browser preserves href case
+PASS: browser renders image alt fallback
+PASS: browser Opera Mini style user agent
+PASS: browser default home matches Qeafbrowser source
+PASS: browser supports back history
+PASS: browser supports keypad URL entry
+PASS: opening application renderer exists
+PASS: resume interstitial text exists
+PASS: launcher/idle/files/task sources show opening screen
+PASS: task switcher can resume app state
+PASS: JPEG and PNG libraries pinned
+PASS: AppContext uses explicit C++11 constructor
+PASS: ctx linker collision remains fixed
+PASS: TFT macro collision fix remains
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 82/82 v0.7 gates
+
+===== tools/test_v08.py =====
+PASS: Shell screen registered
+PASS: Shell service/app context registered
+PASS: main owns file-local shell service
+PASS: AppContext receives shell service
+PASS: shell initialized after storage mount
+PASS: shell enter/draw dispatch exists
+PASS: shell is not blocked in Safe Mode
+PASS: shell is an MRU task screen
+PASS: shell has terminal icon
+PASS: Applications exposes shell
+PASS: Launcher options expose shell
+PASS: opening-app lifecycle includes shell automatically
+PASS: bounded output ring
+PASS: bounded command history
+PASS: no fork or exec command engine
+PASS: bounded ls output
+PASS: bounded cat output
+PASS: microSD cwd normalization
+PASS: shell command help
+PASS: shell command clear
+PASS: shell command uname
+PASS: shell command version
+PASS: shell command uptime
+PASS: shell command free
+PASS: shell command df
+PASS: shell command mount
+PASS: shell command pwd
+PASS: shell command cd
+PASS: shell command ls
+PASS: shell command cat
+PASS: shell command stat
+PASS: shell command date
+PASS: shell command wifi
+PASS: shell command ifconfig
+PASS: shell command ip
+PASS: shell command ps
+PASS: shell command dmesg
+PASS: shell command safe
+PASS: shell command reboot
+PASS: shell command echo
+PASS: shell command history
+PASS: wifi shell command can report/scan/connect/on/off
+PASS: safe mode shell command integrates recovery
+PASS: reboot uses deferred request
+PASS: shell prompt and S60 chrome
+PASS: START opens command editor
+PASS: UP recalls command history
+PASS: shared keyboard has slash and colon
+PASS: v0.8 docs identify S31/S3 architecture difference
+PASS: v0.8 changelog present
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 79/79 v0.8 gates
+
+===== tools/test_v09.py =====
+PASS: v0.9 shell/network feature line retained
+PASS: bounded terminal
+PASS: quoted argument parser
+PASS: file command mkdir
+PASS: file command rm
+PASS: file command rmdir
+PASS: file command touch
+PASS: file command cp
+PASS: file command mv
+PASS: file command hexdump
+PASS: file command write
+PASS: file command append
+PASS: copy uses bounded 512-byte buffer
+PASS: copy removes partial destination on failure
+PASS: rm refuses root
+PASS: rmdir is non-recursive
+PASS: hexdump is bounded
+PASS: network/monitor command netmon
+PASS: network/monitor command nslookup
+PASS: network/monitor command ping
+PASS: network/monitor command wget
+PASS: network/monitor command top
+PASS: DNS uses hostByName
+PASS: ICMP ping has compile-time fallback
+PASS: wget streams to File
+PASS: HTTPS wget explicitly insecure
+PASS: ifconfig shows network details
+PASS: net monitor tracks signal/download
+PASS: system monitor tracks heap/psram
+PASS: S60 shell menu exposes monitors
+PASS: no recursive delete command
+PASS: no arbitrary process execution
+PASS: documentation updated
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 62/62 v0.9 gates
+
+===== tools/test_v10.py =====
+PASS: portrait width 240
+PASS: portrait height 320
+PASS: portrait rotation 0
+PASS: S60 Green theme enum
+PASS: S60 Green theme name
+PASS: default settings choose green
+PASS: one-time theme migration
+PASS: 27px titlebar
+PASS: 22px navbar
+PASS: launcher 3 columns
+PASS: launcher 4 rows
+PASS: 36px icon box
+PASS: 12 launcher apps
+PASS: launcher WiFi
+PASS: launcher Bluetooth
+PASS: launcher Music
+PASS: launcher File mgr
+PASS: launcher Gallery
+PASS: launcher Internet
+PASS: launcher Shell
+PASS: launcher Recovery
+PASS: launcher Settings
+PASS: launcher Notes
+PASS: launcher Apps
+PASS: launcher Library
+PASS: launcher draws theme wallpaper
+PASS: green menu bands
+PASS: green menu icons direct draw
+PASS: no full menu bitmap
+PASS: status remains WiFi+battery only
+PASS: green theme selectable
+PASS: reset appearance chooses green
+PASS: v1.0 version advertised
+PASS: retained shell mkdir
+PASS: retained shell cp
+PASS: retained shell mv
+PASS: retained shell hexdump
+PASS: retained shell netmon
+PASS: retained shell nslookup
+PASS: retained shell ping
+PASS: retained shell wget
+PASS: retained shell top
+PASS: documentation v1.0
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/BrowserService.cpp
+PASS: balanced braces src/services/BrowserService.h
+PASS: balanced braces src/services/ImageViewerService.cpp
+PASS: balanced braces src/services/ImageViewerService.h
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/ShellService.cpp
+PASS: balanced braces src/services/ShellService.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 72/72 v1.0 gates
+
+===== tools/test_v101.py =====
+PASS: portrait 240x320
+PASS: center zone + compact right group
+PASS: clock exact center
+PASS: clock vertical alignment
+PASS: wifi grouped right
+PASS: battery right aligned
+PASS: title pixel clipping
+PASS: wifi bars cached
+PASS: wifi+battery only
+PASS: idle same geometry
+PASS: version migrated
+PASS: changelog 1.0.1
+PASS: balanced src/apps/Apps.cpp
+PASS: balanced src/apps/Apps.h
+PASS: balanced src/core/InputManager.cpp
+PASS: balanced src/core/InputManager.h
+PASS: balanced src/core/SymbianUI.cpp
+PASS: balanced src/core/SymbianUI.h
+PASS: balanced src/core/TextKeyboard.cpp
+PASS: balanced src/core/TextKeyboard.h
+PASS: balanced src/core/Theme.h
+PASS: balanced src/core/Types.h
+PASS: balanced src/main.cpp
+PASS: balanced src/services/BrowserService.cpp
+PASS: balanced src/services/BrowserService.h
+PASS: balanced src/services/ImageViewerService.cpp
+PASS: balanced src/services/ImageViewerService.h
+PASS: balanced src/services/MusicService.cpp
+PASS: balanced src/services/MusicService.h
+PASS: balanced src/services/NotificationService.cpp
+PASS: balanced src/services/NotificationService.h
+PASS: balanced src/services/SettingsStore.cpp
+PASS: balanced src/services/SettingsStore.h
+PASS: balanced src/services/ShellService.cpp
+PASS: balanced src/services/ShellService.h
+PASS: balanced src/services/StorageService.cpp
+PASS: balanced src/services/StorageService.h
+PASS: balanced src/services/SystemService.cpp
+PASS: balanced src/services/SystemService.h
+PASS: balanced src/services/WiFiProfileStore.cpp
+PASS: balanced src/services/WiFiProfileStore.h
+PASS: 41/41 v1.0.1 gates
+
+===== tools/test_v11.py =====
+PASS: portrait geometry
+PASS: compact status constants
+PASS: wifi and battery grouped
+PASS: clock centered
+PASS: amoled enum
+PASS: amoled name
+PASS: source screen palette
+PASS: source accent palette
+PASS: source border palette
+PASS: amoled s60 icons
+PASS: amoled menu background
+PASS: amoled wallpaper
+PASS: theme cycle includes red
+PASS: device vqeaf red
+PASS: device vqeaf green
+PASS: theme docs
+PASS: version 1.1
+PASS: changelog v1.1
+PASS: balanced src/apps/Apps.cpp
+PASS: balanced src/apps/Apps.h
+PASS: balanced src/core/InputManager.cpp
+PASS: balanced src/core/InputManager.h
+PASS: balanced src/core/SymbianUI.cpp
+PASS: balanced src/core/SymbianUI.h
+PASS: balanced src/core/TextKeyboard.cpp
+PASS: balanced src/core/TextKeyboard.h
+PASS: balanced src/core/Theme.h
+PASS: balanced src/core/Types.h
+PASS: balanced src/main.cpp
+PASS: balanced src/services/BrowserService.cpp
+PASS: balanced src/services/BrowserService.h
+PASS: balanced src/services/ImageViewerService.cpp
+PASS: balanced src/services/ImageViewerService.h
+PASS: balanced src/services/MusicService.cpp
+PASS: balanced src/services/MusicService.h
+PASS: balanced src/services/NotificationService.cpp
+PASS: balanced src/services/NotificationService.h
+PASS: balanced src/services/SettingsStore.cpp
+PASS: balanced src/services/SettingsStore.h
+PASS: balanced src/services/ShellService.cpp
+PASS: balanced src/services/ShellService.h
+PASS: balanced src/services/StorageService.cpp
+PASS: balanced src/services/StorageService.h
+PASS: balanced src/services/SystemService.cpp
+PASS: balanced src/services/SystemService.h
+PASS: balanced src/services/WiFiProfileStore.cpp
+PASS: balanced src/services/WiFiProfileStore.h
+PASS: 47/47 v1.1 gates
+
+PlatformIO target build: NOT RUN in this container (pio/platformio unavailable).
+Run: pio run -t clean && pio run && pio run -t upload
+
+C++11 direct Theme.h compile: PASS
+AMOLED Red RGB565 accent mapping runtime check: PASS

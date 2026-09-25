@@ -1,3 +1,81 @@
+# Qeafbrowser v2.2 — Giao diện Symbian S60, chữ ĐẬM kiểu Nokia
+
+Toàn bộ khung UI được vẽ lại theo chuẩn **Symbian S60 (3rd Edition)** và dùng font
+**đậm nét** như Nokia 2700: mọi chuỗi của giao diện đều được thicken thêm 1 px
+stem, cho ra nét chữ 2 px đúng chất feature phone.
+
+Ảnh kiểm tra: `sim/s60_out/*.bmp` (240×320, mở bằng `sim/inspect_bmp.py` hoặc
+bất kỳ trình xem BMP). Xem mục *Kiểm thử* ở dưới để chạy lại.
+
+## Theme nằm ở đâu
+
+| File | Nội dung |
+|---|---|
+| `include/ui_s60.h` | Bảng màu + metric S60 duy nhất cho **cả firmware và simulator** (macro `S60_RGB`, `S60_PANE_TOP/BOT`, `S60_SEL_TOP/BOT`, `S60_SOFT_TOP/BOT`, `S60_ACCENT`, `S60_ROW_H`…) |
+| `src/main.cpp` § *Symbian S60 theme engine* | `s60_text()` (chữ đậm), gradient 565, thanh chọn xanh, panel bo góc, keycap, icon glyph |
+| `sim/s60_main.cpp` + `sim/s60_out/*.bmp` | Regression: splash, Speed Dial, list row, trang web, Options menu, keypad ảo, field |
+
+Các macro `UI_*` cũ vẫn còn nhưng giờ là alias của palette S60, nên mọi điểm gọi
+cũ không phải sửa.
+
+## Những gì đã đổi trên màn hình
+
+- **Application pane (22 px)**: một dải gradient xanh thép → navy dùng chung cho
+  status pane và title bar, 1 px kẻ sáng dưới chân pane. Bên trái là 5 vạch sóng
+  Nokia (lấy mức RSSI thật trên ESP32), bên phải là biểu tượng WiFi + pin, ở giữa
+  là tiêu đề trang **in đậm**. Khi đang tải, 3 px cuối của pane thành progress bar
+  xanh `S60_ACCENT`; dòng trạng thái `Connecting… / Sending request… /
+  Receiving…` thay chỗ tiêu đề.
+- **Thanh softkey (18 px)**: gradient đen, 1 px kẻ sáng, nhãn trái/phải **đậm**
+  (`Menu`/`Back`, `OK`/`Cancel`, `Select`/`Cancel`) và đồng hồ NTP ở giữa.
+- **Dòng danh sách S60** (`<folder>`/`<dir>`): thanh chọn xanh gradient có kẻ sáng,
+  icon glyph 16 px (globe/settings/bookmark/history/search/wifi/info/help) chọn theo
+  nhãn, nhãn **đậm**, mũi tên phải, 1 px kẻ chân dòng. Khoảng trắng giữa hai dòng
+  danh sách được co từ 22 px xuống 2 px nên danh sách liền mạch như menu Nokia.
+- **Ô nhập liệu** (`<input>`/`<field>`): bo góc, khi focus thì **tô nền xanh + chữ
+  trắng** đúng kiểu text box S60.
+- **Options menu**: panel bo góc có bóng, mục **đậm**, thanh chọn xanh full-width,
+  mũi tên cho mục có menu con.
+- **Bàn phím ảo**: keycap gradient bo góc, key đang chọn là gradient xanh S60.
+- **Splash**: pane trên cùng + logo Qeafbrowser + nhãn `Symbian S60 interface` +
+  progress bar.
+- **Bản đồ nhỏ / scrollbar / overview**: tông xám-xanh `S60_SCROLL_*`, khung focus
+  xanh `S60_ACCENT`.
+
+Chữ đậm **không** thêm font bitmap thứ hai: `s60_text()` vẽ lại chuỗi lệch 1 px
+sang phải (`S60_BOLD_PX`), nên không tốn flash/RAM, số đo wrap của `wml.cpp`
+không đổi, và ESP32 với simulator cho ra **cùng một kết quả**.
+
+## Lệnh kiểm tra mới
+
+```
+pio device monitor
+> doc          # in layout da parse: dong / style / chieu cao / y (style 3 = hang danh sach)
+```
+
+`extern "C"` cho harness: `sim_draw_splash()` (chụp lại màn khởi động) và
+`sim_doc_dump()` (in layout ra stdout).
+
+## Sửa kèm trong bản này
+
+- **Chuột ảo bị dính giữa các trang**: `mouse_on` trước đây không được tắt khi mở
+  trang WML/`mtt:`, nên chuột ảo bật từ trang desktop trước đó vẫn "nuốt" D-Pad
+  của UI nhỏ. Giờ trang WML luôn tắt chuột ảo.
+- **Harness build được trên Windows**: biến `OUT` trong các `sim/*_main.cpp` bị
+  `<windef.h>` định nghĩa thành macro rỗng → đổi tên thành `OUTDIR`.
+- **Fixture `https://keypad.test/long.html`** (WML dài 24 block) để regression
+  cuộn pixel/inertia có đủ quãng cuộn; `pixel_scroll_main` và `inertia_scroll_main`
+  chờ animation settle lâu hơn (2 s).
+- `sim/inspect_bmp.py`: đọc BMP 240×320 ra terminal (bands / ascii / zoom) để kiểm
+  tra layout và màu khi không mở được cửa sổ ảnh.
+
+Kiểm chứng: `pio run -e esp32-s3-st7789` → SUCCESS, RAM 64576 B (19.7%),
+Flash 1096613 B (16.7%). Regression: `s60` 0 FAIL, `pixel_scroll`, `inertia_scroll`,
+`overview_anim`, `headless` đều chạy hết. `qeafivels` chỉ còn `thumbnail_lru=FAIL`
+trên Windows vì bản build Windows của simulator không có decoder JPEG/PNG
+(`QB_HAS_TJPEG`/`QB_HAS_PNGDEC` = 0); trên Linux (`-lpng16 -ljpeg`) và trên ESP32
+đường decode đầy đủ.
+
 ## Qeafbrowser v2.0 — light D-Pad inertia
 
 - Main-page pixel scrolling now keeps a small fixed-point velocity while D-Pad is held.

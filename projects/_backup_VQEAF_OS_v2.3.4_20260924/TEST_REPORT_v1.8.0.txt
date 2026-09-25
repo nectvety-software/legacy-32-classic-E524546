@@ -1,0 +1,66 @@
+Symbian S3 OS v1.8.0 — APP & MEDIA UPDATE
+Target ESP32-S3 N16R8, ST7789 portrait 240x320.
+
+DELIVERED
+- New Calculator (bounded arithmetic, on-screen 4x4 grid, S60 Options)
+- New Stopwatch (wrap-aware millis, four laps, partial time redraw)
+- Music Now Playing, 32-track shuffled-cycle/repeat, track advance, volume
+- Gallery slideshow, external image opens; BLE 16 strongest + details
+- No extra full-screen RGB565 framebuffer. Existing WiFi/signed installer retained.
+
+VERIFIED IN HOST ENVIRONMENT (NOT PHYSICAL HARDWARE)
+
+New native model and integration tests: PASS
+PASS: BLE details has return state
+PASS: safe mode audio guard unchanged
+PASS: TFT no full-screen sprite
+PASS: 14 v1.8 source integration checks
+
+Platform mock GNU++11 translation and link: PASS
+PASS: src/services/WiFiConnectionService.cpp
+PASS: src/services/WiFiProfileStore.cpp
+PASS: 20/20 host C++11 translation units + full host link
+NOTE: mock Arduino/ESP32 APIs; PlatformIO target build not verified
+
+v1.6 WiFi retained: PASS
+PASS: credentials never committed on failure
+PASS: no new full-screen framebuffer
+PASS: S60 top bar only wifi and battery
+PASS: 16/16 source integration checks
+
+v1.7 WiFi selection retained: PASS
+PASS: Shell shared-radio override stops competing boot scan
+PASS: Safe Mode / disabled preference does not scan or auto-join
+PASS: 10 auto WiFi integration scenarios
+PASS: WiFi auto-selection host test suite (10 scenarios)
+
+v1.7 UI and wiring retained: PASS
+PASS: shell radio manual override
+PASS: foreground app WiFi icon dirty refresh
+PASS: v1.7 docs
+PASS: 28 source integration assertions
+
+3x4 launcher navigation: PASS
+PASS: S60 3x4 launcher navigation and edge wrapping
+
+20 C++ firmware translation units, GNU++11 + Arduino/ESP32 API mocks: PASS.
+Host mock full linkage and single setup()/loop() run: PASS.
+Portable CalculatorEngine, StopwatchEngine, PlaylistNavigator assert suite: PASS.
+New v1.8 static integration checks: 14/14 PASS.
+
+NOT TESTED HERE
+- PlatformIO/ESP32-S3 compiler, flash usage, hardware PSRAM or SD driver.
+- Real I2S DAC waveform and SD streaming while network requests block.
+- Real NimBLE radio advertisements and gallery JPEG/PNG decode on TFT.
+Older v0.x-v1.3 text-snapshot assertions are tied to superseded app code;
+this release verifies the current v1.6/v1.7 regression suites instead.
+
+MANUAL BOARD VALIDATION
+1. pio run -t clean && pio run && pio run -t upload
+2. pio device monitor -b 115200
+3. Calculator divide-by-zero, popup clear, returning from tasks.
+4. Stopwatch elapsed/laps/background; music WAV16 DAC and auto next;
+   Gallery slideshow and File Manager external image; BLE sorted strongest.
+
+PREVIEWS are illustrative layout redraws from static Python geometry,
+NOT screenshots captured from the board or running ESP firmware.

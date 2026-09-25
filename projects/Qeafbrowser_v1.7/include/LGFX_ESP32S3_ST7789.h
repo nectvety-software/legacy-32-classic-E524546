@@ -20,9 +20,9 @@ public:
   LGFX_ESP32S3_ST7789() {
     {
       auto cfg = _bus.config();
-      cfg.spi_host   = SPI2_HOST;      // SPI2 khả dụng tự do trên S3
+      cfg.spi_host   = SPI2_HOST;      // match E524546-OS reference
       cfg.spi_mode   = 0;
-      cfg.freq_write = 40000000;
+      cfg.freq_write = 20000000;
       cfg.freq_read  = 16000000;
       cfg.spi_3wire  = false;
       cfg.use_lock   = true;
@@ -37,7 +37,7 @@ public:
     {
       auto cfg = _panel.config();
       cfg.pin_cs   = TFT_CS;
-      cfg.pin_rst  = TFT_RESET;
+      cfg.pin_rst  = TFT_RESET;          // GPIO3 hardware reset (DESIGN.txt / E524546-OS)
       cfg.pin_busy = -1;
       cfg.memory_width  = TFT_WIDTH;
       cfg.memory_height = TFT_HEIGHT;

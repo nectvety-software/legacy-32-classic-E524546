@@ -1,3 +1,46 @@
+## v2.2 - Symbian S60 interface + Nokia bold type
+
+### Giao diện
+- Thêm `include/ui_s60.h`: palette + metric Symbian S60 3rd Edition dùng chung cho
+  firmware và simulator (application pane, thanh chọn xanh, softkey bar, keycap,
+  icon glyph, progress, scrollbar). Các macro `UI_*` cũ trở thành alias của palette S60.
+- **Chữ ĐẬM toàn UI**: `s60_text()` vẽ lại chuỗi lệch 1 px sang phải (faux bold
+  theo chiều ngang). Không thêm bộ font bitmap thứ hai → không tăng flash/RAM,
+  số đo wrap của `wml.cpp` không đổi, ESP32 và simulator cho cùng kết quả.
+- Application pane 22 px kiểu S60: gradient xanh thép → navy, 5 vạch sóng Nokia
+  (RSSI thật), WiFi + pin, tiêu đề đậm, 1 px kẻ sáng, 3 px progress bar khi tải.
+- Thanh softkey gradient đen + nhãn đậm trái/phải + đồng hồ NTP giữa.
+- Dòng danh sách `<folder>`/`<dir>` kiểu S60: thanh chọn xanh gradient, icon glyph
+  16 px chọn theo nhãn, nhãn đậm, mũi tên phải, kẻ chân dòng.
+- Ô nhập liệu khi focus được tô nền xanh + chữ trắng như text box S60.
+- Options menu thành panel bo góc có bóng với thanh chọn xanh và mũi tên menu con.
+- Bàn phím ảo dùng keycap S60; splash và màn hình tải/splash vẽ lại theo theme.
+- Icon vẽ bằng hình học cơ bản (đường tròn/cung) — không thêm asset runtime.
+
+### Layout & parser
+- `render_line_h()` co dòng trắng giữa hai dòng danh sách từ 22 px xuống 2 px để
+  danh sách S60 liền mạch (kiểm tra trước nhánh `st == 3` vì parser giữ style 3
+  cho cả dòng trắng).
+
+### Sửa lỗi
+- `mouse_on` không được tắt khi mở trang WML/`mtt:`; chuột ảo bật từ trang desktop
+  trước đó vẫn giữ nguyên và nuốt phím D-Pad của UI nhỏ. Trang WML giờ luôn tắt
+  chuột ảo.
+
+### Kiểm thử
+- Thêm `sim/s60_main.cpp` + `sim/s60_out/*.bmp`: splash, Speed Dial, dòng danh sách,
+  trang web, Options menu + menu con, bàn phím ảo, field; có assert đếm pixel theo
+  màu theme (`S60_PANE_MID`, `S60_SEL_TOP/BOT`, `S60_LINK`, `S60_ACCENT`).
+- Thêm hook `sim_draw_splash()` / `sim_doc_dump()` và lệnh CLI `doc` (in layout đã
+  parse: dòng / style / chiều cao / y).
+- Fixture `https://keypad.test/long.html` (WML 24 block) cho regression cuộn
+  pixel/inertia; hai harness này chờ animation settle 2 s.
+- Đổi `OUT` → `OUTDIR` trong `sim/*_main.cpp` ( `<windef.h>` định nghĩa `OUT` rỗng
+  nên harness không build được trên Windows); thêm hướng dẫn build MinGW vào
+  `sim/README.md`.
+- Thêm `sim/inspect_bmp.py` để đọc BMP 240×320 ra terminal.
+- `pio run -e esp32-s3-st7789`: SUCCESS, RAM 64576 B (19.7%), Flash 1096613 B (16.7%).
+
 ## v2.0 - Fixed-Point D-Pad Inertia
 - Added light velocity accumulation while the browse D-Pad is physically held.
 - Added allocation-free integer friction after key release for a short decelerating coast.

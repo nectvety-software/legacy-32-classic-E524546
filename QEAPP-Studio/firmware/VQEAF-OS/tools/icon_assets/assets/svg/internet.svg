@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" shape-rendering="crispEdges">
+<title>VQEAF OS – internet</title>
+<ellipse cx="18.0" cy="18.0" rx="12.0" ry="12.0" fill="#235FD9" stroke="#23313A" stroke-width="1"/>
+<ellipse cx="18.0" cy="18.0" rx="9.0" ry="12.0" fill="#00000000" stroke="#FFFFFF" stroke-width="1"/>
+<polyline points="6,18 29,18" fill="none" stroke="#FFFFFF" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="9,11 27,11" fill="none" stroke="#69BDEB" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="9,25 27,25" fill="none" stroke="#69BDEB" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+<polygon points="7,14 13,10 18,13 17,18 11,19" fill="#16CD60" stroke-linejoin="round"/>
+<polygon points="21,19 28,18 27,25 23,27 19,24" fill="#93ED8F" stroke-linejoin="round"/>
+</svg>

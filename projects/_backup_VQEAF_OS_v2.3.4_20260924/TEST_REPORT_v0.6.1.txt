@@ -1,0 +1,184 @@
+Symbian S3 OS v0.6.1 - Regression / anti-flicker test report
+Generated: 2026-09-24
+
+Target: ESP32-S3 N16R8, ST7789 portrait 240x320
+Scope: source regression + GNU++11 host syntax + package integrity.
+PlatformIO is not installed in this execution environment, so target linking/upload is not claimed here.
+
+===== tools/test_grid_nav.py =====
+PASS: S60 3x3 launcher navigation and edge wrapping
+
+===== tools/test_v04.py =====
+PASS: check_portrait_layout
+PASS: check_pin_conflicts
+PASS: check_grid_navigation
+PASS: check_keyboard_fit
+PASS: check_features_present
+PASS: check_build_macro_safety
+PASS: check_cpp11_safe_initialization
+PASS: 7/7 v0.4 regression gates
+
+===== tools/test_v05.py =====
+PASS: check_new_screen_ids
+PASS: check_notification_service
+PASS: check_quick_panel_and_lock
+PASS: check_notes_persistence
+PASS: check_settings_scroll_and_timeout
+PASS: check_idle_shortcuts
+PASS: check_ble_duplicate_fixed
+PASS: check_version_docs
+PASS: check_cpp11_initializer_safety
+PASS: 9/9 v0.5 regression gates
+
+===== tools/test_v051.py =====
+PASS: legacy global AppContext ctx removed
+PASS: application context renamed and file-local
+PASS: main.cpp contains no standalone ctx identifier
+PASS: runtime objects use internal linkage
+PASS: README preserves v0.5.1 linker hotfix documentation
+PASS: CHANGELOG documents ctx collision fix
+PASS: 6/6 v0.5.1 linker regression gates
+
+===== tools/test_v06.py =====
+PASS: portrait 240x320 contract
+PASS: TaskSwitcher screen id exists
+PASS: long MENU opens task switcher
+PASS: enterScreen has resume parameter
+PASS: task switcher can request resume
+PASS: resume skips WiFi rescan enter
+PASS: MRU bounded to six tasks
+PASS: MRU de-duplicates existing screen
+PASS: health monitor runs at 5 second cadence
+PASS: low heap warning threshold 48 KB
+PASS: low heap warning rearm threshold 64 KB
+PASS: persistent boot counter
+PASS: WiFi profile store bounded to five
+PASS: WiFi profiles persist SSID/password/open state
+PASS: WiFi UI shows saved marker
+PASS: WiFi forget action exists
+PASS: boot reconnect uses last saved WiFi
+PASS: no standalone ctx identifier in main
+PASS: app context remains file-local appCtx
+PASS: new system services use internal linkage
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: MRU newest first
+PASS: MRU re-open moves existing to front without duplicate
+PASS: MRU seventh task drops oldest
+PASS: v0.6 docs present
+PASS: 47/47 v0.6 regression gates
+
+===== tools/test_v061.py =====
+PASS: portrait remains 240x320
+PASS: S60 titlebar/navbar geometry
+PASS: 28px icon cell
+PASS: warm S60 titlebar keeps close mark/status cluster
+PASS: chrome redraw cache exists
+PASS: softkey redraw cache exists
+PASS: content clear is separate from full-screen clear
+PASS: keyboard clears content only on first frame
+PASS: idle focus redraw is partial
+PASS: idle/clock timer no longer full redraws every second
+PASS: launcher dpad redraws only old/new grid cells
+PASS: applications list redraws only old/new rows
+PASS: WiFi list uses dirty old/new row repaint
+PASS: BLE list uses dirty old/new row repaint
+PASS: File Manager uses dirty old/new row repaint
+PASS: Music uses dirty old/new row repaint
+PASS: Settings uses dirty old/new row repaint
+PASS: Quick Panel selection repaint is local
+PASS: Notifications selection repaint is local
+PASS: Task switcher selection repaint is local
+PASS: transition no longer blanks whole LCD
+PASS: Font4 removed from firmware build
+PASS: WiFi results are fixed char buffers and capped at 16
+PASS: BLE results are fixed char buffers and capped at 16
+PASS: file manager entry cache reduced
+PASS: music entry cache reduced
+PASS: notification queue reduced
+PASS: collection counts media without 64-entry temp array
+PASS: audio work buffers reduced
+PASS: audio DMA pool reduced
+PASS: BLE host memory released after scan
+PASS: app context still file-local and not named ctx
+PASS: TFT macro collision fix preserved
+PASS: balanced braces src/apps/Apps.cpp
+PASS: balanced braces src/apps/Apps.h
+PASS: balanced braces src/core/InputManager.cpp
+PASS: balanced braces src/core/InputManager.h
+PASS: balanced braces src/core/SymbianUI.cpp
+PASS: balanced braces src/core/SymbianUI.h
+PASS: balanced braces src/core/TextKeyboard.cpp
+PASS: balanced braces src/core/TextKeyboard.h
+PASS: balanced braces src/core/Theme.h
+PASS: balanced braces src/core/Types.h
+PASS: balanced braces src/main.cpp
+PASS: balanced braces src/services/MusicService.cpp
+PASS: balanced braces src/services/MusicService.h
+PASS: balanced braces src/services/NotificationService.cpp
+PASS: balanced braces src/services/NotificationService.h
+PASS: balanced braces src/services/SettingsStore.cpp
+PASS: balanced braces src/services/SettingsStore.h
+PASS: balanced braces src/services/StorageService.cpp
+PASS: balanced braces src/services/StorageService.h
+PASS: balanced braces src/services/SystemService.cpp
+PASS: balanced braces src/services/SystemService.h
+PASS: balanced braces src/services/WiFiProfileStore.cpp
+PASS: balanced braces src/services/WiFiProfileStore.h
+PASS: 56/56 v0.6.1 gates
+
+===== GNU++11 host syntax =====
+PASS: src/apps/Apps.cpp
+PASS: src/core/InputManager.cpp
+PASS: src/core/SymbianUI.cpp
+PASS: src/core/TextKeyboard.cpp
+PASS: src/main.cpp
+PASS: src/services/MusicService.cpp
+PASS: src/services/NotificationService.cpp
+PASS: src/services/SettingsStore.cpp
+PASS: src/services/StorageService.cpp
+PASS: src/services/SystemService.cpp
+PASS: src/services/WiFiProfileStore.cpp
+PASS: all C++ translation units accepted by GNU++11-compatible syntax check
+
+===== Anti-flicker implementation audit =====
+PASS: fillScreen is confined to SymbianUI::clear()
+PASS: normal D-pad navigation has partial old/new row redraw paths
+PASS: titlebar/status and softkey bars use redraw caches
+PASS: keyboard does not clear content on every key press
+PASS: periodic clock refresh updates small regions only
+PASS: transition effect does not blank the full LCD
+
+===== Memory pressure audit =====
+WiFi cache: 16 fixed records (SSID char[33], RSSI, auth)
+BLE cache: 16 fixed records (name char[32], address char[18], RSSI)
+File Manager cache: 40 FsEntry objects
+Music cache: 32 FsEntry objects
+Notification queue: 8 entries
+Audio work buffers: int16_t[256] + int16_t[512]
+I2S DMA: 6 buffers x 192 samples/units as configured by ESP-IDF driver
+Font4: removed from TFT_eSPI build flags
+BLE scan: NimBLE deinit(true) after scan-only operation
+
+NOTE: exact Flash/DRAM/PSRAM consumption requires the PlatformIO linker memory report from the target machine.

@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: verify_artifact
+Would run: .pio/build/vqeaf_os/firmware.bin size + SHA-256 + freshness
+Result: SIMULATED
+Verification only planned; no file created, no hash invented.

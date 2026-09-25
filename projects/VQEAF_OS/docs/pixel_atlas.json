@@ -1,0 +1,1842 @@
+{
+  "format": "VQEAF OS 240x320 pixel atlas",
+  "version": "2.2.0",
+  "orientation": "portrait",
+  "unit": "physical_px",
+  "screen_width": 240,
+  "screen_height": 320,
+  "rect_convention": "[x,y,w,h], right-bottom exclusive",
+  "shared": [
+    {
+      "id": "header",
+      "x": 0,
+      "y": 0,
+      "w": 240,
+      "h": 27,
+      "token": "chrome",
+      "description": "Tiêu đề x4..79, NTP giữa, WiFi/pin outline phải",
+      "kind": "box"
+    },
+    {
+      "id": "header_rule",
+      "x": 0,
+      "y": 27,
+      "w": 240,
+      "h": 1,
+      "token": "border",
+      "description": "Đường ngăn",
+      "kind": "box"
+    },
+    {
+      "id": "content",
+      "x": 0,
+      "y": 28,
+      "w": 240,
+      "h": 270,
+      "token": "background",
+      "description": "Nội dung",
+      "kind": "box"
+    },
+    {
+      "id": "soft_left",
+      "x": 0,
+      "y": 298,
+      "w": 80,
+      "h": 22,
+      "token": "footer",
+      "description": "Options/Menu",
+      "kind": "box"
+    },
+    {
+      "id": "soft_center",
+      "x": 80,
+      "y": 298,
+      "w": 80,
+      "h": 22,
+      "token": "footer",
+      "description": "Open/Select",
+      "kind": "box"
+    },
+    {
+      "id": "soft_right",
+      "x": 160,
+      "y": 298,
+      "w": 80,
+      "h": 22,
+      "token": "footer",
+      "description": "Back/Exit",
+      "kind": "box"
+    }
+  ],
+  "screens": [
+    {
+      "id": "home",
+      "title": "Home / General",
+      "regions": [
+        {
+          "id": "clock_card",
+          "x": 12,
+          "y": 43,
+          "w": 216,
+          "h": 78,
+          "token": "panel",
+          "description": "Card đồng hồ + ngày",
+          "kind": "box"
+        },
+        {
+          "id": "clock_text",
+          "x": 18,
+          "y": 50,
+          "w": 204,
+          "h": 43,
+          "token": "text",
+          "description": "HH:MM hoặc --:--, căn giữa",
+          "kind": "box"
+        },
+        {
+          "id": "date_line",
+          "x": 18,
+          "y": 91,
+          "w": 204,
+          "h": 22,
+          "token": "text",
+          "description": "Ngày chưa đồng bộ hiển thị Date not set",
+          "kind": "box"
+        },
+        {
+          "id": "network_card",
+          "x": 12,
+          "y": 132,
+          "w": 216,
+          "h": 46,
+          "token": "panel",
+          "description": "Trạng thái WiFi và số thông báo",
+          "kind": "box"
+        },
+        {
+          "id": "network_line",
+          "x": 18,
+          "y": 137,
+          "w": 205,
+          "h": 15,
+          "token": "text",
+          "description": "SSID/trạng thái cắt theo pixel",
+          "kind": "box"
+        },
+        {
+          "id": "alerts_line",
+          "x": 18,
+          "y": 153,
+          "w": 205,
+          "h": 20,
+          "token": "text",
+          "description": "Thông báo chưa đọc hoặc trạng thái nhạc",
+          "kind": "box"
+        },
+        {
+          "id": "quick_wifi",
+          "x": 8,
+          "y": 191,
+          "w": 72,
+          "h": 67,
+          "token": "selected",
+          "description": "WiFi shortcut",
+          "kind": "box"
+        },
+        {
+          "id": "quick_music",
+          "x": 84,
+          "y": 191,
+          "w": 72,
+          "h": 67,
+          "token": "panel",
+          "description": "Music shortcut",
+          "kind": "box"
+        },
+        {
+          "id": "quick_files",
+          "x": 160,
+          "y": 191,
+          "w": 72,
+          "h": 67,
+          "token": "panel",
+          "description": "Files shortcut",
+          "kind": "box"
+        },
+        {
+          "id": "key_hint",
+          "x": 8,
+          "y": 266,
+          "w": 224,
+          "h": 20,
+          "token": "status",
+          "description": "Phím giữ MENU / OPTION",
+          "kind": "box"
+        }
+      ],
+      "keys": "MENU→Menu; LEFT/RIGHT chọn shortcut; START mở; OPTION→Quick",
+      "notes": "Đồng hồ NTP không được giả giờ; battery chỉ outline",
+      "implementation": "integrated from existing Idle Home; geometry cross-checked with SymbianUI.cpp"
+    },
+    {
+      "id": "menu",
+      "title": "Menu 3 x 4",
+      "regions": [
+        {
+          "id": "cell_00",
+          "x": 1,
+          "y": 28,
+          "w": 76,
+          "h": 66,
+          "token": "selected",
+          "description": "Ô 1: WiFi",
+          "kind": "box"
+        },
+        {
+          "id": "icon_00",
+          "x": 21,
+          "y": 31,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của WiFi",
+          "kind": "box"
+        },
+        {
+          "id": "caption_00",
+          "x": 3,
+          "y": 72,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn WiFi",
+          "kind": "box"
+        },
+        {
+          "id": "cell_01",
+          "x": 79,
+          "y": 28,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 2: Bluetooth",
+          "kind": "box"
+        },
+        {
+          "id": "icon_01",
+          "x": 99,
+          "y": 31,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Bluetooth",
+          "kind": "box"
+        },
+        {
+          "id": "caption_01",
+          "x": 81,
+          "y": 72,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Bluetooth",
+          "kind": "box"
+        },
+        {
+          "id": "cell_02",
+          "x": 157,
+          "y": 28,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 3: Music",
+          "kind": "box"
+        },
+        {
+          "id": "icon_02",
+          "x": 177,
+          "y": 31,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Music",
+          "kind": "box"
+        },
+        {
+          "id": "caption_02",
+          "x": 159,
+          "y": 72,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Music",
+          "kind": "box"
+        },
+        {
+          "id": "cell_03",
+          "x": 1,
+          "y": 94,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 4: File mgr",
+          "kind": "box"
+        },
+        {
+          "id": "icon_03",
+          "x": 21,
+          "y": 97,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của File mgr",
+          "kind": "box"
+        },
+        {
+          "id": "caption_03",
+          "x": 3,
+          "y": 138,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn File mgr",
+          "kind": "box"
+        },
+        {
+          "id": "cell_04",
+          "x": 79,
+          "y": 94,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 5: Gallery",
+          "kind": "box"
+        },
+        {
+          "id": "icon_04",
+          "x": 99,
+          "y": 97,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Gallery",
+          "kind": "box"
+        },
+        {
+          "id": "caption_04",
+          "x": 81,
+          "y": 138,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Gallery",
+          "kind": "box"
+        },
+        {
+          "id": "cell_05",
+          "x": 157,
+          "y": 94,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 6: Internet",
+          "kind": "box"
+        },
+        {
+          "id": "icon_05",
+          "x": 177,
+          "y": 97,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Internet",
+          "kind": "box"
+        },
+        {
+          "id": "caption_05",
+          "x": 159,
+          "y": 138,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Internet",
+          "kind": "box"
+        },
+        {
+          "id": "cell_06",
+          "x": 1,
+          "y": 160,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 7: Shell",
+          "kind": "box"
+        },
+        {
+          "id": "icon_06",
+          "x": 21,
+          "y": 163,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Shell",
+          "kind": "box"
+        },
+        {
+          "id": "caption_06",
+          "x": 3,
+          "y": 204,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Shell",
+          "kind": "box"
+        },
+        {
+          "id": "cell_07",
+          "x": 79,
+          "y": 160,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 8: Recovery",
+          "kind": "box"
+        },
+        {
+          "id": "icon_07",
+          "x": 99,
+          "y": 163,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Recovery",
+          "kind": "box"
+        },
+        {
+          "id": "caption_07",
+          "x": 81,
+          "y": 204,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Recovery",
+          "kind": "box"
+        },
+        {
+          "id": "cell_08",
+          "x": 157,
+          "y": 160,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 9: Settings",
+          "kind": "box"
+        },
+        {
+          "id": "icon_08",
+          "x": 177,
+          "y": 163,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Settings",
+          "kind": "box"
+        },
+        {
+          "id": "caption_08",
+          "x": 159,
+          "y": 204,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Settings",
+          "kind": "box"
+        },
+        {
+          "id": "cell_09",
+          "x": 1,
+          "y": 226,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 10: Themes",
+          "kind": "box"
+        },
+        {
+          "id": "icon_09",
+          "x": 21,
+          "y": 229,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Themes",
+          "kind": "box"
+        },
+        {
+          "id": "caption_09",
+          "x": 3,
+          "y": 270,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Themes",
+          "kind": "box"
+        },
+        {
+          "id": "cell_10",
+          "x": 79,
+          "y": 226,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 11: Apps",
+          "kind": "box"
+        },
+        {
+          "id": "icon_10",
+          "x": 99,
+          "y": 229,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Apps",
+          "kind": "box"
+        },
+        {
+          "id": "caption_10",
+          "x": 81,
+          "y": 270,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Apps",
+          "kind": "box"
+        },
+        {
+          "id": "cell_11",
+          "x": 157,
+          "y": 226,
+          "w": 76,
+          "h": 66,
+          "token": "list",
+          "description": "Ô 12: Library",
+          "kind": "box"
+        },
+        {
+          "id": "icon_11",
+          "x": 177,
+          "y": 229,
+          "w": 36,
+          "h": 36,
+          "token": "icon",
+          "description": "Icon của Library",
+          "kind": "box"
+        },
+        {
+          "id": "caption_11",
+          "x": 159,
+          "y": 270,
+          "w": 72,
+          "h": 16,
+          "token": "text",
+          "description": "Nhãn Library",
+          "kind": "box"
+        },
+        {
+          "id": "grid_scroll",
+          "x": 236,
+          "y": 34,
+          "w": 2,
+          "h": 252,
+          "token": "scrollbar",
+          "description": "Thanh cuộn/menu rail",
+          "kind": "box"
+        }
+      ],
+      "keys": "D-Pad di chuyển; START mở; OPTION popup; A/B về Home; Menu→Home",
+      "notes": "Giữ thứ tự 12 biểu tượng y hệt ảnh; Retro Explorer là tùy chọn trong Options.",
+      "implementation": "integrated original firmware v2.0.1 grid; external vqeaf palette mapped"
+    },
+    {
+      "id": "wifi",
+      "title": "WiFi",
+      "regions": [
+        {
+          "id": "row_00",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Danh sách dòng 1",
+          "kind": "box"
+        },
+        {
+          "id": "row_01",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 2",
+          "kind": "box"
+        },
+        {
+          "id": "row_02",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 3",
+          "kind": "box"
+        },
+        {
+          "id": "row_03",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 4",
+          "kind": "box"
+        },
+        {
+          "id": "row_04",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 5",
+          "kind": "box"
+        },
+        {
+          "id": "row_05",
+          "x": 2,
+          "y": 239,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 6",
+          "kind": "box"
+        },
+        {
+          "id": "page_label",
+          "x": 12,
+          "y": 55,
+          "w": 216,
+          "h": 24,
+          "token": "text",
+          "description": "WIFI",
+          "kind": "box"
+        },
+        {
+          "id": "empty_notice",
+          "x": 12,
+          "y": 101,
+          "w": 216,
+          "h": 20,
+          "token": "dim",
+          "description": "Trạng thái trống",
+          "kind": "box"
+        },
+        {
+          "id": "empty_hint",
+          "x": 12,
+          "y": 126,
+          "w": 216,
+          "h": 20,
+          "token": "dim",
+          "description": "Hướng dẫn thao tác tiếp theo",
+          "kind": "box"
+        },
+        {
+          "id": "signal_icons",
+          "x": 8,
+          "y": 32,
+          "w": 28,
+          "h": 248,
+          "token": "icon",
+          "description": "Cột biểu tượng mạng nếu quét thấy",
+          "kind": "box"
+        }
+      ],
+      "keys": "OPTION quét; UP/DOWN chọn; START kết nối; A lùi",
+      "notes": "Trạng thái trống và list là 2 trạng thái loại trừ. Không hiển thị mật khẩu; scan không chặn UI.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "bluetooth",
+      "title": "Bluetooth",
+      "regions": [
+        {
+          "id": "row_00",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Danh sách dòng 1",
+          "kind": "box"
+        },
+        {
+          "id": "row_01",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 2",
+          "kind": "box"
+        },
+        {
+          "id": "row_02",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 3",
+          "kind": "box"
+        },
+        {
+          "id": "row_03",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 4",
+          "kind": "box"
+        },
+        {
+          "id": "row_04",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 5",
+          "kind": "box"
+        },
+        {
+          "id": "row_05",
+          "x": 2,
+          "y": 239,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 6",
+          "kind": "box"
+        },
+        {
+          "id": "page_label",
+          "x": 12,
+          "y": 55,
+          "w": 216,
+          "h": 24,
+          "token": "text",
+          "description": "Bluetooth",
+          "kind": "box"
+        },
+        {
+          "id": "empty_notice",
+          "x": 12,
+          "y": 101,
+          "w": 216,
+          "h": 20,
+          "token": "dim",
+          "description": "Trạng thái trống",
+          "kind": "box"
+        },
+        {
+          "id": "empty_hint",
+          "x": 12,
+          "y": 126,
+          "w": 216,
+          "h": 20,
+          "token": "dim",
+          "description": "Hướng dẫn thao tác tiếp theo",
+          "kind": "box"
+        }
+      ],
+      "keys": "OPTION quét; START chi tiết; A lùi",
+      "notes": "BLE scanner; không quảng cáo A2DP/Classic nếu chưa hỗ trợ.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "files",
+      "title": "File manager",
+      "regions": [
+        {
+          "id": "path_bar",
+          "x": 5,
+          "y": 32,
+          "w": 226,
+          "h": 21,
+          "token": "panel",
+          "description": "Đường dẫn hiện tại",
+          "kind": "box"
+        },
+        {
+          "id": "row_00",
+          "x": 2,
+          "y": 56,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Danh sách dòng 1",
+          "kind": "box"
+        },
+        {
+          "id": "row_01",
+          "x": 2,
+          "y": 98,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 2",
+          "kind": "box"
+        },
+        {
+          "id": "row_02",
+          "x": 2,
+          "y": 140,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 3",
+          "kind": "box"
+        },
+        {
+          "id": "row_03",
+          "x": 2,
+          "y": 182,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 4",
+          "kind": "box"
+        },
+        {
+          "id": "row_04",
+          "x": 2,
+          "y": 224,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 5",
+          "kind": "box"
+        },
+        {
+          "id": "scrollbar",
+          "x": 236,
+          "y": 56,
+          "w": 2,
+          "h": 211,
+          "token": "scrollbar",
+          "description": "Thumb danh sách file",
+          "kind": "box"
+        },
+        {
+          "id": "empty_notice",
+          "x": 12,
+          "y": 103,
+          "w": 216,
+          "h": 25,
+          "token": "dim",
+          "description": "microSD is not mounted",
+          "kind": "box"
+        }
+      ],
+      "keys": "D-Pad di chuyển; START Open; OPTION actions; A lên một thư mục",
+      "notes": "Bất kỳ thao tác xóa file nào cũng phải xác nhận; path bị sandbox.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "gallery",
+      "title": "Gallery",
+      "regions": [
+        {
+          "id": "page_title",
+          "x": 12,
+          "y": 53,
+          "w": 216,
+          "h": 22,
+          "token": "text",
+          "description": "Gallery",
+          "kind": "box"
+        },
+        {
+          "id": "thumb0",
+          "x": 7,
+          "y": 81,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Thumbnail trái",
+          "kind": "box"
+        },
+        {
+          "id": "thumb1",
+          "x": 84,
+          "y": 81,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Thumbnail giữa",
+          "kind": "box"
+        },
+        {
+          "id": "thumb2",
+          "x": 161,
+          "y": 81,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Thumbnail phải",
+          "kind": "box"
+        },
+        {
+          "id": "thumb3",
+          "x": 7,
+          "y": 158,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Hàng thumbnail 2",
+          "kind": "box"
+        },
+        {
+          "id": "thumb4",
+          "x": 84,
+          "y": 158,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Hàng thumbnail 2",
+          "kind": "box"
+        },
+        {
+          "id": "thumb5",
+          "x": 161,
+          "y": 158,
+          "w": 72,
+          "h": 73,
+          "token": "panel",
+          "description": "Hàng thumbnail 2",
+          "kind": "box"
+        },
+        {
+          "id": "missing_sd",
+          "x": 12,
+          "y": 103,
+          "w": 216,
+          "h": 24,
+          "token": "dim",
+          "description": "microSD is not mounted",
+          "kind": "box"
+        }
+      ],
+      "keys": "UP/DOWN/LEFT/RIGHT thumbnails; START View; A Back",
+      "notes": "Thumbnail view là layout đích; baseline hiện có thể dùng danh sách.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "regions": [
+        {
+          "id": "title_line",
+          "x": 12,
+          "y": 51,
+          "w": 216,
+          "h": 27,
+          "token": "text",
+          "description": "Tên media / trạng thái",
+          "kind": "box"
+        },
+        {
+          "id": "row_00",
+          "x": 2,
+          "y": 36,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Danh sách dòng 1",
+          "kind": "box"
+        },
+        {
+          "id": "row_01",
+          "x": 2,
+          "y": 78,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 2",
+          "kind": "box"
+        },
+        {
+          "id": "row_02",
+          "x": 2,
+          "y": 120,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 3",
+          "kind": "box"
+        },
+        {
+          "id": "row_03",
+          "x": 2,
+          "y": 162,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 4",
+          "kind": "box"
+        },
+        {
+          "id": "row_04",
+          "x": 2,
+          "y": 204,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 5",
+          "kind": "box"
+        },
+        {
+          "id": "mini_player",
+          "x": 6,
+          "y": 251,
+          "w": 228,
+          "h": 40,
+          "token": "panel",
+          "description": "Bộ điều khiển nhỏ không chồng footer",
+          "kind": "box"
+        },
+        {
+          "id": "mini_line1",
+          "x": 11,
+          "y": 255,
+          "w": 218,
+          "h": 14,
+          "token": "text",
+          "description": "Audio ready hoặc trạng thái thực",
+          "kind": "box"
+        },
+        {
+          "id": "mini_line2",
+          "x": 11,
+          "y": 273,
+          "w": 218,
+          "h": 14,
+          "token": "dim",
+          "description": "Track / shuffle / repeat / volume",
+          "kind": "box"
+        }
+      ],
+      "keys": "START Play/Pause; OPTION playlist; A Back",
+      "notes": "Không báo audio ready khi phần cứng DAC chưa sẵn sàng; list & empty states loại trừ.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "shell",
+      "title": "Shell",
+      "regions": [
+        {
+          "id": "terminal",
+          "x": 2,
+          "y": 28,
+          "w": 236,
+          "h": 228,
+          "token": "terminal",
+          "description": "Ring buffer 10-12 dòng đầu ra",
+          "kind": "box"
+        },
+        {
+          "id": "terminal_info",
+          "x": 3,
+          "y": 31,
+          "w": 234,
+          "h": 16,
+          "token": "text",
+          "description": "Shell version/đường dẫn",
+          "kind": "box"
+        },
+        {
+          "id": "prompt",
+          "x": 3,
+          "y": 256,
+          "w": 234,
+          "h": 38,
+          "token": "terminal",
+          "description": "Lệnh nhập + tối đa 1 dòng gợi ý",
+          "kind": "box"
+        },
+        {
+          "id": "prompt_text",
+          "x": 7,
+          "y": 264,
+          "w": 226,
+          "h": 16,
+          "token": "accent",
+          "description": "vqeaf:/$",
+          "kind": "box"
+        }
+      ],
+      "keys": "START Command; UP history; OPTION actions; A Back",
+      "notes": "Lệnh được allowlist/sandbox; không trao arbitrary shell cho .qeapp.",
+      "implementation": "integrated existing shell; coordinates specified for next reflow"
+    },
+    {
+      "id": "settings",
+      "title": "Settings",
+      "regions": [
+        {
+          "id": "setting_0",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Theme",
+          "kind": "box"
+        },
+        {
+          "id": "setting_1",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Backlight",
+          "kind": "box"
+        },
+        {
+          "id": "setting_2",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Audio volume",
+          "kind": "box"
+        },
+        {
+          "id": "setting_3",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Clock format",
+          "kind": "box"
+        },
+        {
+          "id": "setting_4",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Auto WiFi strongest",
+          "kind": "box"
+        },
+        {
+          "id": "setting_5",
+          "x": 2,
+          "y": 239,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Auto keypad lock",
+          "kind": "box"
+        },
+        {
+          "id": "scrollbar",
+          "x": 236,
+          "y": 30,
+          "w": 2,
+          "h": 264,
+          "token": "scrollbar",
+          "description": "Theo số mục",
+          "kind": "box"
+        }
+      ],
+      "keys": "UP/DOWN chọn; LEFT/RIGHT thay đổi nếu hợp lệ; START nhập; A Back",
+      "notes": "Lưu NVS; trình render tuyệt đối không chạy WiFi scan.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "themes",
+      "title": "Themes",
+      "regions": [
+        {
+          "id": "theme_0",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Theme row 1",
+          "kind": "box"
+        },
+        {
+          "id": "theme_1",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Theme row 2",
+          "kind": "box"
+        },
+        {
+          "id": "theme_2",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Theme row 3",
+          "kind": "box"
+        },
+        {
+          "id": "theme_3",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Theme row 4",
+          "kind": "box"
+        },
+        {
+          "id": "theme_4",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Theme row 5",
+          "kind": "box"
+        },
+        {
+          "id": "theme_5",
+          "x": 2,
+          "y": 239,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Theme row 6",
+          "kind": "box"
+        },
+        {
+          "id": "theme_icon",
+          "x": 11,
+          "y": 36,
+          "w": 25,
+          "h": 25,
+          "token": "icon",
+          "description": "Preview mini palette",
+          "kind": "box"
+        },
+        {
+          "id": "scrollbar",
+          "x": 236,
+          "y": 30,
+          "w": 2,
+          "h": 264,
+          "token": "scrollbar",
+          "description": "Có khi số theme >6",
+          "kind": "box"
+        }
+      ],
+      "keys": "START Apply; OPTION Import/Info; A Back",
+      "notes": "Theme Studio DSL @vqeaf 1.x: palette và launcher overrides; tài nguyên phoneShell nằm ngoài LCD.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "applications",
+      "title": "Applications",
+      "regions": [
+        {
+          "id": "app_0",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_1",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_2",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_3",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_4",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_5",
+          "x": 2,
+          "y": 239,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Installed/system app row",
+          "kind": "box"
+        },
+        {
+          "id": "app_icon",
+          "x": 10,
+          "y": 36,
+          "w": 27,
+          "h": 27,
+          "token": "icon",
+          "description": "Icon của app",
+          "kind": "box"
+        },
+        {
+          "id": "scrollbar",
+          "x": 236,
+          "y": 30,
+          "w": 2,
+          "h": 264,
+          "token": "scrollbar",
+          "description": "Danh sách app",
+          "kind": "box"
+        }
+      ],
+      "keys": "START Open; OPTION Info/Uninstall; A Back",
+      "notes": "Chỉ nhận installed QEAPP/2 signed + built-in; không chạy Lua native mới.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "installer",
+      "title": "App installer",
+      "regions": [
+        {
+          "id": "inbox_label",
+          "x": 12,
+          "y": 42,
+          "w": 216,
+          "h": 28,
+          "token": "text",
+          "description": "App inbox",
+          "kind": "box"
+        },
+        {
+          "id": "row_00",
+          "x": 2,
+          "y": 76,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Danh sách dòng 1",
+          "kind": "box"
+        },
+        {
+          "id": "row_01",
+          "x": 2,
+          "y": 118,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 2",
+          "kind": "box"
+        },
+        {
+          "id": "row_02",
+          "x": 2,
+          "y": 160,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 3",
+          "kind": "box"
+        },
+        {
+          "id": "row_03",
+          "x": 2,
+          "y": 202,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 4",
+          "kind": "box"
+        },
+        {
+          "id": "row_04",
+          "x": 2,
+          "y": 244,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Danh sách dòng 5",
+          "kind": "box"
+        },
+        {
+          "id": "details_modal",
+          "x": 11,
+          "y": 77,
+          "w": 218,
+          "h": 166,
+          "token": "modal",
+          "description": "Manifest/publisher/signature trước khi cài",
+          "kind": "box"
+        },
+        {
+          "id": "missing_sd",
+          "x": 12,
+          "y": 106,
+          "w": 216,
+          "h": 23,
+          "token": "dim",
+          "description": "microSD is not available",
+          "kind": "box"
+        }
+      ],
+      "keys": "UP/DOWN chọn; START xem/xác minh; OPTION Install; A Back",
+      "notes": "Không đổi QEAPP/2 định dạng ECDSA-P256; dialog loại trừ empty state.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "recovery",
+      "title": "Recovery",
+      "regions": [
+        {
+          "id": "recovery_0",
+          "x": 2,
+          "y": 29,
+          "w": 233,
+          "h": 41,
+          "token": "selected",
+          "description": "Boot status",
+          "kind": "box"
+        },
+        {
+          "id": "recovery_1",
+          "x": 2,
+          "y": 71,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Start normal mode",
+          "kind": "box"
+        },
+        {
+          "id": "recovery_2",
+          "x": 2,
+          "y": 113,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Enable Safe Mode",
+          "kind": "box"
+        },
+        {
+          "id": "recovery_3",
+          "x": 2,
+          "y": 155,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Clear recovery flags",
+          "kind": "box"
+        },
+        {
+          "id": "recovery_4",
+          "x": 2,
+          "y": 197,
+          "w": 233,
+          "h": 41,
+          "token": "list",
+          "description": "Restart device",
+          "kind": "box"
+        },
+        {
+          "id": "confirmation_modal",
+          "x": 14,
+          "y": 88,
+          "w": 212,
+          "h": 132,
+          "token": "modal",
+          "description": "Cần xác nhận Clear/Restart",
+          "kind": "box"
+        }
+      ],
+      "keys": "UP/DOWN chọn; START Select; A Back",
+      "notes": "Giữ DOWN lúc khởi động; không tải theme từ SD trước khi chọn Safe Mode.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "calculator",
+      "title": "Calculator",
+      "regions": [
+        {
+          "id": "result",
+          "x": 12,
+          "y": 40,
+          "w": 216,
+          "h": 48,
+          "token": "panel",
+          "description": "Biểu thức/kết quả",
+          "kind": "box"
+        },
+        {
+          "id": "result_text",
+          "x": 17,
+          "y": 52,
+          "w": 205,
+          "h": 30,
+          "token": "text",
+          "description": "Số được căn phải, ellipsis nếu quá dài",
+          "kind": "box"
+        },
+        {
+          "id": "key_0",
+          "x": 8,
+          "y": 100,
+          "w": 51,
+          "h": 41,
+          "token": "selected",
+          "description": "Phím 7",
+          "kind": "box"
+        },
+        {
+          "id": "key_1",
+          "x": 64,
+          "y": 100,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 8",
+          "kind": "box"
+        },
+        {
+          "id": "key_2",
+          "x": 120,
+          "y": 100,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 9",
+          "kind": "box"
+        },
+        {
+          "id": "key_3",
+          "x": 176,
+          "y": 100,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím /",
+          "kind": "box"
+        },
+        {
+          "id": "key_4",
+          "x": 8,
+          "y": 145,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 4",
+          "kind": "box"
+        },
+        {
+          "id": "key_5",
+          "x": 64,
+          "y": 145,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 5",
+          "kind": "box"
+        },
+        {
+          "id": "key_6",
+          "x": 120,
+          "y": 145,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 6",
+          "kind": "box"
+        },
+        {
+          "id": "key_7",
+          "x": 176,
+          "y": 145,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím *",
+          "kind": "box"
+        },
+        {
+          "id": "key_8",
+          "x": 8,
+          "y": 190,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 1",
+          "kind": "box"
+        },
+        {
+          "id": "key_9",
+          "x": 64,
+          "y": 190,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 2",
+          "kind": "box"
+        },
+        {
+          "id": "key_10",
+          "x": 120,
+          "y": 190,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 3",
+          "kind": "box"
+        },
+        {
+          "id": "key_11",
+          "x": 176,
+          "y": 190,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím -",
+          "kind": "box"
+        },
+        {
+          "id": "key_12",
+          "x": 8,
+          "y": 235,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím C",
+          "kind": "box"
+        },
+        {
+          "id": "key_13",
+          "x": 64,
+          "y": 235,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím 0",
+          "kind": "box"
+        },
+        {
+          "id": "key_14",
+          "x": 120,
+          "y": 235,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím =",
+          "kind": "box"
+        },
+        {
+          "id": "key_15",
+          "x": 176,
+          "y": 235,
+          "w": 51,
+          "h": 41,
+          "token": "panel",
+          "description": "Phím +",
+          "kind": "box"
+        },
+        {
+          "id": "instruction",
+          "x": 8,
+          "y": 284,
+          "w": 224,
+          "h": 11,
+          "token": "dim",
+          "description": "Options / Backspace / Clear",
+          "kind": "box"
+        }
+      ],
+      "keys": "D-pad move 4×4; START Enter; B xóa; OPTION reset; A Back",
+      "notes": "Khu vực 4×4 không vượt vào footer; phép chia 0 được chặn.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "stopwatch",
+      "title": "Stopwatch",
+      "regions": [
+        {
+          "id": "face",
+          "x": 10,
+          "y": 52,
+          "w": 220,
+          "h": 74,
+          "token": "panel",
+          "description": "00:00.00 hoặc elapsed",
+          "kind": "box"
+        },
+        {
+          "id": "digits",
+          "x": 22,
+          "y": 79,
+          "w": 196,
+          "h": 34,
+          "token": "text",
+          "description": "Thời gian căn giữa",
+          "kind": "box"
+        },
+        {
+          "id": "start",
+          "x": 8,
+          "y": 135,
+          "w": 72,
+          "h": 36,
+          "token": "selected",
+          "description": "Start/Pause",
+          "kind": "box"
+        },
+        {
+          "id": "lap",
+          "x": 84,
+          "y": 135,
+          "w": 72,
+          "h": 36,
+          "token": "panel",
+          "description": "Lap",
+          "kind": "box"
+        },
+        {
+          "id": "reset",
+          "x": 160,
+          "y": 135,
+          "w": 72,
+          "h": 36,
+          "token": "panel",
+          "description": "Reset",
+          "kind": "box"
+        },
+        {
+          "id": "lap_list",
+          "x": 8,
+          "y": 178,
+          "w": 224,
+          "h": 113,
+          "token": "list",
+          "description": "Các vòng đã ghi (nếu có)",
+          "kind": "box"
+        }
+      ],
+      "keys": "LEFT/RIGHT chọn; START thao tác; A Back",
+      "notes": "Chỉ dirty vùng đồng hồ theo tick; thời gian chạy ở service không phụ thuộc màn hình.",
+      "implementation": "target; retained baseline screen behavior"
+    },
+    {
+      "id": "browser",
+      "title": "Qeafbrowser",
+      "regions": [
+        {
+          "id": "address",
+          "x": 4,
+          "y": 29,
+          "w": 232,
+          "h": 26,
+          "token": "panel",
+          "description": "Thanh địa chỉ nếu ở browser loaded mode",
+          "kind": "box"
+        },
+        {
+          "id": "page_view",
+          "x": 4,
+          "y": 59,
+          "w": 232,
+          "h": 234,
+          "token": "list",
+          "description": "Viewport HTML/WML và scrollbar",
+          "kind": "box"
+        },
+        {
+          "id": "offline_header",
+          "x": 12,
+          "y": 57,
+          "w": 216,
+          "h": 22,
+          "token": "text",
+          "description": "Qeafbrowser khi WiFi offline",
+          "kind": "box"
+        },
+        {
+          "id": "offline_reason",
+          "x": 12,
+          "y": 100,
+          "w": 216,
+          "h": 20,
+          "token": "dim",
+          "description": "WiFi is not connected",
+          "kind": "box"
+        },
+        {
+          "id": "offline_hint",
+          "x": 12,
+          "y": 121,
+          "w": 216,
+          "h": 22,
+          "token": "dim",
+          "description": "Options > Home can open cache",
+          "kind": "box"
+        }
+      ],
+      "keys": "OPTION browser menu; START open link; D-pad scroll/focus; SELECT hold T9; A Back",
+      "notes": "Offline và loaded là 2 trạng thái loại trừ; HTTPS phải kiểm CA khi có.",
+      "implementation": "target; retained baseline screen behavior"
+    }
+  ],
+  "remarks": [
+    "Danh sách các region giao nhau có chủ đích: UI nhiều trạng thái (offline vs loaded), hoặc container chứa child text/icon.",
+    "Status bar WiFi thực, không giả pin %, SIM, LTE khi thiếu cảm biến/modem.",
+    "Tọa độ spec là hợp đồng đích; phần app cũ cần soát lại khi port từ baseline."
+  ]
+}

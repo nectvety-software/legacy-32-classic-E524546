@@ -1,0 +1,5 @@
+[DRY-RUN: NOT EXECUTED] 2026-09-24T12:24:41+00:00
+Stage: compile
+Would run: xtensa-esp32s3-elf-g++ [project translation units]
+Result: SIMULATED_PASS
+Compilation command illustrative; real commands would be visible in pio -v output.

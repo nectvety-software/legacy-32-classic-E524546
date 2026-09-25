@@ -1,0 +1,2 @@
+home: 96.199% large palette pixels, host simulated fonts
+menu: 96.195% large palette pixels, host simulated fonts

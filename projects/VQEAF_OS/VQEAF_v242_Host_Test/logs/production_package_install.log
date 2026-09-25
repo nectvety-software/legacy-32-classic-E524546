@@ -1,0 +1,7 @@
+$ /mnt/data/VQEAF_v242_acceptance_work/actual_app_install /mnt/data/VQEAF_v242_acceptance_work/emulated_sd /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/sd/System/Apps/Inbox/welcome.qeapp /mnt/data/VQEAF_OS_v242_delivery/VQEAF-OS/sd/System/Apps/Inbox/help_site.qeapp
+VERIFIED_INSTALLED|welcome|Welcome|1.0.0|text
+VERIFIED_INSTALLED|help_site|Help website|1.0.0|web
+REBOOT_CATALOG|2
+CORRUPT_REJECTED|1
+
+[exit] 0
