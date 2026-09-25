@@ -1,3 +1,13 @@
+# v0.7.5 — 2026-09-25 — New Project, build recovery, phone window
+
+- feat(project): New Project dialog (LuaS30-style) — Project name, Display name, unique random **App ID** (Random button, no collisions), template or blank; standard Lua scaffold (`main.lua`, `assets/icon.png` 32×32, `tests/`, `docs/`).
+- feat(gui): compact IDE panes (narrower Explorer/OUTPUT/right rail); **F9 Run** opens a floating Virtual Phone window (LuaS30-IDE style).
+- fix(build): firmware-root recovery — env → settings → sibling/embedded OS; reject Studio folder; **Settings → Build / Firmware**; error codes `OS_ROOT_*`, `LUA_BETA_REQUIRED`, …
+- fix(status): Host vs Build never mix (`BUILD PASSED` / `BUILD FAILED` / `HOST RUNNING` per operation ID). T9 message is `HOST_LIMIT`, not a crash.
+- feat(doctor): `studio_doctor.py --json` and Help → Export Diagnostic Bundle (secrets redacted).
+- sample: `projects/doodle-notebook` — Ballpoint/Pencil notebook doodle game (splash + Play/Language/Guide/About/Settings/Exit).
+- docs: `docs/qa/BUILD_UI_RECOVERY_REPORT_VN.md`. Projects default to `%USERPROFILE%\Documents\QEAPP-Studio Projects`. Signed builds via `QEAPP_Signing_Key_Starter` (key-id `0x31534351`); private PEM never stored in settings.
+
 # v0.7.4 — 2026-09-25
 
 - Staged non-relocating virtualenv updates and atomic runtime activation.

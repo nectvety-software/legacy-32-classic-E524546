@@ -9,10 +9,14 @@
 ## Tính năng
 
 - **IDE PySide6:** Explorer, trình soạn thảo nhiều tab, tìm kiếm, Problems, build/output và giao diện tối.
-- **Máy ảo Lua trên PC:** Virtual Phone 240×320, phím điều khiển, replay, tạm dừng/step, ảnh chụp và thống kê host.
+- **New Project:** hộp thoại Project name / Display name / **App ID ngẫu nhiên** (nút Random, không trùng), chọn mẫu hoặc Blank — luôn tạo cấu trúc chuẩn Lua (`docs/agents/PROMPT.md`).
+- **Máy ảo Lua trên PC:** **cửa sổ Virtual Phone riêng khi F9 Run**, 240×320, phím điều khiển, replay, tạm dừng/step, ảnh chụp và thống kê host.
 - **QEAPP/2:** công cụ tạo, kiểm tra và đóng gói ứng dụng theo hợp đồng chữ ký của firmware tương ứng.
+- **Build recovery:** `Settings → Build / Firmware`, mã lỗi `OS_ROOT_*` / `LUA_BETA_REQUIRED`, tách trạng thái Host vs Build. Xem `docs/qa/BUILD_UI_RECOVERY_REPORT_VN.md`.
 - **An toàn môi trường:** `run_studio.bat` có kiểm tra GUI Qt thật bằng offscreen, cập nhật dependency qua môi trường staging và khả năng rollback.
 - **AI Agent:** `AGENTS.md` điều phối; `PROMPT.md`, `SKILLS.md`, các vai trò trong `agents/` và mẫu bàn giao/kiểm thử trong `docs/agents/`.
+
+**Dự án mặc định:** `%USERPROFILE%\Documents\QEAPP-Studio Projects\`. Ví dụ doodle: `projects/doodle-notebook` (splash + Play/Language/Guide/About/Settings/Exit).
 
 ![Pocket Calculator chạy trên PC host](samples/pocket-calculator/screenshots/00_OVERVIEW_ACTUAL_PC_VM.png)
 
@@ -97,6 +101,16 @@ QEAPP-Studio/
 ├── docs/            # hợp đồng ABI, thiết kế và quy trình
 └── tests/           # kiểm thử nền tảng
 ```
+
+## Ký gói `.qeapp` (khóa Starter)
+
+Dùng khóa ECDSA P-256 bên ngoài repo (không commit private PEM):
+
+```bat
+D:\Program\arduino\legacy-32-classic-E524546\QEAPP_Signing_Key_Starter\build_signed.bat doodle-notebook
+```
+
+Key ID mặc định `0x31534351`. `type=lua` cần firmware **vqeaf_lua_beta** đã ghim `QeappTrustKey.h` tương ứng; stock chỉ nhận `text`/`web` đã ký. Chi tiết: `docs/qa/BUILD_UI_RECOVERY_REPORT_VN.md`.
 
 ## Kiểm thử và đóng góp
 
